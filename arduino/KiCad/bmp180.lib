@@ -1,0 +1,33 @@
+EESchema-LIBRARY Version 2.3  14/10/2016-19:00:00
+# encoding utf-8
+# Device count = 1
+#
+# Dev Name: BMP180 breakout
+# Package Name: BMP180
+# Dev Tech: ''
+# Dev Prefix: IC
+# Gate count = 1
+#
+DEF BMP180 U 0 40 Y Y 1 F N
+# Gate Name: G$1
+# Symbol Name: BMP180XX
+F0 "IC" 200 300 60 H V C CNN
+F1 "BMP180" 0 -300 60 H V C CNN
+F2 "" -50 0 60 H V C CNN
+F3 "" -50 0 60 H V C CNN
+$FPLIST
+ LGA_BMP180
+$ENDFPLIST
+DRAW
+S -250 250 250 -250 0 1 0 N
+X CSB 1 -400 150 150 R 50 50 1 1 I
+X VDD 2 -400 0 150 R 50 50 1 1 W
+X VDDIO 3 -400 -150 150 R 50 50 1 1 W
+X SDO 4 400 -150 150 L 50 50 1 1 O
+X SCL 5 400 0 150 L 50 50 1 1 I
+X SDA 6 400 150 150 L 50 50 1 1 O
+X GND 7 0 400 150 D 50 50 1 1 W
+ENDDRAW
+ENDDEF
+
+#End Library

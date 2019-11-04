@@ -1,3 +1,8 @@
+## Arduino code
+
+The *\*_test* folders contain scripts used to test the individual components connected to the [Arduino board Pro Mini][1].
+The final code is in the folder *ws_final*.
+
 ### BOM 
 [Arduino board Pro Mini][1]
 

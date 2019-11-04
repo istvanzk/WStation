@@ -33,9 +33,14 @@
 // RFM22B board
 #define BOARD_RFM22B
 
-// Now we include RasPi_Boards.h so this will expose defined
-// constants with CS and IRQ pin definition
-#include "../RasPiBoards.h"
+// Constants with CS and IRQ pin definition
+// HopeRF RFM22B based radio modules (no onboard led - reset pin not used)
+// =========================================
+// see http://www.sparkfun.com/products/10153
+#define RF_CS_PIN  RPI_V2_GPIO_P1_24 // Slave Select on CE0 so P1 connector pin #24
+#define RF_IRQ_PIN RPI_V2_GPIO_P1_22 // IRQ on GPIO25 so P1 connector pin #22
+#define RF_LED_PIN NOT_A_PIN	     // No onboard led to drive
+#define RF_RST_PIN NOT_A_PIN		 // No onboard reset
 
 // Our RFM22B Configuration
 #define RF_FREQUENCY  434.0

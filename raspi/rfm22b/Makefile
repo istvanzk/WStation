@@ -1,6 +1,6 @@
 # Makefile
-# Sample for RH_RF22B (client and server) on Raspberry Pi
-# Caution: requires bcm2835 library to be already installed
+# Sample for RH_RF22B server with POSIX Message Queue on Raspberry Pi
+# Note: Requires the bcm2835 library to be already installed, see
 # http://www.airspayce.com/mikem/bcm2835/
 
 CC            = g++

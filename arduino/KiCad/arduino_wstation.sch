@@ -1,0 +1,1270 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title "Weather Station"
+Date "23-10-2016"
+Rev "1.5"
+Comp "IzK"
+Comment1 "Measures: wind direction&speed, temperature, pressure, humidity"
+Comment2 "OBH eHome wind meter, Arduino Pro Mini, RFM22B-S2"
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L arduino_wstation-rescue:CONN_12-wstation-cache P1
+U 1 1 552014A1
+P 6725 2375
+F 0 "P1" V 6675 2375 60  0000 C CNN
+F 1 "Digital" V 6775 2375 60  0000 C CNN
+F 2 "Socket_Arduino_Pro_Mini:Socket_Strip_Arduino_1x12" H 6725 2375 60  0001 C CNN
+F 3 "" H 6725 2375 60  0000 C CNN
+	1    6725 2375
+	1    0    0    -1  
+$EndComp
+$Comp
+L arduino_wstation-rescue:CONN_12-wstation-cache P4
+U 1 1 552014EF
+P 7050 2375
+F 0 "P4" V 7000 2375 60  0000 C CNN
+F 1 "Analog" V 7100 2375 60  0000 C CNN
+F 2 "Socket_Arduino_Pro_Mini:Socket_Strip_Arduino_1x12" H 7050 2375 60  0001 C CNN
+F 3 "" H 7050 2375 60  0000 C CNN
+	1    7050 2375
+	-1   0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR01
+U 1 1 55201608
+P 6300 3100
+F 0 "#PWR01" H 6300 3100 30  0001 C CNN
+F 1 "GND" H 6300 3030 30  0001 C CNN
+F 2 "" H 6300 3100 60  0000 C CNN
+F 3 "" H 6300 3100 60  0000 C CNN
+	1    6300 3100
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR02
+U 1 1 55201646
+P 7475 3100
+F 0 "#PWR02" H 7475 3100 30  0001 C CNN
+F 1 "GND" H 7475 3030 30  0001 C CNN
+F 2 "" H 7475 3100 60  0000 C CNN
+F 3 "" H 7475 3100 60  0000 C CNN
+	1    7475 3100
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR03
+U 1 1 5520166F
+P 7600 1650
+F 0 "#PWR03" H 7600 1750 30  0001 C CNN
+F 1 "3V3" H 7600 1750 30  0000 C CNN
+F 2 "" H 7600 1650 60  0000 C CNN
+F 3 "" H 7600 1650 60  0000 C CNN
+	1    7600 1650
+	1    0    0    -1  
+$EndComp
+Text Label 7475 1650 1    60   ~ 0
+RAW
+$Comp
+L power:GND #PWR04
+U 1 1 55201722
+P 7250 1300
+F 0 "#PWR04" H 7250 1300 30  0001 C CNN
+F 1 "GND" H 7250 1230 30  0001 C CNN
+F 2 "" H 7250 1300 60  0000 C CNN
+F 3 "" H 7250 1300 60  0000 C CNN
+	1    7250 1300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR05
+U 1 1 5520175E
+P 6925 975
+F 0 "#PWR05" H 6925 1075 30  0001 C CNN
+F 1 "3V3" H 6925 1075 30  0000 C CNN
+F 2 "" H 6925 975 60  0000 C CNN
+F 3 "" H 6925 975 60  0000 C CNN
+	1    6925 975 
+	1    0    0    -1  
+$EndComp
+Text Label 6625 1225 1    60   ~ 0
+DTR
+Text Label 6725 1225 1    60   ~ 0
+1(Tx)
+Text Label 6825 1225 1    60   ~ 0
+0(Rx)
+Text Label 5725 1825 0    60   ~ 0
+1(Tx)
+Text Label 5725 1925 0    60   ~ 0
+0(Rx)
+Text Label 5725 2025 0    60   ~ 0
+Reset
+Text Label 7675 2025 0    60   ~ 0
+Reset
+Text Label 5725 2225 0    60   ~ 0
+2
+Text Label 5725 2325 0    60   ~ 0
+3(**)
+Text Label 5725 2425 0    60   ~ 0
+4
+Text Label 5725 2525 0    60   ~ 0
+5(**)
+Text Label 5725 2625 0    60   ~ 0
+6(**)
+Text Label 5725 2725 0    60   ~ 0
+7
+Text Label 5725 2825 0    60   ~ 0
+8
+Text Label 5725 2925 0    60   ~ 0
+9(**)
+Text Label 7675 2925 0    60   ~ 0
+10(**/SS)
+Text Label 7675 2725 0    60   ~ 0
+12(MISO)
+Text Label 7675 2625 0    60   ~ 0
+13(SCK)
+Text Label 7675 2525 0    60   ~ 0
+A0
+Text Label 7675 2425 0    60   ~ 0
+A1
+Text Label 7675 2325 0    60   ~ 0
+A2
+Text Label 7675 2225 0    60   ~ 0
+A3
+$Comp
+L arduino_wstation-rescue:CONN_2-wstation-cache P3
+U 1 1 55201A4F
+P 6675 3200
+F 0 "P3" V 6625 3200 40  0000 C CNN
+F 1 "ADC" V 6725 3200 40  0000 C CNN
+F 2 "Socket_Arduino_Pro_Mini:Socket_Strip_Arduino_1x02" H 6675 3200 60  0001 C CNN
+F 3 "" H 6675 3200 60  0000 C CNN
+	1    6675 3200
+	0    -1   -1   0   
+$EndComp
+Text Label 6775 3550 3    60   ~ 0
+A4
+Text Label 6575 3550 3    60   ~ 0
+A5
+Text Notes 6350 725  0    60   ~ 0
+Shield Arduino Pro Mini \n
+$Comp
+L arduino_wstation-rescue:CONN_2-wstation-cache P5
+U 1 1 552112EB
+P 7100 3200
+F 0 "P5" V 7050 3200 40  0000 C CNN
+F 1 "ADC" V 7150 3200 40  0000 C CNN
+F 2 "Socket_Arduino_Pro_Mini:Socket_Strip_Arduino_1x02" H 7100 3200 60  0001 C CNN
+F 3 "" H 7100 3200 60  0000 C CNN
+	1    7100 3200
+	0    -1   -1   0   
+$EndComp
+Text Label 7000 3550 3    60   ~ 0
+A7
+Text Label 7200 3550 3    60   ~ 0
+A6
+$Comp
+L arduino_wstation-rescue:BMP180-bmp180 IC2
+U 1 1 58010E86
+P 10025 5775
+F 0 "IC2" H 10225 6075 60  0000 C CNN
+F 1 "BMP180 breakout" H 10025 5475 50  0000 C CNN
+F 2 "" H 9975 5775 60  0000 C CNN
+F 3 "" H 9975 5775 60  0000 C CNN
+	1    10025 5775
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R1_PU
+U 1 1 5801114F
+P 5225 1900
+F 0 "R1_PU" V 5305 1900 50  0000 C CNN
+F 1 "10K" V 5225 1900 50  0000 C CNN
+F 2 "" V 5155 1900 50  0000 C CNN
+F 3 "" H 5225 1900 50  0000 C CNN
+	1    5225 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L arduino_wstation-rescue:RFM22B-rfm22b U2
+U 1 1 58011353
+P 10000 2725
+F 0 "U2" H 10275 2250 60  0000 C CNN
+F 1 "RFM22B" H 10240 3165 60  0000 C CNN
+F 2 "" H 10000 2725 60  0000 C CNN
+F 3 "" H 10000 2725 60  0000 C CNN
+	1    10000 2725
+	1    0    0    -1  
+$EndComp
+Text GLabel 5700 2225 0    60   Input ~ 0
+nIRQ
+Text GLabel 9200 3025 0    60   Input ~ 0
+nIRQ
+$Comp
+L power:GND #PWR?
+U 1 1 58011AE5
+P 9900 3300
+F 0 "#PWR?" H 9900 3300 30  0001 C CNN
+F 1 "GND" H 9900 3230 30  0001 C CNN
+F 2 "" H 9900 3300 60  0000 C CNN
+F 3 "" H 9900 3300 60  0000 C CNN
+	1    9900 3300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 58011BB4
+P 10000 2125
+F 0 "#PWR?" H 10000 2225 30  0001 C CNN
+F 1 "3V3" H 10000 2225 30  0000 C CNN
+F 2 "" H 10000 2125 60  0000 C CNN
+F 3 "" H 10000 2125 60  0000 C CNN
+	1    10000 2125
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 58011C8E
+P 4000 2200
+F 0 "#PWR?" H 4000 2300 30  0001 C CNN
+F 1 "3V3" H 4000 2300 30  0000 C CNN
+F 2 "" H 4000 2200 60  0000 C CNN
+F 3 "" H 4000 2200 60  0000 C CNN
+	1    4000 2200
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 58011D5F
+P 4000 3675
+F 0 "#PWR?" H 4000 3675 30  0001 C CNN
+F 1 "GND" H 4000 3605 30  0001 C CNN
+F 2 "" H 4000 3675 60  0000 C CNN
+F 3 "" H 4000 3675 60  0000 C CNN
+	1    4000 3675
+	1    0    0    -1  
+$EndComp
+Text Label 7675 2825 0    60   ~ 0
+11(**/MOSI)
+$Comp
+L Device:R R2_PU
+U 1 1 58012CA6
+P 5000 1900
+F 0 "R2_PU" V 5080 1900 50  0000 C CNN
+F 1 "10K" V 5000 1900 50  0000 C CNN
+F 2 "" V 4930 1900 50  0000 C CNN
+F 3 "" H 5000 1900 50  0000 C CNN
+	1    5000 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R5_PD
+U 1 1 58012DE9
+P 4975 3500
+F 0 "R5_PD" V 5055 3500 50  0000 C CNN
+F 1 "10K" V 4975 3500 50  0000 C CNN
+F 2 "" V 4905 3500 50  0000 C CNN
+F 3 "" H 4975 3500 50  0000 C CNN
+	1    4975 3500
+	1    0    0    -1  
+$EndComp
+Text GLabel 3250 3425 0    60   Input ~ 0
+D3
+Text GLabel 5450 2325 0    60   Input ~ 0
+D3
+$Comp
+L Device:R R4_PD
+U 1 1 58013086
+P 5150 3500
+F 0 "R4_PD" V 5230 3500 50  0000 C CNN
+F 1 "10K" V 5150 3500 50  0000 C CNN
+F 2 "" V 5080 3500 50  0000 C CNN
+F 3 "" H 5150 3500 50  0000 C CNN
+	1    5150 3500
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R3_PD
+U 1 1 580130CC
+P 5325 3500
+F 0 "R3_PD" V 5405 3500 50  0000 C CNN
+F 1 "10K" V 5325 3500 50  0000 C CNN
+F 2 "" V 5255 3500 50  0000 C CNN
+F 3 "" H 5325 3500 50  0000 C CNN
+	1    5325 3500
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R2_PD
+U 1 1 58013109
+P 5500 3500
+F 0 "R2_PD" V 5580 3500 50  0000 C CNN
+F 1 "10K" V 5500 3500 50  0000 C CNN
+F 2 "" V 5430 3500 50  0000 C CNN
+F 3 "" H 5500 3500 50  0000 C CNN
+	1    5500 3500
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R1_PD
+U 1 1 5801314A
+P 5675 3500
+F 0 "R1_PD" V 5755 3500 50  0000 C CNN
+F 1 "10K" V 5675 3500 50  0000 C CNN
+F 2 "" V 5605 3500 50  0000 C CNN
+F 3 "" H 5675 3500 50  0000 C CNN
+	1    5675 3500
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R6_PD
+U 1 1 58013819
+P 4800 3500
+F 0 "R6_PD" V 4880 3500 50  0000 C CNN
+F 1 "10K" V 4800 3500 50  0000 C CNN
+F 2 "" V 4730 3500 50  0000 C CNN
+F 3 "" H 4800 3500 50  0000 C CNN
+	1    4800 3500
+	1    0    0    -1  
+$EndComp
+Text GLabel 4700 3225 0    60   Input ~ 0
+AN1
+Text GLabel 8250 2525 2    60   Input ~ 0
+AN0
+$Comp
+L power:VCC #PWR?
+U 1 1 5801416B
+P 5225 1575
+F 0 "#PWR?" H 5225 1675 30  0001 C CNN
+F 1 "3V3" H 5225 1675 30  0000 C CNN
+F 2 "" H 5225 1575 60  0000 C CNN
+F 3 "" H 5225 1575 60  0000 C CNN
+	1    5225 1575
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R6
+U 1 1 5801448D
+P 2775 3125
+F 0 "R6" V 2855 3125 50  0000 C CNN
+F 1 "1K" V 2775 3125 50  0000 C CNN
+F 2 "" V 2705 3125 50  0000 C CNN
+F 3 "" H 2775 3125 50  0000 C CNN
+	1    2775 3125
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R5
+U 1 1 58014580
+P 3050 3025
+F 0 "R5" V 3130 3025 50  0000 C CNN
+F 1 "1K" V 3050 3025 50  0000 C CNN
+F 2 "" V 2980 3025 50  0000 C CNN
+F 3 "" H 3050 3025 50  0000 C CNN
+	1    3050 3025
+	0    1    1    0   
+$EndComp
+Text GLabel 2525 3125 0    60   Input ~ 0
+AN0
+$Comp
+L Device:R R4
+U 1 1 580149BD
+P 2775 2925
+F 0 "R4" V 2855 2925 50  0000 C CNN
+F 1 "47R" V 2775 2925 50  0000 C CNN
+F 2 "" V 2705 2925 50  0000 C CNN
+F 3 "" H 2775 2925 50  0000 C CNN
+	1    2775 2925
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R3
+U 1 1 58014A1A
+P 3050 2825
+F 0 "R3" V 3130 2825 50  0000 C CNN
+F 1 "47R" V 3050 2825 50  0000 C CNN
+F 2 "" V 2980 2825 50  0000 C CNN
+F 3 "" H 3050 2825 50  0000 C CNN
+	1    3050 2825
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R2
+U 1 1 58014A75
+P 2775 2725
+F 0 "R2" V 2855 2725 50  0000 C CNN
+F 1 "47R" V 2775 2725 50  0000 C CNN
+F 2 "" V 2705 2725 50  0000 C CNN
+F 3 "" H 2775 2725 50  0000 C CNN
+	1    2775 2725
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R1
+U 1 1 58014AD6
+P 3050 2625
+F 0 "R1" V 3130 2625 50  0000 C CNN
+F 1 "47R" V 3050 2625 50  0000 C CNN
+F 2 "" V 2980 2625 50  0000 C CNN
+F 3 "" H 3050 2625 50  0000 C CNN
+	1    3050 2625
+	0    1    1    0   
+$EndComp
+Text GLabel 2275 3025 0    60   Input ~ 0
+AN6
+Text GLabel 8500 2425 2    60   Input ~ 0
+AN1
+$Comp
+L Connector_Generic:Conn_01x08 JP1
+U 1 1 5801550C
+P 1825 2225
+F 0 "JP1" H 1825 2675 50  0000 C CNN
+F 1 "WIND DIRECTION" V 1925 2225 50  0000 C CNN
+F 2 "" H 1825 2225 50  0000 C CNN
+F 3 "" H 1825 2225 50  0000 C CNN
+	1    1825 2225
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 580159C0
+P 2100 2650
+F 0 "#PWR?" H 2100 2650 30  0001 C CNN
+F 1 "GND" H 2100 2580 30  0001 C CNN
+F 2 "" H 2100 2650 60  0000 C CNN
+F 3 "" H 2100 2650 60  0000 C CNN
+	1    2100 2650
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 58015A13
+P 2950 3675
+F 0 "#PWR?" H 2950 3675 30  0001 C CNN
+F 1 "GND" H 2950 3605 30  0001 C CNN
+F 2 "" H 2950 3675 60  0000 C CNN
+F 3 "" H 2950 3675 60  0000 C CNN
+	1    2950 3675
+	1    0    0    -1  
+$EndComp
+Text Label 8250 2000 0    60   ~ 0
+nc
+Text Label 5575 2025 0    60   ~ 0
+nc
+Text Label 5575 1925 0    60   ~ 0
+nc
+Text Label 5575 1825 0    60   ~ 0
+nc
+$Comp
+L Connector_Generic:Conn_01x02 JP2
+U 1 1 5801651D
+P 1825 1400
+F 0 "JP2" H 1825 1550 50  0000 C CNN
+F 1 "WIND SPEED" V 1925 1400 50  0000 C CNN
+F 2 "" H 1825 1400 50  0000 C CNN
+F 3 "" H 1825 1400 50  0000 C CNN
+	1    1825 1400
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 58016D00
+P 2100 1225
+F 0 "#PWR?" H 2100 1325 30  0001 C CNN
+F 1 "3V3" H 2100 1325 30  0000 C CNN
+F 2 "" H 2100 1225 60  0000 C CNN
+F 3 "" H 2100 1225 60  0000 C CNN
+	1    2100 1225
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x04 JP5
+U 1 1 58017D8A
+P 8625 4825
+F 0 "JP5" H 8625 5075 50  0000 C CNN
+F 1 "HUMIDITY, TEMPERATURE" V 8725 4825 50  0000 C CNN
+F 2 "" H 8625 4825 50  0000 C CNN
+F 3 "" H 8625 4825 50  0000 C CNN
+	1    8625 4825
+	-1   0    0    1   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x04 JP4
+U 1 1 580183A6
+P 8650 5925
+F 0 "JP4" H 8650 6175 50  0000 C CNN
+F 1 "BAROMETER" V 8750 5925 50  0000 C CNN
+F 2 "" H 8650 5925 50  0000 C CNN
+F 3 "" H 8650 5925 50  0000 C CNN
+	1    8650 5925
+	-1   0    0    1   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x04 JP4
+U 1 1 580192D4
+P 6550 4250
+F 0 "JP4" H 6550 4500 50  0000 C CNN
+F 1 "BAROMETER" V 6650 4250 50  0000 C CNN
+F 2 "" H 6550 4250 50  0000 C CNN
+F 3 "" H 6550 4250 50  0000 C CNN
+	1    6550 4250
+	0    1    1    0   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x04 JP5
+U 1 1 5801A31F
+P 9050 2100
+F 0 "JP5" H 9050 2350 50  0000 C CNN
+F 1 "HUMIDITY, TEMPERATURE" V 9150 1850 50  0000 C CNN
+F 2 "" H 9050 2100 50  0000 C CNN
+F 3 "" H 9050 2100 50  0000 C CNN
+	1    9050 2100
+	1    0    0    1   
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5801A770
+P 6275 4050
+F 0 "#PWR?" H 6275 4150 30  0001 C CNN
+F 1 "3V3" H 6275 4150 30  0000 C CNN
+F 2 "" H 6275 4050 60  0000 C CNN
+F 3 "" H 6275 4050 60  0000 C CNN
+	1    6275 4050
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5801A7D2
+P 8800 1850
+F 0 "#PWR?" H 8800 1950 30  0001 C CNN
+F 1 "3V3" H 8800 1950 30  0000 C CNN
+F 2 "" H 8800 1850 60  0000 C CNN
+F 3 "" H 8800 1850 60  0000 C CNN
+	1    8800 1850
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5801A834
+P 6800 4050
+F 0 "#PWR?" H 6800 4050 30  0001 C CNN
+F 1 "GND" H 6800 3980 30  0001 C CNN
+F 2 "" H 6800 4050 60  0000 C CNN
+F 3 "" H 6800 4050 60  0000 C CNN
+	1    6800 4050
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5801A896
+P 8800 2250
+F 0 "#PWR?" H 8800 2250 30  0001 C CNN
+F 1 "GND" H 8800 2180 30  0001 C CNN
+F 2 "" H 8800 2250 60  0000 C CNN
+F 3 "" H 8800 2250 60  0000 C CNN
+	1    8800 2250
+	1    0    0    -1  
+$EndComp
+Text Label 10175 850  0    60   ~ 0
+16.4cm@434MHz
+Text Label 10525 2775 0    60   ~ 0
+TX-RFM22B
+Text Label 10525 2875 0    60   ~ 0
+RX-RFM22B
+Text Label 10525 2975 0    60   ~ 0
+nc
+Text Label 7375 1725 0    60   ~ 0
+nc
+$Comp
+L Connector_Generic:Conn_01x08 JP1
+U 1 1 5801BAAE
+P 1075 5000
+F 0 "JP1" H 1075 5450 50  0000 C CNN
+F 1 "WIND DIRECTION" V 1175 5000 50  0000 C CNN
+F 2 "" H 1075 5000 50  0000 C CNN
+F 3 "" H 1075 5000 50  0000 C CNN
+	1    1075 5000
+	-1   0    0    1   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x02 JP2
+U 1 1 5801BC09
+P 1150 7200
+F 0 "JP2" H 1150 7350 50  0000 C CNN
+F 1 "WIND SPEED" V 1250 7200 50  0000 C CNN
+F 2 "" H 1150 7200 50  0000 C CNN
+F 3 "" H 1150 7200 50  0000 C CNN
+	1    1150 7200
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:LED 1D1
+U 1 1 5801BEE5
+P 2500 5250
+F 0 "1D1" H 2500 5350 50  0000 C CNN
+F 1 "IR LED" H 2500 5150 50  0000 C CNN
+F 2 "" H 2500 5250 50  0000 C CNN
+F 3 "" H 2500 5250 50  0000 C CNN
+	1    2500 5250
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:LED 1D2
+U 1 1 5801C03F
+P 2925 5875
+F 0 "1D2" H 2925 5975 50  0000 C CNN
+F 1 "IR LED" H 2925 5775 50  0000 C CNN
+F 2 "" H 2925 5875 50  0000 C CNN
+F 3 "" H 2925 5875 50  0000 C CNN
+	1    2925 5875
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:LED 1D3
+U 1 1 5801C357
+P 3375 5250
+F 0 "1D3" H 3375 5350 50  0000 C CNN
+F 1 "IR LED" H 3375 5150 50  0000 C CNN
+F 2 "" H 3375 5250 50  0000 C CNN
+F 3 "" H 3375 5250 50  0000 C CNN
+	1    3375 5250
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:LED 1D5
+U 1 1 5801C3D8
+P 4250 5250
+F 0 "1D5" H 4250 5350 50  0000 C CNN
+F 1 "IR LED" H 4250 5150 50  0000 C CNN
+F 2 "" H 4250 5250 50  0000 C CNN
+F 3 "" H 4250 5250 50  0000 C CNN
+	1    4250 5250
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:LED 1D7
+U 1 1 5801C45B
+P 5075 5275
+F 0 "1D7" H 5075 5375 50  0000 C CNN
+F 1 "IR LED" H 5075 5175 50  0000 C CNN
+F 2 "" H 5075 5275 50  0000 C CNN
+F 3 "" H 5075 5275 50  0000 C CNN
+	1    5075 5275
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:LED 1D4
+U 1 1 5801C4EA
+P 3800 5875
+F 0 "1D4" H 3800 5975 50  0000 C CNN
+F 1 "IR LED" H 3800 5775 50  0000 C CNN
+F 2 "" H 3800 5875 50  0000 C CNN
+F 3 "" H 3800 5875 50  0000 C CNN
+	1    3800 5875
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:LED 1D6
+U 1 1 5801C574
+P 4675 5875
+F 0 "1D6" H 4675 5975 50  0000 C CNN
+F 1 "IR LED" H 4675 5775 50  0000 C CNN
+F 2 "" H 4675 5875 50  0000 C CNN
+F 3 "" H 4675 5875 50  0000 C CNN
+	1    4675 5875
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:LED 1D8
+U 1 1 5801C5FF
+P 5525 5900
+F 0 "1D8" H 5525 6000 50  0000 C CNN
+F 1 "IR LED" H 5525 5800 50  0000 C CNN
+F 2 "" H 5525 5900 50  0000 C CNN
+F 3 "" H 5525 5900 50  0000 C CNN
+	1    5525 5900
+	0    -1   -1   0   
+$EndComp
+$Comp
+L arduino_wstation-rescue:OPTO_NPN-wstation-cache 1Q2
+U 1 1 5801EB4C
+P 2625 6600
+F 0 "1Q2" H 2775 6650 50  0000 L CNN
+F 1 "IR_SENS" H 2775 6500 50  0000 L CNN
+F 2 "" H 2625 6600 50  0000 C CNN
+F 3 "" H 2625 6600 50  0000 C CNN
+	1    2625 6600
+	1    0    0    -1  
+$EndComp
+$Comp
+L arduino_wstation-rescue:OPTO_NPN-wstation-cache 1Q3
+U 1 1 5801EBFA
+P 3500 6600
+F 0 "1Q3" H 3650 6650 50  0000 L CNN
+F 1 "IR_SENS" H 3650 6500 50  0000 L CNN
+F 2 "" H 3500 6600 50  0000 C CNN
+F 3 "" H 3500 6600 50  0000 C CNN
+	1    3500 6600
+	1    0    0    -1  
+$EndComp
+$Comp
+L arduino_wstation-rescue:OPTO_NPN-wstation-cache 1Q4
+U 1 1 5801ED94
+P 4350 6600
+F 0 "1Q4" H 4500 6650 50  0000 L CNN
+F 1 "IR_SENS" H 4500 6500 50  0000 L CNN
+F 2 "" H 4350 6600 50  0000 C CNN
+F 3 "" H 4350 6600 50  0000 C CNN
+	1    4350 6600
+	1    0    0    -1  
+$EndComp
+Text Notes 1425 7225 0    60   ~ 12
+Reed relay
+$Comp
+L Connector_Generic:Conn_01x02 JP3
+U 1 1 5803BD05
+P 1825 3950
+F 0 "JP3" H 1825 4100 50  0000 C CNN
+F 1 "POWER SUPPLY" V 1925 3950 50  0000 C CNN
+F 2 "" H 1825 3950 50  0000 C CNN
+F 3 "" H 1825 3950 50  0000 C CNN
+	1    1825 3950
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5803BEAF
+P 2100 4000
+F 0 "#PWR?" H 2100 4000 30  0001 C CNN
+F 1 "GND" H 2100 3930 30  0001 C CNN
+F 2 "" H 2100 4000 60  0000 C CNN
+F 3 "" H 2100 4000 60  0000 C CNN
+	1    2100 4000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5803BF3E
+P 2100 3800
+F 0 "#PWR?" H 2100 3900 30  0001 C CNN
+F 1 "3V3" H 2100 3900 30  0000 C CNN
+F 2 "" H 2100 3800 60  0000 C CNN
+F 3 "" H 2100 3800 60  0000 C CNN
+	1    2100 3800
+	1    0    0    -1  
+$EndComp
+Text Notes 7250 3450 0    60   ~ 0
+A6 & A7 are Analog Input ONLY!
+Text GLabel 7200 4050 3    60   Input ~ 0
+AN6
+Text Label 6975 4000 0    60   ~ 0
+nc
+Wire Wire Line
+	6300 3100 6300 2125
+Wire Wire Line
+	6300 2125 6375 2125
+Wire Wire Line
+	7400 2125 7600 2125
+Wire Wire Line
+	7400 1825 7475 1825
+Wire Wire Line
+	7475 1825 7475 1650
+Wire Wire Line
+	7600 2125 7600 1650
+Wire Wire Line
+	7475 3100 7475 1925
+Wire Wire Line
+	7475 1925 7400 1925
+Wire Wire Line
+	7250 1150 7250 1300
+Wire Wire Line
+	7025 1150 7125 1150
+Wire Wire Line
+	7125 1150 7125 1225
+Wire Wire Line
+	7025 1225 7025 1150
+Connection ~ 7125 1150
+Wire Wire Line
+	6925 1225 6925 975 
+Wire Wire Line
+	6825 1225 6825 975 
+Wire Wire Line
+	6725 1225 6725 975 
+Wire Wire Line
+	6625 1225 6625 975 
+Wire Wire Line
+	6375 1825 5700 1825
+Wire Wire Line
+	6375 1925 5700 1925
+Wire Wire Line
+	6375 2025 5700 2025
+Wire Wire Line
+	6375 2225 5700 2225
+Wire Wire Line
+	5450 2325 6375 2325
+Wire Wire Line
+	7400 2625 9500 2625
+Wire Wire Line
+	7400 2725 9100 2725
+Wire Wire Line
+	7400 2425 8500 2425
+Wire Wire Line
+	7400 2525 8250 2525
+Wire Wire Line
+	7400 2225 8650 2225
+Wire Wire Line
+	7400 2325 8725 2325
+Wire Wire Line
+	8225 2025 7400 2025
+Wire Notes Line
+	6325 800  7500 800 
+Wire Notes Line
+	7500 800  7500 625 
+Wire Wire Line
+	9100 2725 9100 2425
+Wire Wire Line
+	9100 2425 9500 2425
+Wire Wire Line
+	9500 3025 9200 3025
+Wire Wire Line
+	9500 2775 9350 2775
+Wire Wire Line
+	9350 2775 9350 3225
+Wire Wire Line
+	9350 3225 9900 3225
+Connection ~ 9900 3225
+Wire Wire Line
+	9900 3300 9900 3225
+Wire Wire Line
+	10000 2225 10000 2125
+Wire Wire Line
+	4000 2375 4000 2200
+Wire Wire Line
+	4000 3475 4000 3650
+Wire Wire Line
+	9200 2525 9500 2525
+Wire Wire Line
+	9200 2825 9200 2525
+Wire Wire Line
+	7400 2825 9200 2825
+Wire Wire Line
+	7400 2925 9500 2925
+Wire Notes Line
+	7500 625  6325 625 
+Wire Notes Line
+	6325 625  6325 800 
+Wire Wire Line
+	5225 2050 5225 2425
+Connection ~ 5225 2425
+Wire Wire Line
+	5000 2050 5000 2525
+Connection ~ 5000 2525
+Wire Wire Line
+	3250 3425 3300 3425
+Wire Wire Line
+	4000 3650 4800 3650
+Connection ~ 5500 3650
+Connection ~ 5325 3650
+Connection ~ 5150 3650
+Connection ~ 4975 3650
+Connection ~ 4000 3650
+Wire Wire Line
+	5675 3350 5675 2625
+Connection ~ 5675 2625
+Wire Wire Line
+	5500 3350 5500 2725
+Connection ~ 5500 2725
+Wire Wire Line
+	5325 3350 5325 2825
+Connection ~ 5325 2825
+Wire Wire Line
+	5150 3350 5150 2925
+Connection ~ 5150 2925
+Wire Wire Line
+	4975 3650 4800 3650
+Connection ~ 4800 3650
+Wire Wire Line
+	4975 3025 4975 3225
+Wire Wire Line
+	5225 1575 5225 1675
+Wire Wire Line
+	5000 1750 5000 1675
+Wire Wire Line
+	5000 1675 5225 1675
+Connection ~ 5225 1675
+Wire Wire Line
+	3300 3125 2925 3125
+Wire Wire Line
+	2625 3125 2525 3125
+Wire Wire Line
+	3300 2625 3200 2625
+Wire Wire Line
+	3300 2725 2925 2725
+Wire Wire Line
+	3300 2825 3200 2825
+Wire Wire Line
+	3300 2925 2925 2925
+Wire Wire Line
+	2275 3025 2350 3025
+Wire Wire Line
+	3300 2525 2025 2525
+Wire Wire Line
+	3300 2425 2025 2425
+Wire Wire Line
+	2025 2325 2100 2325
+Wire Wire Line
+	2100 2325 2100 2650
+Wire Wire Line
+	2025 2225 2350 2225
+Wire Wire Line
+	2350 2225 2350 3025
+Connection ~ 2350 3025
+Wire Wire Line
+	3300 3325 2950 3325
+Wire Wire Line
+	2950 3325 2950 3675
+Wire Wire Line
+	4975 3225 4700 3225
+Connection ~ 4975 3225
+Wire Wire Line
+	4800 1400 4800 3125
+Wire Wire Line
+	2025 1300 2100 1300
+Wire Wire Line
+	2100 1300 2100 1225
+Wire Wire Line
+	2025 1400 4800 1400
+Connection ~ 4800 3125
+Wire Wire Line
+	8825 4925 9600 4925
+Wire Wire Line
+	9600 4325 8875 4325
+Wire Wire Line
+	8875 4325 8875 4625
+Wire Wire Line
+	8875 4625 8825 4625
+Wire Wire Line
+	8825 4825 9125 4825
+Wire Wire Line
+	8900 5725 8850 5725
+Wire Wire Line
+	10550 5425 10550 5775
+Wire Wire Line
+	8850 5925 9625 5925
+Wire Wire Line
+	10550 5775 10425 5775
+Wire Wire Line
+	10025 6175 9200 6175
+Wire Wire Line
+	9200 6175 9200 6025
+Wire Wire Line
+	9200 6025 8850 6025
+Wire Wire Line
+	9625 5775 9600 5775
+Wire Wire Line
+	9600 5775 9600 5825
+Wire Wire Line
+	6550 4050 6550 3900
+Wire Wire Line
+	6550 3900 6775 3900
+Wire Wire Line
+	6775 3900 6775 3550
+Wire Wire Line
+	6575 3550 6575 3800
+Wire Wire Line
+	6575 3800 6450 3800
+Wire Wire Line
+	6450 3800 6450 4050
+Wire Wire Line
+	7200 3550 7200 4050
+Wire Wire Line
+	7000 3550 7000 3900
+Wire Wire Line
+	6350 4050 6275 4050
+Wire Wire Line
+	6650 4050 6800 4050
+Wire Wire Line
+	10500 2425 10825 2425
+Wire Wire Line
+	10825 2425 10825 900 
+Wire Wire Line
+	1275 5300 1425 5300
+Wire Wire Line
+	1275 5200 1550 5200
+Wire Wire Line
+	2500 4900 2500 4950
+Wire Wire Line
+	2500 4950 2925 4950
+Wire Wire Line
+	2925 4950 2925 5725
+Wire Wire Line
+	3375 4800 3375 4950
+Wire Wire Line
+	3375 4950 3800 4950
+Wire Wire Line
+	3800 4950 3800 5725
+Wire Wire Line
+	4250 4950 4675 4950
+Wire Wire Line
+	4675 4950 4675 5725
+Wire Wire Line
+	5075 4600 5075 4950
+Wire Wire Line
+	5075 4950 5525 4950
+Wire Wire Line
+	5525 4950 5525 5750
+Wire Wire Line
+	1275 4900 2500 4900
+Connection ~ 2500 4950
+Wire Wire Line
+	1275 4800 3375 4800
+Connection ~ 3375 4950
+Wire Wire Line
+	1275 4700 4250 4700
+Wire Wire Line
+	1275 4600 5075 4600
+Connection ~ 5075 4950
+Wire Wire Line
+	1275 5100 1725 5100
+Wire Wire Line
+	1725 5100 1700 6800
+Wire Wire Line
+	1275 5000 1825 5000
+Wire Wire Line
+	1825 5000 1825 6400
+Wire Wire Line
+	2625 2725 2625 1925
+Wire Wire Line
+	2900 2825 2525 2825
+Wire Wire Line
+	2525 2825 2525 2025
+Wire Wire Line
+	2625 2925 2425 2925
+Wire Wire Line
+	2425 2925 2425 2125
+Wire Wire Line
+	2900 2625 2725 2625
+Wire Wire Line
+	2725 2625 2725 1825
+Wire Wire Line
+	9600 5825 8850 5825
+Wire Wire Line
+	10550 5425 8900 5425
+Wire Wire Line
+	8900 5425 8900 5725
+Wire Wire Line
+	2025 3850 2100 3850
+Wire Wire Line
+	2100 3850 2100 3800
+Wire Wire Line
+	2025 3950 2100 3950
+Wire Wire Line
+	2100 3950 2100 4000
+Wire Wire Line
+	8725 2325 8725 2100
+Wire Wire Line
+	8725 2100 8850 2100
+Wire Wire Line
+	8650 2225 8650 2000
+Wire Wire Line
+	8650 2000 8850 2000
+Wire Wire Line
+	8800 2250 8800 2200
+Wire Wire Line
+	8800 2200 8850 2200
+Wire Wire Line
+	8850 1900 8800 1900
+Wire Wire Line
+	8800 1900 8800 1850
+Wire Wire Line
+	2725 1825 2025 1825
+Wire Wire Line
+	2625 1925 2025 1925
+Wire Wire Line
+	2525 2025 2025 2025
+Wire Wire Line
+	2425 2125 2025 2125
+Wire Wire Line
+	1425 5300 1425 5500
+Wire Wire Line
+	1550 5200 1550 6125
+Text Notes 2400 4550 0    60   ~ 0
+NNE
+Text Notes 2850 4550 0    60   ~ 0
+NNW
+Text Notes 3300 4550 0    60   ~ 0
+NWW
+Text Notes 3725 4550 0    60   ~ 0
+SWW
+Text Notes 4175 4550 0    60   ~ 0
+SSW
+Text Notes 4575 4550 0    60   ~ 0
+SSE
+Text Notes 5000 4550 0    60   ~ 0
+SEE
+Text Notes 5475 4550 0    60   ~ 0
+NEE
+Wire Wire Line
+	8825 4725 9000 4725
+Wire Wire Line
+	9000 4725 9000 4525
+Wire Wire Line
+	9000 4525 9600 4525
+Wire Wire Line
+	9125 4825 9125 4725
+Wire Wire Line
+	9125 4725 9600 4725
+Text Notes 1050 4425 0    60   ~ 0
+North direction = support arm:
+Wire Wire Line
+	7125 1150 7250 1150
+Wire Wire Line
+	5225 2425 6375 2425
+Wire Wire Line
+	5000 2525 6375 2525
+Wire Wire Line
+	5500 3650 5675 3650
+Wire Wire Line
+	5325 3650 5500 3650
+Wire Wire Line
+	5150 3650 5325 3650
+Wire Wire Line
+	4975 3650 5150 3650
+Wire Wire Line
+	4000 3650 4000 3675
+Wire Wire Line
+	5675 2625 6375 2625
+Wire Wire Line
+	5500 2725 6375 2725
+Wire Wire Line
+	5325 2825 6375 2825
+Wire Wire Line
+	5150 2925 6375 2925
+Wire Wire Line
+	5225 1675 5225 1750
+Wire Wire Line
+	2350 3025 2900 3025
+Wire Wire Line
+	4975 3225 4975 3350
+Wire Wire Line
+	4800 3125 4800 3350
+Wire Wire Line
+	2500 4950 2500 5100
+Wire Wire Line
+	3375 4950 3375 5100
+Wire Wire Line
+	5075 4950 5075 5125
+Wire Wire Line
+	9900 3225 10100 3225
+Wire Wire Line
+	4250 4700 4250 5100
+Wire Wire Line
+	1550 6125 2925 6125
+Wire Wire Line
+	1425 5500 2500 5500
+Wire Wire Line
+	1825 6400 5275 6400
+Wire Wire Line
+	1700 6800 5275 6800
+$Comp
+L arduino_wstation-rescue:SHT1X-sht10_11_15 IC1
+U 1 1 58010BB1
+P 10000 4625
+F 0 "IC1" H 9800 4150 50  0000 L BNN
+F 1 "SHT15 breakout" H 9800 5050 50  0000 L BNN
+F 2 "sht10_11_15-SHT1X" H 10000 4775 50  0001 C CNN
+F 3 "" H 10000 4625 60  0000 C CNN
+	1    10000 4625
+	1    0    0    -1  
+$EndComp
+$Comp
+L arduino_wstation-rescue:CONN_6-wstation-cache P2
+U 1 1 55201543
+P 6875 1575
+F 0 "P2" V 6925 1550 60  0000 C CNN
+F 1 "COM" V 6825 1550 60  0000 C CNN
+F 2 "Socket_Arduino_Pro_Mini:Socket_Strip_Arduino_1x06" H 6875 1575 60  0001 C CNN
+F 3 "" H 6875 1575 60  0000 C CNN
+	1    6875 1575
+	0    -1   1    0   
+$EndComp
+Wire Wire Line
+	3300 3025 3200 3025
+$Comp
+L 74xx:74HC245 U1
+U 1 1 580106BC
+P 3800 2925
+F 0 "U1" H 3475 2275 50  0000 L BNN
+F 1 "74HC245" H 3875 3550 50  0000 L TNN
+F 2 "" H 3800 2925 50  0000 C CNN
+F 3 "" H 3800 2925 50  0000 C CNN
+	1    3800 2925
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4300 2425 5225 2425
+Wire Wire Line
+	4300 2525 5000 2525
+Wire Wire Line
+	4300 2625 5675 2625
+Wire Wire Line
+	4300 2725 5500 2725
+Wire Wire Line
+	4300 2825 5325 2825
+Wire Wire Line
+	4300 2925 5150 2925
+Wire Wire Line
+	4300 3025 4975 3025
+Wire Wire Line
+	4300 3125 4800 3125
+Connection ~ 2500 5500
+Wire Wire Line
+	2500 5500 3375 5500
+Connection ~ 3375 5500
+Wire Wire Line
+	3375 5500 4250 5500
+Connection ~ 4250 5500
+Wire Wire Line
+	4250 5500 5075 5500
+Wire Wire Line
+	5075 5425 5075 5500
+Wire Wire Line
+	4250 5400 4250 5500
+Wire Wire Line
+	3375 5400 3375 5500
+Wire Wire Line
+	2500 5400 2500 5500
+Wire Wire Line
+	5525 6050 5525 6125
+Wire Wire Line
+	4675 6025 4675 6125
+Connection ~ 4675 6125
+Wire Wire Line
+	4675 6125 5525 6125
+Wire Wire Line
+	3800 6025 3800 6125
+Connection ~ 3800 6125
+Wire Wire Line
+	3800 6125 4675 6125
+Wire Wire Line
+	2925 6025 2925 6125
+Connection ~ 2925 6125
+Wire Wire Line
+	2925 6125 3800 6125
+$Comp
+L arduino_wstation-rescue:OPTO_NPN-wstation-cache 1Q5
+U 1 1 5801EE37
+P 5175 6600
+F 0 "1Q5" H 5325 6650 50  0000 L CNN
+F 1 "IR_SENS" H 5325 6500 50  0000 L CNN
+F 2 "" H 5175 6600 50  0000 C CNN
+F 3 "" H 5175 6600 50  0000 C CNN
+	1    5175 6600
+	1    0    0    -1  
+$EndComp
+$EndSCHEMATC

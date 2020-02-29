@@ -1,4 +1,4 @@
-update=Monday, 24 February 2020 at 18:10:10
+update=Saturday, 29 February 2020 at 21:43:32
 version=1
 last_client=eeschema
 [general]
@@ -34,7 +34,7 @@ LibDir=
 [schematic_editor]
 version=1
 PageLayoutDescrFile=
-PlotDirectoryName=
+PlotDirectoryName=/Users/izk/Documents/Soft/WStation/docs/
 SubpartIdSeparator=0
 SubpartFirstId=65
 NetFmtName=

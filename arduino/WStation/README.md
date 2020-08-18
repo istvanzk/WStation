@@ -14,9 +14,9 @@ The final code is in the folder *sensrfm*.
 
 [Octal Bus Transceiver Tri-State - 74HC245][5]
 
-### Connections
+### Connections, wiring, sensors
 
-** See [full schematics][6] for details **
+[Full schematics][6]
 
 
 [1]: https://www.arduino.cc/en/Main/ArduinoBoardProMini

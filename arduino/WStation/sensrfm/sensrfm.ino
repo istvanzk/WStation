@@ -1,12 +1,12 @@
-/* Wind direction + speed sensor (OBH eHome Wind Meter), SFE_BMP180, SHT15 and RFM22B test sketch
+/* Home Weather Sation code for Arduino
+ 
+Collects measurements of:
+  * wind direction & speed (OBH eHome Wind Meter)
+  * pressure (BMP180)
+  * temperature & humidity (SHT15)
+and transmits combined data using RFM22B radio module.
 
-With all Serial.print()'s:
-Sketch uses 21522 bytes (70%) of program storage space. Maximum is 30720 bytes.
-Global variables use 1042 bytes (50%) of dynamic memory, leaving 1006 bytes for local variables. Maximum is 2048 bytes.
-
-Without Serial.print()'s:
-Sketch uses 16,898 bytes (55%) of program storage space. Maximum is 30,720 bytes.
-Global variables use 1,001 bytes (48%) of dynamic memory, leaving 1,047 bytes for local variables. Maximum is 2,048 bytes.
+Connections:
 
 BMP180 Connections:
 GND  -> GND
@@ -25,7 +25,7 @@ D3    	-> Enable 74HC245
 D4-D9 	-> Ports B0-B7 (input) 74HC245, IR LEDs Pw
 A0		-> Wind speed Reed relay Output
 A1 (DO)	-> Wind direction IR Sensor Pw
-A6 		-> Wind direction IR Sensor Output
+A7 		-> Wind direction IR Sensor Output
 
 RFM-22B Connections:
                 GND----------GND-\ (ground in)
@@ -41,15 +41,17 @@ interrupt 0 pin D2-----------NIRQ  (interrupt request out)
 						  /--GPIO1 (GPIO1 out to control receiver antenna RX_ANT)
 						  \--RX_ANT (RX antenna control in) RFM22B only
 
-
 Requires:
+
 Sparkfun BMP180 Arduino Library: https://github.com/sparkfun/BMP180_Breakout
 SparkFun_SHT1X Arduino Library: https://github.com/sparkfun/SHT15_Breakout/
 RadioHead RH_RF22 Arduino Library: http://www.airspayce.com/mikem/arduino/RadioHead/index.html
 
-
 Output:
 
+Wind data:
+ direction: 14
+ speed: 0.13
 BMP data:
  temperature: 19.11 C, 66.39 F
  absolute pressure: 1017.10 mb, 30.04 inHg
@@ -58,9 +60,19 @@ BMP data:
 SHT data:
  temperature: 18.94 C, 66.13 F
  humidity: 67.77%
-Wind data:
- direction: 14
- speed: 0.13
+
+Notes:
+
+The RH_ASK driver uses a timer-driven interrupt to generate 8 interrupts per bit period. By default it takes over Timer 1.
+This sketch uses Timer 2, therefore the RH_ASK timer does not need to be changed.
+
+Without Serial.print()'s:
+  Sketch uses 18368 bytes (59%) of program storage space. Maximum is 30720 bytes.
+  Global variables use 1027 bytes (50%) of dynamic memory, leaving 1021 bytes for local variables. Maximum is 2048 bytes.
+
+With all Serial.print()'s:
+  Sketch uses 21806 bytes (70%) of program storage space. Maximum is 30720 bytes.
+  Global variables use 1043 bytes (50%) of dynamic memory, leaving 1005 bytes for local variables. Maximum is 2048 bytes.
 
 */
 
@@ -71,67 +83,31 @@ Wind data:
 #include <SHT1X.h>
 #include <Wire.h>
 
-// The same length must be set in RH_RF22.h !
-#define RH_RF22_MAX_MESSAGE_LEN 20 //Max=255
-#include <RH_RF22.h>
-#include <RHReliableDatagram.h>
-
-// Enable Serial.print()' s
+// Enable Serial.print() for debugging
 #define SERIAL_PRINT
 
-// Directions [deg from North]
-#define REF_ANGLE -22.5
-#define DELTA_ANGLE 22.5
+// Loop delay value (milliseconds)
+#define LOOP_DELAY 5000
 
-// Reference altitude of Frydendal, Aalborg in meters
-#define ALTITUDE 40.0
+// Reference altitude (m) of Home Weather Station
+#define ALTITUDE 43.0
+
+// Anemometer scaling (meters per revolution), for sensor with 1 pulse per revolution
+#define ANEMOMETER_MPR 0.345708 
 
 // RFM22B communication addresses
 #define RF_GROUP_ID   22 // All devices
 #define RF_GATEWAY_ID 1  // Server ID (where to send packets)
 #define RF_NODE_ID    10 // Client ID (device sending the packets)
 
-/*
-const char s_N[] PROGMEM = "N";
-const char s_NNE[] PROGMEM = "NNE";
-const char s_NE[] PROGMEM = "NE";
-const char s_NEE[] PROGMEM = "NEE";
-const char s_E[] PROGMEM = "E";
 
-const char s_SEE[] PROGMEM = "SEE";
-const char s_SE[] PROGMEM = "SE";
-const char s_SSE[] PROGMEM = "SSE";
-const char s_S[] PROGMEM = "S";
+// Implementation specific parameters. 
+// DO NOT change these unless you absolutely need to and you know what you are doing!
 
-const char s_SSW[] PROGMEM = "SSW";
-const char s_SW[] PROGMEM = "SW";
-const char s_SWW[] PROGMEM = "SWW";
-const char s_W[] PROGMEM = "W";
-
-const char s_NWW[] PROGMEM = "NWW";
-const char s_NW[] PROGMEM = "NW";
-const char s_NNW[] PROGMEM = "NNW";
-
-const char* const WindDir_string_table[] PROGMEM=
-{
-	s_NNE,
-	s_NE,
-	s_NEE,
-	s_E,
-	s_SEE,
-	s_SE,
-	s_SSE,
-	s_S,
-	s_SSW,
-	s_SW,
-	s_SWW,
-	s_W,
-	s_NWW,
-	s_NW,
-	s_NNW,
-	s_N,
-};
- */
+// RF22B messge length (bytes). The same length must be set in RH_RF22.h !
+#define RH_RF22_MAX_MESSAGE_LEN 20 
+#include <RH_RF22.h>
+#include <RHReliableDatagram.h>
 
 // SFE_BMP180 object "pressure":
 SFE_BMP180 pressure;
@@ -143,18 +119,17 @@ SHT1x sht15(A2, A3); //Data, SCK
 RH_RF22 driver;
 // Class to manage message delivery and receipt, using the driver declared above
 RHReliableDatagram manager(driver, RF_NODE_ID);
-// The RH_ASK driver uses a timer-driven interrupt to generate 8 interrupts per bit period. By default it takes over Timer 1.
-// You _have_ to force it to use Timer 2 instead by enabling the define RH_ASK_ARDUINO_USE_TIMER2 near the top of RH_ASK.cpp!
 
 uint8_t tx_data[RH_RF22_MAX_MESSAGE_LEN+1];
 // Dont put this on the stack:
 uint8_t rx_buf[RH_RF22_MAX_MESSAGE_LEN+1];
 
 // Hwd status flags
+boolean windM_OK  = false;
 boolean bmp180_OK = false;
 boolean sht15_OK  = false;
 boolean rfm22_OK  = false;
-boolean windM_OK  = false;
+boolean rfm22_sentOK = false;
 
 // Wind Meter Control pins
 int windIntfEnable   = 3;  //active low; enables the 74HC245 3-state buffers
@@ -173,11 +148,11 @@ int windDirGrp4Seq[2] = {windDirGrp1357Pw, windDirGrp2468Pw};
 int windDirGrp2Seq[4] = {windDirGrp12Pw, windDirGrp34Pw, windDirGrp56Pw, windDirGrp78Pw};
 
 float AnemometerSpeed = 0.0;
-float AnemometerScaleMPR = 0.345708; // Windspeed [meters/revolution] for 1 pulse per revolution
 volatile unsigned long AnemometerPeriodTotal = 0;
 volatile unsigned long AnemometerPeriodReadingCount = 0;
-volatile unsigned long lastAnemometerPeriodReadingCount = 11111;
+volatile unsigned long lastAnemometerPeriodReadingCount = 0;
 volatile uint8_t zeroSpeedCount = 0;
+volatile uint8_t ovfSpeedCount = 0;
 volatile unsigned long GustPeriod = 65535;
 volatile unsigned long lastAnemometerEvent = 42;
 
@@ -274,60 +249,61 @@ void loop()
 	  status = pressure.startTemperature();
 	  if (status != 0)
 	  {
-		// Wait for the measurement to complete:
-		delay(status);
+		  // Wait for the measurement to complete:
+		  delay(status);
 
-		// Retrieve the completed temperature measurement:
-		// Note that the measurement is stored in the variable T.
-		// Function returns 1 if successful, 0 if failure.
-
-		status = pressure.getTemperature(T);
-		if (status != 0)
-		{
-		  // Start a pressure measurement:
-		  // The parameter is the oversampling setting, from 0 to 3 (highest res, longest wait).
-		  // If request is successful, the number of ms to wait is returned.
-		  // If request is unsuccessful, 0 is returned.
-
-		  status = pressure.startPressure(3);
-		  if (status != 0)
-		  {
-			// Wait for the measurement to complete:
-			delay(status);
-
-			// Retrieve the completed pressure measurement:
-			// Note that the measurement is stored in the variable P.
-			// Note also that the function requires the previous temperature measurement (T).
-			// (If temperature is stable, you can do one temperature measurement for a number of pressure measurements.)
-			// Function returns 1 if successful, 0 if failure.
-
-			status = pressure.getPressure(P,T);
-			if (status != 0)
-			{
-			  // The pressure sensor returns abolute pressure, which varies with altitude.
-			  // To remove the effects of altitude, use the sealevel function and your current altitude.
-			  // This number is commonly used in weather reports.
-			  // Parameters: P = absolute pressure in mb, ALTITUDE = current altitude in m.
-			  // Result: p0 = sea-level compensated pressure in mb
-			  p0 = pressure.sealevel(P,ALTITUDE); // we're at 1655 meters (Boulder, CO)
-
-			  // On the other hand, if you want to determine your altitude from the pressure reading,
-			  // use the altitude function along with a baseline pressure (sea-level or other).
-			  // Parameters: P = absolute pressure in mb, p0 = baseline pressure in mb.
-			  // Result: a = altitude in m.
-			  a = pressure.altitude(P,p0);
-
-			}
+  		// Retrieve the completed temperature measurement:
+  		// Note that the measurement is stored in the variable T.
+  		// Function returns 1 if successful, 0 if failure.
+  
+  		status = pressure.getTemperature(T);
+  		if (status != 0)
+  		{
+        T -= 1;
+  		  // Start a pressure measurement:
+  		  // The parameter is the oversampling setting, from 0 to 3 (highest res, longest wait).
+  		  // If request is successful, the number of ms to wait is returned.
+  		  // If request is unsuccessful, 0 is returned.
+  
+  		  status = pressure.startPressure(3);
+  		  if (status != 0)
+  		  {
+    			// Wait for the measurement to complete:
+    			delay(status);
+    
+    			// Retrieve the completed pressure measurement:
+    			// Note that the measurement is stored in the variable P.
+    			// Note also that the function requires the previous temperature measurement (T).
+    			// (If temperature is stable, you can do one temperature measurement for a number of pressure measurements.)
+    			// Function returns 1 if successful, 0 if failure.
+    
+    			status = pressure.getPressure(P,T);
+    			if (status != 0)
+    			{
+    			  // The pressure sensor returns abolute pressure, which varies with altitude.
+    			  // To remove the effects of altitude, use the sealevel function and your current altitude.
+    			  // This number is commonly used in weather reports.
+    			  // Parameters: P = absolute pressure in mb, ALTITUDE = current altitude in m.
+    			  // Result: p0 = sea-level compensated pressure in mb
+    			  p0 = pressure.sealevel(P,ALTITUDE); // we're at 1655 meters (Boulder, CO)
+    
+    			  // On the other hand, if you want to determine your altitude from the pressure reading,
+    			  // use the altitude function along with a baseline pressure (sea-level or other).
+    			  // Parameters: P = absolute pressure in mb, p0 = baseline pressure in mb.
+    			  // Result: a = altitude in m.
+    			  a = pressure.altitude(P,p0);
+    
+    			}
 #if defined(SERIAL_PRINT)
-			else Serial.println(F("error retrieving BMP pressure measurement\n"));
+    			else Serial.println(F("error retrieving BMP pressure measurement\n"));
+#endif
+	  	  }
+#if defined(SERIAL_PRINT)
+		    else Serial.println(F("error starting BMP pressure measurement\n"));
 #endif
 		  }
 #if defined(SERIAL_PRINT)
-		  else Serial.println(F("error starting BMP pressure measurement\n"));
-#endif
-		}
-#if defined(SERIAL_PRINT)
-		else Serial.println(F("error retrieving BMP temperature measurement\n"));
+		  else Serial.println(F("error retrieving BMP temperature measurement\n"));
 #endif
 	  }
 #if defined(SERIAL_PRINT)
@@ -338,7 +314,7 @@ void loop()
   // Read humidity sensor
   if (sht15_OK)
   {
-	  tempC = sht15.readTemperatureC();
+	  tempC = sht15.readTemperatureC() - 1;
 	  //tempF = sht15.readTemperatureF();
 	  humidity = sht15.readHumidity();
   }
@@ -365,9 +341,8 @@ void loop()
   			// Power on
   			digitalWrite(windDirGrp2Seq[grp2], HIGH);
 
+  			// Read wind direction (avg 5 measurements)
         delay(10);
-
-  			// Read wind direction
   			windDirSensValue = analogRead(windDirSens);
         delay(10);
         windDirSensValue += analogRead(windDirSens);
@@ -412,8 +387,6 @@ void loop()
        
   		}
 
-      //delay(1000);
-          
 		  // Disable
 		  digitalWrite(windDirGrp4Seq[grp4], HIGH);
 
@@ -431,11 +404,9 @@ void loop()
 	  // When disabled no speed and direction measurements are possible!
 	  //digitalWrite(windIntfEnable, HIGH);
 
-    // Calculate direction angle
-    //dir_angle = -REF_ANGLE;
+    // Calculate direction angle index
     if( dir_val>0 )
     {
-      //dir_angle = dir_angle + 360 - DELTA_ANGLE*dir_val;
       dir_val = 16 - dir_val + 1;
     } else
     {
@@ -544,42 +515,27 @@ void loop()
   // Send a RFM22B message
   if (rfm22_OK)
   {
-
       if (manager.sendtoWait(tx_data, RH_RF22_MAX_MESSAGE_LEN, RF_GATEWAY_ID))
+      {
+        rfm22_sentOK = true;
 #if defined(SERIAL_PRINT)
         Serial.print(F("sendtoWait ACK: "));
+#endif
+      }
       else
+      {
+        rfm22_sentOK = false;
+#if defined(SERIAL_PRINT)
         Serial.print(F("sendtoWait failed: "));
-
+#endif        
+      }
+#if defined(SERIAL_PRINT)      
       Serial.println(manager.headerId(), HEX);
       Serial.println();
 #endif
-/*
-	  if (manager.sendtoWait(tx_data, RH_RF22_MAX_MESSAGE_LEN, RF_GATEWAY_ID))
-	  {
-		// Now wait for a reply from the server
-		uint8_t len = sizeof(rx_buf);
-		uint8_t from;
-		if (manager.recvfromAckTimeout(rx_buf, &len, 500, &from))
-		{
-#if defined(SERIAL_PRINT)
-		  Serial.print(F("Rx reply from : 0x"));
-		  Serial.print(from, HEX);
-		  Serial.print(F(": "));
-		  Serial.println((char*)rx_buf);
-#endif
-		}
-#if defined(SERIAL_PRINT)
-		else Serial.println(F("No reply, is rf22_reliable_datagram_server running?"));
-#endif
-	  }
-#if defined(SERIAL_PRINT)
-	  else Serial.println(F("sendtoWait failed"));
-#endif
-*/
   }
 
-  delay(5000);
+  delay(LOOP_DELAY);
 }
 
 
@@ -587,48 +543,18 @@ void set_pci()
 {
 	cli();
 
-	// https://thewanderingengineer.com/2014/08/11/arduino-pin-change-interrupts/
-	// https://www.avrprogrammers.com/howto/int-pin-change
-	// Enables Port C (PCINT8 - PCINT14) Pin Change Interrupts
+	// Enable Port C (PCINT8 - PCINT14) Pin Change Interrupts
 	PCICR |= B00000010;
 	// Mask PCINT8 (A0)
 	PCMSK1 |= B00000001;
-/*
-	// https://arduinodiy.wordpress.com/2012/02/28/timer-interrupts/
-	// Set compare match register for ~0.5sec increments
-	TCCR1A = B00000000;
-	TCCR1B = B00000000;
-  // Set CS10 & CS12 bits for 1024 prescaler: 1024 * 65535 * 1/(8*10^6) = 8.388480 sec
-  TCCR1B |= (1 << CS10) | (1 << CS12);
 
-	// Turn on CTC mode
-  OCR1A = 2*3906;// =  0.5*8*10^6/1024 - 1 (must be <65536)
-	TCCR1B |= (1 << WGM12);
-	// Enable timer compare ISR
-	TIMSK1 |= (1 << OCIE1A);
-  
-	// Enable the overflow ISR
-	//TIMSK1 |= (1 << TOIE1);
-	// Reset the counter
-	TCNT1 = 0;
-
-*/
-
-  // https://arduinodiy.wordpress.com/2012/02/28/timer-interrupts/
-  // Set compare match register for ~0.032sec increments
+  // Set up TIMER2
   TCCR2A = B00000000;
-  TCCR2B = B00000000;
+  TCCR2B = B00000000; 
   // Set CS20 & CS22 bits for 1024 prescaler: 1024 * 256 * 1/(8*10^6) = 0.032768 msec
   TCCR2B |= (1 << CS20) | (1 << CS22);
-
-  // Turn on CTC mode
-  //OCR2A = 255;// =  0.032768*8*10^6/1024 - 1 (must be <256)
-  //TCCR2B |= (1 << WGM22);
-  // Enable timer compare ISR
-  //TIMSK2 |= (1 << OCIE2A);
-
   // Enable the overflow ISR
-  TIMSK2 |= (1 << TOIE2);
+  TIMSK2 |= (1 << TOIE2); 
   // Reset the counter
   TCNT2 = 0;
 
@@ -641,7 +567,6 @@ ISR(PCINT1_vect)
 {
 	// Count only at LOW to HIGH transition (pulse start)
   if( (PINC & (1 << PINC0)) == 1 ){
-	//if( digitalRead(A0) == HIGH ) {
 
 		// Based on https://github.com/rpurser47/weatherstation/blob/master/weatherstation.ino
 		// Activated by the magnet in the anemometer (1 ticks per rotation)
@@ -659,8 +584,8 @@ ISR(PCINT1_vect)
 			else {
 				period = timeAnemometerEvent - lastAnemometerEvent;
 			}
-			// Ignore switch-bounce glitches less than 10ms after initial edge
-			if(period < 10) {
+			// Ignore switch-bounce glitches less than 50ms after initial edge
+			if(period < 50) {
 				return;
 			}
 			// If the period is the shortest (and therefore fastest windspeed) seen, capture it
@@ -679,27 +604,37 @@ ISR(PCINT1_vect)
 }
 
 
-// Timer1 comparator interrupt routine (~0.5sec period)
-// Timer2 overflow interrupt routine (~0.032sec period)
+// Timer2 overflow interrupt routine (0.032768sec period)
 ISR(TIMER2_OVF_vect)
 {
+  TCNT2 = 0;
+  
+  // Estimate wind speed only ~1 per second
+  ovfSpeedCount++;
+  if (ovfSpeedCount < 30) 
+    return;
+
+  // Estimate wind speed  
+  ovfSpeedCount = 0;
 	if(AnemometerPeriodTotal > 0) {
-		AnemometerSpeed =  AnemometerScaleMPR * 1000.0 * float(AnemometerPeriodReadingCount) / float(AnemometerPeriodTotal);
+		AnemometerSpeed =  ANEMOMETER_MPR * 1000.0 * float(AnemometerPeriodReadingCount) / float(AnemometerPeriodTotal);
 	}
+ 
 	if(AnemometerPeriodReadingCount == lastAnemometerPeriodReadingCount && lastAnemometerPeriodReadingCount > 0)
 	{
 		zeroSpeedCount++;
-		if(zeroSpeedCount > 30)
+		if(zeroSpeedCount > 10)
 		{
 			zeroSpeedCount = 0;
 			AnemometerSpeed = 0.0;
 			lastAnemometerEvent = 0;
 			AnemometerPeriodTotal = 0;
 			AnemometerPeriodReadingCount = 0;
-			lastAnemometerPeriodReadingCount = 1111;
+			lastAnemometerPeriodReadingCount = 0;
 			GustPeriod = 65535;
 		}
 	}
-	lastAnemometerPeriodReadingCount = AnemometerPeriodReadingCount;
-  TCNT2 = 0;
+  else
+  	lastAnemometerPeriodReadingCount = AnemometerPeriodReadingCount;
+  
 }

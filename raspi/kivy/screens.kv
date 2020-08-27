@@ -1,0 +1,165 @@
+#:import FadeTransition kivy.uix.screenmanager.FadeTransition
+#:import cos math.cos
+#:import sin math.sin
+#:import radians math.radians
+#:import log10 math.log10
+MyScreenManager:
+    transition: FadeTransition()
+    FirstScreen:
+    SecondScreen:
+
+<LabelN@Label>:
+    font_size: '40sp'
+    color: 1,1,1,1
+    outline_color: 0,0,0
+    outline_width: 5
+    text_size: self.size
+    halign: 'center'
+    valign: 'middle'
+    bold: True
+
+<LabelNE@Label>:
+    font_size: '30sp'
+    text_size: self.size
+    color: 0.6,0.6,0.6,1
+    outline_color: 0.1,0.1,0.1
+    outline_width: 10
+    halign: 'center'
+    valign: 'middle'
+    bold: True
+
+<LabelInfo@Label>:
+    font_size: '30sp'
+    text_size: self.size
+    outline_color: 0,0,1
+    outline_width: 10
+    halign: 'center'
+    valign: 'middle'
+    bold: True
+
+<FirstScreen>:
+    name: 'first'
+    FloatLayout:
+        Widget:
+            size_hint: 1.0, 1.0
+            pos_hint: {'x':0.0, 'y':0.0}
+            canvas.before:      
+                Color:
+                    rgba: 0.5,0,0,0 
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+
+            canvas:
+                Color:
+                    rgb: 0,0,1
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x, self.center_y, 400, 10, 80)
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x, self.center_y, 400, 100, 170)
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x, self.center_y, 400, 190, 260)
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x, self.center_y, 400, 280, 350)
+
+                Color:
+                    hsv: (160-205*log10(1+root.wind_speed/5))/360,1,1
+                Ellipse:
+                    pos: self.center_x-10*root.wind_speed, self.center_y-10*root.wind_speed
+                    size: 20*root.wind_speed, 20*root.wind_speed
+                    angle_start: root.wind_direction-11.25
+                    angle_end: root.wind_direction+11.25
+                    segments: 2    
+                Ellipse:
+                    pos: self.center_x-10, self.center_y-10
+                    size: 20,20
+                    angle_start: 0
+                    angle_end: 360
+
+                Color: 
+                    rgb: 1,1,1
+                Line:
+                    width: 2.
+                    cap: 'round'
+                    joint: 'round'
+                    points: self.center_x, self.center_y, self.center_x+350*cos(radians(-root.wind_direction+90-11.25)), self.center_y+350*sin(radians(-root.wind_direction+90-11.25))
+                Line:
+                    width: 2.
+                    cap: 'round'
+                    joint: 'round'
+                    points: self.center_x, self.center_y, self.center_x+350*cos(radians(-root.wind_direction+90+11.25)), self.center_y+350*sin(radians(-root.wind_direction+90+11.25))
+ 
+        LabelN:
+            text: 'N'
+            pos: 0,400
+        LabelN:
+            text: 'E'
+            pos: 400,00
+        LabelN:
+            text: 'S'
+            pos: 0,-400
+        LabelN:
+            text: 'W'
+            pos: -400,0
+
+        LabelNE:
+            text: 'NE'
+            pos: 280,280
+        LabelNE:
+            text: 'SE'
+            pos: 280,-280
+        LabelNE:
+            text: 'SW'
+            pos: -280,-280
+        LabelNE:
+            text: 'NW'
+            pos: -280,280
+
+        LabelInfo:
+            text: '{:4.1f} C'.format(root.air_temperature)
+            pos: -600,300           
+            color: 0.6,0.6,0.6,1
+
+        LabelInfo:
+            text: '{:6.1f} mB'.format(root.air_pressure)
+            pos: -600,-300           
+            color: 0.6,0.6,0.6,1
+
+        LabelInfo:
+            text: '{:4.1f} m/s'.format(root.wind_speed)
+            pos: 600,300           
+            color: 0.6,0.6,0.6,1
+
+        LabelInfo:
+            text: '{:4.1f} %'.format(root.air_relhumidity)
+            pos: 600,-300           
+            color: 0.6,0.6,0.6,1
+
+        Button:
+            pos_hint: {'x':0.975, 'y':0.35}
+            size_hint: 0.025, 0.30
+            background_color: 0,0,1,0.5
+            on_press: app.root.current = 'second'
+        
+        
+<SecondScreen>:
+    name: 'second'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'TRACES screen!'
+            font_size: 30
+    FloatLayout:
+        Button:
+            pos_hint: {'x':0, 'y':0.35}
+            size_hint: 0.025, 0.30
+            background_color: 0,0,1,0.5
+            on_press: app.root.current = 'first'

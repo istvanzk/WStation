@@ -1,13 +1,13 @@
 
 from kivy.app import App
 from kivy.clock import Clock
-#from kivy.base import runTouchApp
+from kivy.base import runTouchApp
 from kivy.lang import Builder
 from kivy.properties import ListProperty, NumericProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 
-from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, SlideTransition
 
 from kivy.core.window import Window
 Window.size = (800, 480)

@@ -13,6 +13,7 @@ from kivy.core.window import Window
 Window.size = (800, 480)
 Window.resizable = '0'
 Window.borderless = True
+Window.fullscreen = True
 
 import time
 from random import random

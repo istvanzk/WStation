@@ -27,7 +27,6 @@ import sys
 import os
 import signal
 import struct
-
 import posix_ipc
 
 # Message queue parameters

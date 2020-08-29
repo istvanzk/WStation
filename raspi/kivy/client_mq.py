@@ -87,18 +87,18 @@ def main(args):
                
             elif chr(s[ii]) in ['S', 'T', 'P', 'H']:
                 if chr(s[ii]) is 'P':
-                    val_d = s[ii+1:ii+5]
+                    val_d = bytearray(s[ii+1:ii+5])
                     lng = 6
                 else:
-                    val_d = s[ii+1:ii+3]
+                    val_d = bytearray(s[ii+1:ii+3])                    
                     lng = 4
 
-                if val_d[0] == 20:
-                    val_d[0] = 30
+                if val_d[0] == 0x20:
+                    val_d[0] = 0x30
 
                 val = 0
                 for dd in range(lng):
-                    val += (val_d[lng-dd-1]-30)*10**(dd-1)   
+                    val += (val_d[lng-dd-1]-0x30)*10**(dd-1)   
 
                 print(F"{chr(s[ii]):1s}: {val:.1f}")
 

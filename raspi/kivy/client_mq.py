@@ -74,7 +74,33 @@ def main(args):
         #sd = s.decode()
         print("Message#%d:(%d):" % (m, p))
         print(unpacked_s)
-        print(":".join("{:02x}".format(ord(c)) for c in s[18:38].decode()))
+        #print(":".join("{:02x}".format(ord(c)) for c in s[18:38].decode()))
+        #print(":".join("{s}".format(chr(c)) for c in s[18:38])
+        ii = 18
+        while ii < 39:
+            if chr(s[ii]) == 'N':
+                val = s[ii+1]
+
+                print(F"{chr(s[ii]):1s}: {val:1d}")
+
+                ii += 2
+               
+            elif chr(s[ii]) in ['S', 'T', 'P', 'H']:
+                if chr(s[ii]) is 'P':
+                    val_d = s[ii+1:ii+5]
+                else:
+                    val_d = s[ii+1:ii+3]
+                    
+                if s[ii+1] == 20:
+                    val_d[0] = 30
+
+                val = 0
+                for dd in range(len(val_d))
+                    val += (val_d[len(val_d)-dd-1]-30)*10**(dd-1)   
+
+                print(F"{chr(s[ii]):1s}: {val:.1f}")
+
+                ii += len(val_d)
         m = m+1
 
 if __name__ == '__main__':

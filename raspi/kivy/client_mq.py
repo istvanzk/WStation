@@ -77,7 +77,8 @@ def main(args):
         #print(":".join("{:02x}".format(ord(c)) for c in s[18:38].decode()))
         #print(":".join("{:1s}".format(chr(c)) for c in s[18:38]))
         ii = 18
-        while ii < 39:
+        lng = 0
+        while ii < 38:
             if chr(s[ii]) == 'N':
                 val = s[ii+1]
                 lng = 1
@@ -103,7 +104,7 @@ def main(args):
                 #print("".join("{:1s}".format(chr(c)) for c in val_d))
 
             ii += (lng+1)
-            
+
         m = m+1
 
 if __name__ == '__main__':

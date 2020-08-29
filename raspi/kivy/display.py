@@ -30,7 +30,7 @@ class ClientMq():
     #old_umask = os.umask(0)
     #os.umask(old_umask)
     import posix_ipc
-    mqRX = posix_ipc.MessageQueue(RXQUEUE_NAME, posix_ipc.O_RDONLY)
+    mqRX = posix_ipc.MessageQueue(RXQUEUE_NAME, posix_ipc.O_RDONLY | posix_ipc.O_CREAT)
 
     # Request notifications
     #mqRX.request_notification((self.process_notification, mqRX))

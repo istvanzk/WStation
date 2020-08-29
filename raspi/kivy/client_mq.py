@@ -75,7 +75,7 @@ def main(args):
         print("Message#%d:(%d):" % (m, p))
         print(unpacked_s)
         #print(":".join("{:02x}".format(ord(c)) for c in s[18:38].decode()))
-        #print(":".join("{:1s}".format(chr(c)) for c in s[18:38]))
+        print(":".join("{:1s}".format(chr(c)) for c in s[18:38]))
         ii = 18
         while ii < 39:
             if chr(s[ii]) == 'N':
@@ -96,11 +96,12 @@ def main(args):
                 if val_d[0] == 0x20:
                     val_d[0] = 0x30
 
-                val = 0
-                for dd in range(lng):
-                    val += (val_d[lng-dd-1]-0x30)*10**(dd-1)   
+                #val = 0
+                #for dd in range(lng):
+                #    val += (val_d[lng-dd-1]-0x30)*10**(dd-1)   
 
-                print(F"{chr(s[ii]):1s}: {val:.1f}")
+                #print(F"{chr(s[ii]):1s}: {val:.1f}")
+                print("".join("{:1s}".format(chr(c)) for c in val_d))
 
                 ii += lng
         m = m+1

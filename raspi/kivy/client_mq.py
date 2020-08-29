@@ -75,35 +75,35 @@ def main(args):
         print("Message#%d:(%d):" % (m, p))
         print(unpacked_s)
         #print(":".join("{:02x}".format(ord(c)) for c in s[18:38].decode()))
-        print(":".join("{:1s}".format(chr(c)) for c in s[18:38]))
+        #print(":".join("{:1s}".format(chr(c)) for c in s[18:38]))
         ii = 18
         while ii < 39:
             if chr(s[ii]) == 'N':
                 val = s[ii+1]
+                lng = 1
 
                 print(F"{chr(s[ii]):1s}: {val:1d}")
-
-                ii += 2
                
             elif chr(s[ii]) in ['S', 'T', 'P', 'H']:
                 if chr(s[ii]) is 'P':
-                    val_d = bytearray(s[ii+1:ii+5])
-                    lng = 6
+                    val_d = bytearray(s[ii+1:ii+6])
+                    lng = 5
                 else:
-                    val_d = bytearray(s[ii+1:ii+3])                    
-                    lng = 4
+                    val_d = bytearray(s[ii+1:ii+4])                    
+                    lng = 3
 
                 if val_d[0] == 0x20:
                     val_d[0] = 0x30
 
-                #val = 0
-                #for dd in range(lng):
-                #    val += (val_d[lng-dd-1]-0x30)*10**(dd-1)   
+                val = 0
+                for dd in range(lng):
+                    val += (val_d[lng-dd-1]-0x30)*10**(dd-1)   
 
-                #print(F"{chr(s[ii]):1s}: {val:.1f}")
-                print("".join("{:1s}".format(chr(c)) for c in val_d))
+                print(F"{chr(s[ii]):1s}: {val:.1f}")
+                #print("".join("{:1s}".format(chr(c)) for c in val_d))
 
-                ii += lng
+            ii += (lng+1)
+            
         m = m+1
 
 if __name__ == '__main__':

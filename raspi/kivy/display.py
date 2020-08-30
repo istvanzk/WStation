@@ -176,12 +176,13 @@ class MyScreenManager(ScreenManager):
         
         elif self._update_display_msgq:
             self.weather_data = self._msg_queue.read_weather_data(1.0)
-            # TODO: adjust North direction based on calibration data
-            self._wind_direction  = self.weather_data['N']*22.5
-            self._air_temperature = self.weather_data['T']
-            self._wind_speed      = self.weather_data['S']
-            self._air_pressure    = self.weather_data['P']
-            self._air_relhumidity = self.weather_data['H']
+            if self.weather_data is not {}:
+                # TODO: adjust North direction based on calibration data
+                self._wind_direction  = self.weather_data['N']*22.5
+                self._air_temperature = self.weather_data['T']
+                self._wind_speed      = self.weather_data['S']
+                self._air_pressure    = self.weather_data['P']
+                self._air_relhumidity = self.weather_data['H']
 
 
         # Set the info display colors depending on their value/range

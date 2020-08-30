@@ -33,10 +33,13 @@ class ClientMq(object):
     #os.umask(old_umask)
     import posix_ipc
     if hasattr(posix_ipc, 'MessageQueue'):
-        mqRX = posix_ipc.MessageQueue(RXQUEUE_NAME, posix_ipc.O_RDONLY | posix_ipc.O_CREAT)
-
-        # Request notifications
-        #mqRX.request_notification((self.process_notification, mqRX))
+        try:
+            mqRX = posix_ipc.MessageQueue(RXQUEUE_NAME, posix_ipc.O_RDONLY | posix_ipc.O_CREAT)
+            # Request notifications
+            #mqRX.request_notification((self.process_notification, mqRX))
+        except:
+            mqRX = None
+            pass
     else:
         mqRX = None
 
@@ -57,7 +60,7 @@ class ClientMq(object):
         _weather_data = {}
 
         # Receive from the MessageQueue     
-        if mqRX is not None:
+        if self.mqRX is not None:
             msg, pri = self.mqRX.receive(timeout=timeout_sec)
         else: 
             return _weather_data

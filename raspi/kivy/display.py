@@ -2,6 +2,7 @@
 import struct
 from random import random
 from math import log10
+import posix_ipc
 
 # Kivy
 from kivy.app import App
@@ -31,7 +32,6 @@ class ClientMq(object):
     # The umask is not relevant for reading, when the queue has been created as RW!
     #old_umask = os.umask(0)
     #os.umask(old_umask)
-    import posix_ipc
     if hasattr(posix_ipc, 'MessageQueue'):
         try:
             mqRX = posix_ipc.MessageQueue(RXQUEUE_NAME, posix_ipc.O_RDONLY | posix_ipc.O_CREAT)
@@ -59,15 +59,19 @@ class ClientMq(object):
         # The local dictionary for storing the most recent weather data
         _weather_data = {}
 
+        # Return if no RX message queue
+        if self.mqRX is None:
+            return {}
+
         # Receive from the MessageQueue     
-        if self.mqRX is not None:
+        try:
             msg, pri = self.mqRX.receive(timeout=timeout_sec)
-        else: 
-            return _weather_data
+        except posix_ipc.BusyError:
+            return {}
 
         # Unpack header info    
-        unpacked_msgheader = struct.unpack('HHHHHHBBBBBb', msg[:18])
-        _weather_data['Header'] = unpacked_msgheader
+        _unpacked_msgheader = struct.unpack('HHHHHHBBBBBb', msg[:18])
+        _weather_data['Header'] = _unpacked_msgheader
 
         # Show raw data
         #print(F"Message ({p:d}):")
@@ -175,7 +179,7 @@ class MyScreenManager(ScreenManager):
                 self._wind_direction= 360*random()
         
         elif self._update_display_msgq:
-            self.weather_data = self._msg_queue.read_weather_data(1.0)
+            self.weather_data = self._msg_queue.read_weather_data(3.0)
             if self.weather_data is not {}:
                 # TODO: adjust North direction based on calibration data
                 self._wind_direction  = self.weather_data['N']*22.5

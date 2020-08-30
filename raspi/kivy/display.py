@@ -25,17 +25,21 @@ DEBUG_MSG = False
 RXQUEUE_NAME  = "/rf22b_server_tx"
 MAX_RXMSG_SIZE = 255
 
-class ClientMq():
+class ClientMq(object):
 
     # Create the message queue
     # The umask is not relevant for reading, when the queue has been created as RW!
     #old_umask = os.umask(0)
     #os.umask(old_umask)
     import posix_ipc
-    mqRX = posix_ipc.MessageQueue(RXQUEUE_NAME, posix_ipc.O_RDONLY | posix_ipc.O_CREAT)
+    if hasattr(posix_ipc, 'MessageQueue'):
+        mqRX = posix_ipc.MessageQueue(RXQUEUE_NAME, posix_ipc.O_RDONLY | posix_ipc.O_CREAT)
 
-    # Request notifications
-    #mqRX.request_notification((self.process_notification, mqRX))
+        # Request notifications
+        #mqRX.request_notification((self.process_notification, mqRX))
+    else:
+        mqRX = None
+
 
     def process_notification(self,mq):
 
@@ -45,18 +49,21 @@ class ClientMq():
         # Re-register for notifications
         mq.request_notification((self.process_notification, mq))
 
-        print("Message received: %s (%d) - %s\n" % (s, p, sd))
+        #print("Message received: %s (%d) - %s\n" % (s, p, sd))
 
     def read_weather_data(self, timeout_sec=None):
        
         # The local dictionary for storing the most recent weather data
         _weather_data = {}
 
-        # Receive and unpack message from the MessageQueue        
-        msg, pri = self.mqRX.receive(timeout=timeout_sec)
-        #msg = b''
+        # Receive from the MessageQueue     
+        if mqRX is not None:
+            msg, pri = self.mqRX.receive(timeout=timeout_sec)
+        else: 
+            return _weather_data
+
+        # Unpack header info    
         unpacked_msgheader = struct.unpack('HHHHHHBBBBBb', msg[:18])
-        
         _weather_data['Header'] = unpacked_msgheader
 
         # Show raw data
@@ -73,6 +80,7 @@ class ClientMq():
                 lng = 1
 
                 #print(F"{chr(msg[ii]):1s}: {val:1d}")
+                _weather_data[chr(msg[ii])] = val
                
             elif chr(msg[ii]) in ['S', 'T', 'P', 'H']:
                 if chr(msg[ii]) is 'P':
@@ -90,14 +98,17 @@ class ClientMq():
                     val += (val_d[lng-dd-1]-0x30)*10**(dd-1)   
 
                 #print(F"{chr(msg[ii]):1s}: {val:.1f}")
-
-            _weather_data[chr(msg[ii])] = val
+                _weather_data[chr(msg[ii])] = val
 
             ii += (lng+1)
 
         return _weather_data
 
 class MyScreenManager(ScreenManager):    
+
+    # How to update the values
+    _update_display_rnd  = False
+    _update_display_msgq = True
 
     # Displayed info and their color
     #(access with root.manager.* from the kv file)
@@ -119,12 +130,15 @@ class MyScreenManager(ScreenManager):
     # The dictionary storing the most recent weather data read from the message queue
     weather_data = {'N': _wind_direction,'S':_wind_speed, 'T':_air_temperature, 'P':_air_pressure,'H':_air_relhumidity}
 
-    # How to update the values
-    _update_display_rnd  = True
-    _update_display_msgq = False
-
+    # Create the receive message queue
     if _update_display_msgq:
-        msg_queue = ClientMq()
+        _msg_queue = ClientMq()
+        if _msg_queue.mqRX is None:
+            _update_display_msgq = False
+            _update_display_rnd  = True
+            _msg_queue = None
+    else:
+        _msg_queue = None
 
     def __init__(self, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
@@ -158,7 +172,7 @@ class MyScreenManager(ScreenManager):
                 self._wind_direction= 360*random()
         
         elif self._update_display_msgq:
-            self.weather_data = self.msg_queue.read_weather_data(1.0)
+            self.weather_data = self._msg_queue.read_weather_data(1.0)
             # TODO: adjust North direction based on calibration data
             self._wind_direction  = self.weather_data['N']*22.5
             self._air_temperature = self.weather_data['T']

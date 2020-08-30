@@ -2,6 +2,7 @@
 #:import cos math.cos
 #:import sin math.sin
 #:import radians math.radians
+
 MyScreenManager:
     transition: SlideTransition()
     FirstScreen:
@@ -70,12 +71,12 @@ MyScreenManager:
                         (self.center_x, self.center_y, 200, 280, 350)
 
                 Color:
-                    hsv: root.wind_speed_hue,1,1
+                    hsv: root.manager._wind_speed_hue,1,1
                 Ellipse:
-                    pos: self.center_x-2.5*root.wind_speed, self.center_y-2.5*root.wind_speed
-                    size: 5*root.wind_speed, 5*root.wind_speed
-                    angle_start: root.wind_direction-11.25
-                    angle_end: root.wind_direction+11.25
+                    pos: self.center_x-2.5*root.manager._wind_speed, self.center_y-2.5*root.manager._wind_speed
+                    size: 5*root.manager._wind_speed, 5*root.manager._wind_speed
+                    angle_start: root.manager._wind_direction-11.25
+                    angle_end: root.manager._wind_direction+11.25
                     segments: 2    
                 Ellipse:
                     pos: self.center_x-10, self.center_y-10
@@ -89,12 +90,12 @@ MyScreenManager:
                     width: 2.
                     cap: 'round'
                     joint: 'round'
-                    points: self.center_x, self.center_y, self.center_x+170*cos(radians(-root.wind_direction+90-11.25)), self.center_y+170*sin(radians(-root.wind_direction+90-11.25))
+                    points: self.center_x, self.center_y, self.center_x+170*cos(radians(-root.manager._wind_direction+90-11.25)), self.center_y+170*sin(radians(-root.manager._wind_direction+90-11.25))
                 Line:
                     width: 2.
                     cap: 'round'
                     joint: 'round'
-                    points: self.center_x, self.center_y, self.center_x+170*cos(radians(-root.wind_direction+90+11.25)), self.center_y+170*sin(radians(-root.wind_direction+90+11.25))
+                    points: self.center_x, self.center_y, self.center_x+170*cos(radians(-root.manager._wind_direction+90+11.25)), self.center_y+170*sin(radians(-root.manager._wind_direction+90+11.25))
  
         LabelN:
             text: 'N'
@@ -124,25 +125,25 @@ MyScreenManager:
 
         LabelInfo:
             markup: True
-            text: '{:4.1f} '.format(root.air_temperature) + '[sup]o[/sup]C'
+            text: '{:4.1f} '.format(root.manager._air_temperature) + '[sup]o[/sup]C'
             pos: -300,200           
-            color: root.air_temperature_color + [1]
+            color: root.manager._air_temperature_color + [1]
 
         LabelInfo:
             markup: True
-            text: '{:6.1f}'.format(root.air_pressure) + '[size=20]mbar[/size]'
+            text: '{:6.1f}'.format(root.manager._air_pressure) + '[size=20]mbar[/size]'
             pos: -300,-200           
             color: 0.6,0.6,0.6,1
 
         LabelInfo:
             markup: True
-            text: '{:4.1f}'.format(root.wind_speed) + '[size=20]m/s[/size]'
+            text: '{:4.1f}'.format(root.manager._wind_speed) + '[size=20]m/s[/size]'
             pos: 300,200           
             color: 0.6,0.6,0.6,1
 
         LabelInfo:
             markup: True
-            text: '{:4.1f}'.format(root.air_relhumidity) + '[size=20]%[/size]'
+            text: '{:4.1f}'.format(root.manager._air_relhumidity) + '[size=20]%[/size]'
             pos: 300,-200           
             color: 0.6,0.6,0.6,1
 
@@ -150,7 +151,9 @@ MyScreenManager:
             pos_hint: {'x':0.975, 'y':0.35}
             size_hint: 0.025, 0.30
             background_color: 0,0,1,0.5
-            on_press: app.root.current = 'second'
+            on_press: 
+                root.manager.current = 'second'
+                root.manager.transition.direction = 'left'
         
         
 <SecondScreen>:
@@ -165,4 +168,6 @@ MyScreenManager:
             pos_hint: {'x':0, 'y':0.35}
             size_hint: 0.025, 0.30
             background_color: 0,0,1,0.5
-            on_press: app.root.current = 'first'
+            on_press:
+                root.manager.current = 'first'
+                root.manager.transition.direction = 'right'

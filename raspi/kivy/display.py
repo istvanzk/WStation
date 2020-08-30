@@ -71,7 +71,7 @@ class ClientMq(object):
 
         # Unpack header info    
         _unpacked_msgheader = struct.unpack('HHHHHHBBBBBb', msg[:18])
-        _weather_data['Header'] = _unpacked_msgheader
+        _weather_data["Header"] = _unpacked_msgheader
 
         # Show raw data
         #print(F"Message ({p:d}):")
@@ -87,7 +87,7 @@ class ClientMq(object):
                 lng = 1
 
                 #print(F"{chr(msg[ii]):1s}: {val:1d}")
-                _weather_data[chr(msg[ii])] = val
+                _weather_data[F"{chr(msg[ii]):1s}"] = val
                
             elif chr(msg[ii]) in ['S', 'T', 'P', 'H']:
                 if chr(msg[ii]) is 'P':
@@ -105,7 +105,7 @@ class ClientMq(object):
                     val += (val_d[lng-dd-1]-0x30)*10**(dd-1)   
 
                 #print(F"{chr(msg[ii]):1s}: {val:.1f}")
-                _weather_data[chr(msg[ii])] = val
+                _weather_data[F"{chr(msg[ii]):1s}"] = val
 
             ii += (lng+1)
 

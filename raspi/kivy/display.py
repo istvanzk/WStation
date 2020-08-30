@@ -61,13 +61,13 @@ class ClientMq(object):
 
         # Return if no RX message queue
         if self.mqRX is None:
-            return {}
+            return None
 
         # Receive from the MessageQueue     
         try:
             msg, pri = self.mqRX.receive(timeout=timeout_sec)
         except posix_ipc.BusyError:
-            return {}
+            return None
 
         # Unpack header info    
         _unpacked_msgheader = struct.unpack('HHHHHHBBBBBb', msg[:18])
@@ -179,8 +179,8 @@ class MyScreenManager(ScreenManager):
                 self._wind_direction= 360*random()
         
         elif self._update_display_msgq:
-            self.weather_data = self._msg_queue.read_weather_data(3.0)
-            if self.weather_data is not {}:
+            self.weather_data = self._msg_queue.read_weather_data(11.0)
+            if self.weather_data is not None:
                 # TODO: adjust North direction based on calibration data
                 self._wind_direction  = self.weather_data['N']*22.5
                 self._air_temperature = self.weather_data['T']

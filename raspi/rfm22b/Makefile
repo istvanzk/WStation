@@ -11,8 +11,8 @@ INCLUDE       = -I$(RADIOHEADBASE)
 
 all: server_mq
 
-RasPi.o: $(RADIOHEADBASE)/RHutil/RasPi.cpp
-				$(CC) $(CFLAGS) -c $(RADIOHEADBASE)/RHutil/RasPi.cpp $(INCLUDE)
+RasPi.o: $(RADIOHEADBASE)/RHutil_rf22b/RasPi.cpp
+				$(CC) $(CFLAGS) -c $(RADIOHEADBASE)/RHutil_rf22b/RasPi.cpp $(INCLUDE)
 
 server_mq.o: server_mq.cpp
 				$(CC) $(CFLAGS) -c $(INCLUDE) $<

@@ -149,7 +149,7 @@ class MyScreenManager(ScreenManager):
 
     def __init__(self, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
-        Clock.schedule_interval(self.update_display_info, 1.0)
+        Clock.schedule_interval(self.update_display_info, 10.0)
 
     def update_display_info(self, *args):
 
@@ -179,7 +179,7 @@ class MyScreenManager(ScreenManager):
                 self._wind_direction= 360*random()
         
         elif self._update_display_msgq:
-            self.weather_data = self._msg_queue.read_weather_data(11.0)
+            self.weather_data = self._msg_queue.read_weather_data(5.0)
             if self.weather_data is not None:
                 # TODO: adjust North direction based on calibration data
                 self._wind_direction  = self.weather_data['N']*22.5

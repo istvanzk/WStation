@@ -119,8 +119,8 @@ class MyScreenManager(ScreenManager):
 
     # Displayed info and their color
     #(access with root.manager.* from the kv file)
-    _wind_direction = NumericProperty(1)
-    _wind_speed = NumericProperty(0.5)
+    _wind_direction = NumericProperty(22.5)
+    _wind_speed = NumericProperty(0.11)
     # HSV: Hue = degrees/360
     #     Red: 0 and 60 degrees.
     #     Yellow: 61 and 120 degrees.
@@ -178,16 +178,33 @@ class MyScreenManager(ScreenManager):
             if random() > 0.5:
                 self._wind_direction= 360*random()
         
-        elif self._update_display_msgq:
-            self.weather_data = self._msg_queue.read_weather_data(1.0)
-            if self.weather_data is not None:
-                # TODO: adjust North direction based on calibration data
-                self._wind_direction  = self.weather_data['N']*22.5
-                self._air_temperature = self.weather_data['T']
-                self._wind_speed      = self.weather_data['S']
-                self._air_pressure    = self.weather_data['P']
-                self._air_relhumidity = self.weather_data['H']
+            # No header info
+            self.weather_data["Header"] = ()
 
+        elif self._update_display_msgq:
+            _weather_data = self._msg_queue.read_weather_data(1.0)
+            if _weather_data is not None:
+                try:
+                    # TODO: adjust North direction based on calibration data
+                    self._wind_direction   = _weather_data["N"]*22.5
+                    self._air_temperature  = _weather_data["T"]           
+                    self._wind_speed       = _weather_data["S"]
+                    self._air_pressure     = _weather_data["P"]
+                    self._air_relhumidity  = _weather_data["H"]
+
+                    # TODO: convert tuple and extract time stamp, rssi, etc.
+                    self.weather_data["Header"] = _weather_data["Header"]
+
+                except KeyError:
+                    # This error can occur even. Why?
+                    pass
+
+        # Store last weather data reading   
+        self.weather_data["N"] = self._wind_direction  
+        self.weather_data["T"] = self._air_temperature
+        self.weather_data["S"] = self._wind_speed
+        self.weather_data["P"] = self._air_pressure
+        self.weather_data["H"] = self._air_relhumidity
 
         # Set the info display colors depending on their value/range
         if self._air_temperature < -10:

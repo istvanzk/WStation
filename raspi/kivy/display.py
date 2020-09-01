@@ -1,11 +1,12 @@
 #import time
 import struct
 from random import random
-from math import log10
+from math import log10, cos
 import posix_ipc
 
 # Kivy
 from kivy.app import App
+from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.base import runTouchApp
 from kivy.lang import Builder
@@ -14,7 +15,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
-Window.size = (800, 480)
+Window.size = (dp(800), dp(480))
 Window.resizable = '0'
 Window.borderless = True
 #Window.fullscreen = True
@@ -221,12 +222,32 @@ class MyScreenManager(ScreenManager):
         self._wind_speed_hue = (160-205*log10(1+self._wind_speed/5))/360
 
 
-class FirstScreen(Screen):
+class MainScreen(Screen):
     pass
 
-class SecondScreen(Screen):
-    pass
+class TracesScreen(Screen):
+    dt = NumericProperty(0)
+    _air_temperature_points = ListProperty([])
 
+    def __init__(self, **kwargs):
+        super(TracesScreen, self).__init__(**kwargs)
+        Clock.schedule_interval(self.update_points_animation, 5.0)
+
+    def update_points_animation(self, dt):
+        cy = self.height * 0.6
+        cx = self.width * 0.1
+        w = self.width * 0.9
+        step = 50
+        points = []
+        self.dt += dt
+        for i in range(int(w / step)):
+            x = i * step
+            points.append(cx + x)
+            points.append(cy + cos(x / w * 8. + self.dt) * self.height * 0.1)
+        self._air_temperature_points = points
+
+class LockScreen(Screen):
+    pass
 
 root_widget = Builder.load_file('screens.kv')
 

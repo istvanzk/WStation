@@ -56,31 +56,31 @@ MyScreenManager:
                 Line:
                     width: 1.5
                     circle:
-                        (self.center_x, self.center_y, 200, 10, 80)
+                        (self.center_x, self.center_y, dp(200), 10, 80)
                 Line:
                     width: 1.5
                     circle:
-                        (self.center_x, self.center_y, 200, 100, 170)
+                        (self.center_x, self.center_y, dp(200), 100, 170)
                 Line:
                     width: 1.5
                     circle:
-                        (self.center_x, self.center_y, 200, 190, 260)
+                        (self.center_x, self.center_y, dp(200), 190, 260)
                 Line:
                     width: 1.5
                     circle:
-                        (self.center_x, self.center_y, 200, 280, 350)
+                        (self.center_x, self.center_y, dp(200), 280, 350)
 
                 Color:
                     hsv: root.manager._wind_speed_hue,1,1
                 Ellipse:
-                    pos: self.center_x-2.5*root.manager._wind_speed, self.center_y-2.5*root.manager._wind_speed
-                    size: 5*root.manager._wind_speed, 5*root.manager._wind_speed
+                    pos: self.center_x-dp(2.5*root.manager._wind_speed), self.center_y-dp(2.5*root.manager._wind_speed)
+                    size: dp(5*root.manager._wind_speed), dp(5*root.manager._wind_speed)
                     angle_start: root.manager._wind_direction-11.25
                     angle_end: root.manager._wind_direction+11.25
                     segments: 2    
                 Ellipse:
-                    pos: self.center_x-10, self.center_y-10
-                    size: 20,20
+                    pos: self.center_x-dp(10), self.center_y-dp(10)
+                    size: dp(20),dp(20)
                     angle_start: 0
                     angle_end: 360
 
@@ -90,61 +90,61 @@ MyScreenManager:
                     width: 2.
                     cap: 'round'
                     joint: 'round'
-                    points: self.center_x, self.center_y, self.center_x+170*cos(radians(-root.manager._wind_direction+90-11.25)), self.center_y+170*sin(radians(-root.manager._wind_direction+90-11.25))
+                    points: self.center_x, self.center_y, self.center_x+dp(170*cos(radians(-root.manager._wind_direction+90-11.25))), self.center_y+dp(170*sin(radians(-root.manager._wind_direction+90-11.25)))
                 Line:
                     width: 2.
                     cap: 'round'
                     joint: 'round'
-                    points: self.center_x, self.center_y, self.center_x+170*cos(radians(-root.manager._wind_direction+90+11.25)), self.center_y+170*sin(radians(-root.manager._wind_direction+90+11.25))
+                    points: self.center_x, self.center_y, self.center_x+dp(170*cos(radians(-root.manager._wind_direction+90+11.25))), self.center_y+dp(170*sin(radians(-root.manager._wind_direction+90+11.25)))
  
         LabelN:
             text: 'N'
-            pos: 0,200
+            pos: 0,dp(200)
         LabelN:
             text: 'E'
-            pos: 200,00
+            pos: dp(200),00
         LabelN:
             text: 'S'
-            pos: 0,-200
+            pos: 0,dp(-200)
         LabelN:
             text: 'W'
-            pos: -200,0
+            pos: dp(-200),0
 
         LabelNE:
             text: 'NE'
-            pos: 140,140
+            pos: dp(140),dp(140)
         LabelNE:
             text: 'SE'
-            pos: 140,-140
+            pos: dp(140),dp(-140)
         LabelNE:
             text: 'SW'
-            pos: -140,-140
+            pos: dp(-140),dp(-140)
         LabelNE:
             text: 'NW'
-            pos: -140,140
+            pos: -dp(140),dp(140)
 
         LabelInfo:
             markup: True
             text: '{:4.1f} '.format(root.manager._air_temperature) + '[sup]o[/sup]C'
-            pos: -300,200           
+            pos: dp(-300),dp(200)           
             color: root.manager._air_temperature_color + [1]
 
         LabelInfo:
             markup: True
             text: '{:6.1f}'.format(root.manager._air_pressure) + '[size=20]mbar[/size]'
-            pos: -300,-200           
+            pos: dp(-300),dp(-200)           
             color: 0.6,0.6,0.6,1
 
         LabelInfo:
             markup: True
             text: '{:4.1f}'.format(root.manager._wind_speed) + '[size=20]m/s[/size]'
-            pos: 300,200           
+            pos: dp(300),dp(200)           
             color: 0.6,0.6,0.6,1
 
         LabelInfo:
             markup: True
             text: '{:4.1f}'.format(root.manager._air_relhumidity) + '[size=20]%[/size]'
-            pos: 300,-200           
+            pos: dp(300),dp(-200)           
             color: 0.6,0.6,0.6,1
 
         Button:
@@ -158,12 +158,14 @@ MyScreenManager:
         
 <SecondScreen>:
     name: 'second'
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: 'TRACES screen!'
-            font_size: 30
     FloatLayout:
+        canvas:
+            Color:
+                rgba: root.manager._air_temperature_color + [1]
+            Point:
+                points: root._air_temperature_points
+                pointsize: 5
+ 
         Button:
             pos_hint: {'x':0, 'y':0.35}
             size_hint: 0.025, 0.30

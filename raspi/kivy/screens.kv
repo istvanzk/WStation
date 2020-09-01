@@ -5,8 +5,9 @@
 
 MyScreenManager:
     transition: SlideTransition()
-    FirstScreen:
-    SecondScreen:
+    MainScreen:
+    TracesScreen:
+    LockScreen:
 
 <LabelN@Label>:
     font_size: '40sp'
@@ -32,13 +33,22 @@ MyScreenManager:
     font_size: '30sp'
     text_size: self.size
     outline_color: 0,0,1
-    outline_width: 10
+    outline_width: 5
     halign: 'center'
     valign: 'middle'
     bold: True
 
-<FirstScreen>:
-    name: 'first'
+<RoundedButton@Button>:
+    canvas.before:
+        Color:
+            rgba: (.4,.4,.4,0.5) if self.state=='normal' else (.7,.7,.7,1)  # visual feedback of press
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(20),]
+
+<MainScreen>:
+    name: 'main'
     FloatLayout:
         Widget:
             size_hint: 1.0, 1.0
@@ -147,17 +157,24 @@ MyScreenManager:
             pos: dp(300),dp(-200)           
             color: 0.6,0.6,0.6,1
 
-        Button:
-            pos_hint: {'x':0.975, 'y':0.35}
+        RoundedButton:
+            pos_hint: {'x':0.985, 'y':0.35}
             size_hint: 0.025, 0.30
-            background_color: 0,0,1,0.5
+            background_color: 0,0,1,0
             on_press: 
-                root.manager.current = 'second'
+                root.manager.current = 'traces'
                 root.manager.transition.direction = 'left'
         
+        RoundedButton:
+            pos_hint: {'x':-0.01, 'y':0.35}
+            size_hint: 0.025, 0.30
+            background_color: 0,1,0,0
+            on_press:
+                root.manager.current = 'lock'
+                root.manager.transition.direction = 'right'
         
-<SecondScreen>:
-    name: 'second'
+<TracesScreen>:
+    name: 'traces'
     FloatLayout:
         canvas:
             Color:
@@ -165,11 +182,23 @@ MyScreenManager:
             Point:
                 points: root._air_temperature_points
                 pointsize: 5
- 
-        Button:
-            pos_hint: {'x':0, 'y':0.35}
+
+        RoundedButton:
+            pos_hint: {'x':-0.01, 'y':0.35}
             size_hint: 0.025, 0.30
-            background_color: 0,0,1,0.5
+            background_color: 0,0,1,0
             on_press:
-                root.manager.current = 'first'
+                root.manager.current = 'main'
                 root.manager.transition.direction = 'right'
+
+<LockScreen>:
+    name: 'lock'
+    FloatLayout:
+ 
+        RoundedButton:
+            pos_hint: {'x':0.985, 'y':0.35}
+            size_hint: 0.025, 0.30
+            background_color: 0,1,0,0
+            on_press:
+                root.manager.current = 'main'
+                root.manager.transition.direction = 'left'

@@ -38,10 +38,10 @@ MyScreenManager:
     valign: 'middle'
     bold: True
 
-<RoundedButton@Button>:
+<RoundedButton>:
     canvas.before:
         Color:
-            rgba: (.4,.4,.4,0.5) if self.state=='normal' else (.7,.7,.7,1)  # visual feedback of press
+            rgba: self.color_rgb + [0.2] if self.state=='normal' else (.7,.7,.7,1)  # visual feedback of press
         RoundedRectangle:
             pos: self.pos
             size: self.size
@@ -160,7 +160,7 @@ MyScreenManager:
         RoundedButton:
             pos_hint: {'x':0.985, 'y':0.35}
             size_hint: 0.025, 0.30
-            background_color: 0,0,1,0
+            color_rgb: 0,0,1
             on_press: 
                 root.manager.current = 'traces'
                 root.manager.transition.direction = 'left'
@@ -168,7 +168,7 @@ MyScreenManager:
         RoundedButton:
             pos_hint: {'x':-0.01, 'y':0.35}
             size_hint: 0.025, 0.30
-            background_color: 0,1,0,0
+            color_rgb: 0,1,0
             on_press:
                 root.manager.current = 'lock'
                 root.manager.transition.direction = 'right'
@@ -186,7 +186,7 @@ MyScreenManager:
         RoundedButton:
             pos_hint: {'x':-0.01, 'y':0.35}
             size_hint: 0.025, 0.30
-            background_color: 0,0,1,0
+            color_rgb: 0,0,1
             on_press:
                 root.manager.current = 'main'
                 root.manager.transition.direction = 'right'
@@ -198,7 +198,7 @@ MyScreenManager:
         RoundedButton:
             pos_hint: {'x':0.985, 'y':0.35}
             size_hint: 0.025, 0.30
-            background_color: 0,1,0,0
+            color_rgb: 0,1,0
             on_press:
                 root.manager.current = 'main'
                 root.manager.transition.direction = 'left'

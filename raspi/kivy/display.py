@@ -1,8 +1,9 @@
 import time
 import struct
-from random import random
+from random import random, randint
 from collections import deque
 from math import log10, cos
+from statistics import mean, median, mode
 import posix_ipc
 
 # Kivy
@@ -11,10 +12,11 @@ from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.base import runTouchApp
 from kivy.lang import Builder
-from kivy.properties import ListProperty, NumericProperty
+from kivy.properties import ListProperty, NumericProperty, StringProperty, ObjectProperty
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
 Window.size = (dp(800), dp(480))
@@ -71,7 +73,7 @@ class ClientMq(object):
 
         # Unpack header info    
         _unpacked_msgheader = struct.unpack('HHHHHHBBBBBb', msg[:18])
-        _weather_data["Header"] = _unpacked_msgheader
+        _weather_data["Header"] = list(_unpacked_msgheader)
 
         # Show raw data
         #print(F"Message ({p:d}):")
@@ -118,14 +120,40 @@ class ClientMq(object):
 
 class MyScreenManager(ScreenManager):    
 
-    # How to update the values
-    _update_display_rnd  = False
-    _update_display_msgq = True
+    screen_traces = ObjectProperty(None)
+
+    # The dictionary storing the most recent weather data read from the message queue 
+    weather_data = {'Header': tuple(), 'IniMsg': None, 'N': 0,'S':0, 'T':0, 'P':0,'H':0}
+ 
+    # Dictionary of deques with weather data for the past ~15 minutes in steps corresponding to the received rate (~15*12 values)
+    weather_data_trace15 = {}
+    weather_data_trace15["Time"] = deque([],180)
+    weather_data_trace15["Rssi"] = deque([],180)
+    weather_data_trace15["N"] = deque([],180)
+    weather_data_trace15["T"] = deque([],180)
+    weather_data_trace15["S"] = deque([],180)
+    weather_data_trace15["P"] = deque([],180)
+    weather_data_trace15["H"] = deque([],180)
+
+    # Dictionary of deques with weather data for the past 24 hours in 15 minutes steps (24*4 values)
+    weather_data_trace24 = {}
+    weather_data_trace24["Time"] = deque([],96)
+    weather_data_trace24["Rssi"] = deque([],96)
+    weather_data_trace24["N"] = deque([],96)
+    weather_data_trace24["T"] = deque([],96)
+    weather_data_trace24["S"] = deque([],96)
+    weather_data_trace24["P"] = deque([],96)
+    weather_data_trace24["H"] = deque([],96)
+
+    # Create the receive message queue
+    # _msg_queue.mqRX is set to None when no MessageQueue has been instantiated!
+    _msg_queue = ClientMq()
 
     # Displayed info and their color
     #(access with root.manager.* from the kv file)
     _wind_direction = NumericProperty(22.5)
     _wind_speed = NumericProperty(0.11)
+    _wind_speed_trace24 = ListProperty([])
     # HSV: Hue = degrees/360
     #     Red: 0 and 60 degrees.
     #     Yellow: 61 and 120 degrees.
@@ -136,75 +164,26 @@ class MyScreenManager(ScreenManager):
     _wind_speed_hue = NumericProperty(160)
     _air_temperature = NumericProperty(23.5)
     _air_temperature_color = ListProperty([0,1,0])
-    _air_pressure = NumericProperty(1000.8)
-    _air_relhumidity = NumericProperty(64.5)
+    _air_pressure = NumericProperty(1013.25)
+    _air_pressure_color = ListProperty([0,1,0])
+    _air_relhumidity = NumericProperty(50.0)
+    _air_relhumidity_color = ListProperty([0,1,0])
     _rssi_dBm = NumericProperty(-66)
 
-    # The dictionary storing the most recent weather data read from the message queue 
-    weather_data = {'Header': tuple(), 'IniMsg': None, 'N': _wind_direction,'S':_wind_speed, 'T':_air_temperature, 'P':_air_pressure,'H':_air_relhumidity}
- 
-    # Deque of dictionaries with weather data for the past 15min in steps corresponding to the received rate
-    weather_data_trace15 = deque([])
+    # Time stamps (floating seconds)
+    _start_secs = 0
+    _crt_secs = 0
 
-    # Deque of dictionaries with weather data for the past 24h in 15min steps
-    weather_data_trace24 = deque([])
-
-    # Create the receive message queue
-    if _update_display_msgq:
-        _msg_queue = ClientMq()
-        if _msg_queue.mqRX is None:
-            _update_display_msgq = False
-            _update_display_rnd  = True
-            _msg_queue = None
-    else:
-        _msg_queue = None
 
     def __init__(self, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
-        Clock.schedule_interval(self.update_display_info, 5.0)
+        _update_mainscreen_sch = Clock.schedule_interval(self.update_mainscreen_info, 5.0)
 
-    def update_display_info(self, *args):
+    def update_mainscreen_info(self, *args):
 
-        # Generate random test data
-        if self._update_display_rnd:
-            if random() > 0.5:
-                self._air_temperature += 2*random()
-            else:
-                self._air_temperature -= 2*random()
+        # Get real data from the remote weather station (via RF22B and local MessageQueue)
+        if self._msg_queue.mqRX is not None:
 
-            if random() > 0.5:
-                self._air_pressure += 5*random()
-            else:
-                self._air_pressure -= 5*random()
-
-            if random() > 0.5:
-                self._air_relhumidity += random()
-            else:
-                self._air_relhumidity -= random()
-
-            if random() > 0.5:
-                self._wind_speed = 35*random()
-
-            if random() > 0.5:
-                self._wind_direction = 360*random()
-        
-            if random() > 0.5:
-                self._rssi_dBm = -(60+42*random())
-
-            # Header info
-            struc_t = time.localtime(time.time())
-            self.weather_data["Header"] = (
-                struc_t.tm_sec,
-                struc_t.tm_min,
-                struc_t.tm_hour,
-                struc_t.tm_mday,
-                struc_t.tm_mon,
-                struc_t.tm_year,
-                0,0,0,0,self._rssi_dBm, 20)
-            self.weather_data["IniMsg"] = None
-
-        # Real data from the weather station
-        elif self._update_display_msgq:
             _weather_data = self._msg_queue.read_weather_data(1.0)
             if _weather_data is not None:
 
@@ -226,7 +205,47 @@ class MyScreenManager(ScreenManager):
                 _weather_data["Header"][5] += 1900
                 _weather_data["Header"][10] -= 256
                 self.weather_data["Header"] = _weather_data["Header"]
-                    
+
+
+        # Generate random test data        
+        else:
+            
+            if random() > 0.5:
+                self._air_temperature += 2*random()
+            else:
+                self._air_temperature -= 2*random()
+
+            if random() > 0.5:
+                self._air_pressure += 2*random()
+            else:
+                self._air_pressure -= 2*random()
+
+            if random() > 0.5:
+                self._air_relhumidity += random()
+            else:
+                self._air_relhumidity -= random()
+
+            if random() > 0.5:
+                self._wind_speed = 35*random()
+
+            if random() > 0.5:
+                self._wind_direction = 22.5*randint(1,16)
+        
+            if random() > 0.5:
+                self._rssi_dBm = -(60+42*random())
+
+            # Header info
+            struc_t = time.localtime(time.time())
+            self.weather_data["Header"] = (
+                struc_t.tm_sec,
+                struc_t.tm_min,
+                struc_t.tm_hour,
+                struc_t.tm_mday,
+                struc_t.tm_mon,
+                struc_t.tm_year,
+                0,0,0,0,self._rssi_dBm, 20)
+            self.weather_data["IniMsg"] = None
+
 
         # Store last weather data reading   
         self.weather_data["N"] = self._wind_direction  
@@ -237,9 +256,20 @@ class MyScreenManager(ScreenManager):
 
         print(self.weather_data)
 
-        # Process and store weather data
+        #self.test_trace24_point()
+
+        # Process and store weather data       
         if self.weather_data["IniMsg"] is None:
-            self.procstore_weather_data()
+            
+            if self.procstore_weather_data() is not None:
+
+                # Update the 24 hours traces info every ~15 minutes
+                self.get_screen('traces24').update_trace_plots(self.weather_data_trace24)
+
+                print(self.weather_data_trace24)
+
+            # Update the 15 minutes traces info
+            self.get_screen('traces15').update_trace_plots(self.weather_data_trace15)
 
         # Set the info display colors depending on their value/range
         if self._air_temperature < -10:
@@ -258,110 +288,258 @@ class MyScreenManager(ScreenManager):
     # Process and store weather data
     def procstore_weather_data(self):
 
-        # Init trace15 deque
-        if len(self.weather_data_trace15) < 2:
-            self.weather_data_trace15.append(self.weather_data)
-            return
-
-        # Check past 15min time window (current - oldest)
-        t_crt_secs = time.mktime((
+        # Update trace15 deques
+        self._crtTime = (
             self.weather_data["Header"][5], 
             self.weather_data["Header"][4], 
             self.weather_data["Header"][3], 
             self.weather_data["Header"][2], 
             self.weather_data["Header"][1], 
             self.weather_data["Header"][0], 
-            0, 0, 0))
+            0, 0, 0)
+        self._crt_secs = time.mktime(self._crtTime)
 
-        _oldest_weather_data = self.weather_data_trace15[0]
-        t_old_secs = time.mktime(( 
-            _oldest_weather_data["Header"][5], 
-            _oldest_weather_data["Header"][4], 
-            _oldest_weather_data["Header"][3], 
-            _oldest_weather_data["Header"][2], 
-            _oldest_weather_data["Header"][1], 
-            _oldest_weather_data["Header"][0], 
-            0, 0, 0))
+        self.weather_data_trace15["Time"].append(self._crtTime)
+        self.weather_data_trace15["Rssi"].append(self.weather_data["Header"][10])
+        self.weather_data_trace15["N"].append(self.weather_data["N"])
+        self.weather_data_trace15["T"].append(self.weather_data["T"])
+        self.weather_data_trace15["S"].append(self.weather_data["S"])
+        self.weather_data_trace15["P"].append(self.weather_data["P"])
+        self.weather_data_trace15["H"].append(self.weather_data["H"])
 
-        # At the end of the 15min time window:
-        # - Calculate average values over the past 15min (all values in the trace15 deque)
+        if len(self.weather_data_trace15["Time"]) < 2:
+            self._start_secs = time.mktime((
+                self.weather_data["Header"][5], 
+                self.weather_data["Header"][4], 
+                self.weather_data["Header"][3], 
+                self.weather_data["Header"][2], 
+                self.weather_data["Header"][1], 
+                self.weather_data["Header"][0], 
+                0, 0, 0))
+            return None
+
+        # At the end of each ~15 minutes time window:
+        # - Calculate average values over the past ~15 minutes (all values in the trace15 deque)
         # - Clear trace15 deque and append the current value
-        # - Append dictionary with average values to the trace24 deque
-        if t_crt_secs - t_old_secs > 900:
+        # - Append dictionary with average values to the trace24 deques
+        _TimeAvg = None
+        if self._crt_secs - self._start_secs >= 900:
 
-            _avg15_weather_data = {'TimeAvg':tuple(), 'Rssi':0, 'N':0, 'S':0, 'T':0, 'P':0, 'H':0}
-            for wd in self.weather_data_trace15:
-                _avg15_weather_data["Rssi"] += wd["Header"][10] 
-                _avg15_weather_data["T"] += wd["T"]
-                _avg15_weather_data["S"] += wd["S"]
-                _avg15_weather_data["P"] += wd["P"]
-                _avg15_weather_data["H"] += wd["H"]
-
-            # The time of the average values
-            struc_t = time.localtime(t_old_secs+450)
-            _avg15_weather_data["TimeAvg"] = (
-                struc_t.tm_year,
+            # Update the trace24 deques with the average values of the past ~15 minutes
+            # The wind direction 'average' is the most frequent direction
+            # The time stamp 'average' is the mid-time
+            struc_t = time.localtime(self._start_secs+450)
+            _TimeAvg = (struc_t.tm_year,
                 struc_t.tm_mon,
                 struc_t.tm_mday,
                 struc_t.tm_hour,
                 struc_t.tm_min,
-                struc_t.tm_sec)
+                struc_t.tm_sec,
+                0,0,0)
+            self.weather_data_trace24["Time"].append(_TimeAvg)
+            self.weather_data_trace24["N"].append(mode(self.weather_data_trace15["N"]))
+            self.weather_data_trace24["T"].append(mean(self.weather_data_trace15["T"]))
+            self.weather_data_trace24["S"].append(mean(self.weather_data_trace15["S"]))
+            self.weather_data_trace24["P"].append(mean(self.weather_data_trace15["P"]))
+            self.weather_data_trace24["H"].append(mean(self.weather_data_trace15["H"]))
+            self.weather_data_trace24["Rssi"].append(mean(self.weather_data_trace15["Rssi"]))
 
-            # TODO: Estimate an average direction
-            _avg15_weather_data["N"] = self.weather_data_trace15[:-1]["N"]
+            # Store first values of the new 15 minutes window in the trace15 deques
+            for k in self.weather_data_trace15:
+                self.weather_data_trace15[k].clear()
 
-            # The average values
-            _avg15_weather_data["Rssi"] /= len(self.weather_data_trace15)
-            _avg15_weather_data["T"] /= len(self.weather_data_trace15)
-            _avg15_weather_data["S"] /= len(self.weather_data_trace15)
-            _avg15_weather_data["P"] /= len(self.weather_data_trace15)
-            _avg15_weather_data["H"] /= len(self.weather_data_trace15)
+            self._crtTime = (
+                self.weather_data["Header"][5], 
+                self.weather_data["Header"][4], 
+                self.weather_data["Header"][3], 
+                self.weather_data["Header"][2], 
+                self.weather_data["Header"][1], 
+                self.weather_data["Header"][0], 
+                0, 0, 0)
+            self._start_secs = time.mktime(self._crtTime)
 
-            # Update deques
-            self.weather_data_trace15.clear()
-            self.weather_data_trace15.append(self.weather_data)
-            self.weather_data_trace24.append(_avg15_weather_data)
-
-            # Keep only the last 24h data (24*4 values)
-            if len(self.weather_data_trace24) > 96:
-                self.weather_data_trace24.popleft()
+            self.weather_data_trace15["Time"].append(self._crtTime)
+            self.weather_data_trace15["N"].append(self.weather_data["N"])
+            self.weather_data_trace15["T"].append(self.weather_data["T"])
+            self.weather_data_trace15["S"].append(self.weather_data["S"])
+            self.weather_data_trace15["P"].append(self.weather_data["P"])
+            self.weather_data_trace15["H"].append(self.weather_data["H"])
+            self.weather_data_trace15["Rssi"].append(self.weather_data["Header"][10])
 
         # Current time
         #time_secs = time.mktime(time.localtime(time.time()))
-        #self.weather_data["Header"]
 
+        return _TimeAvg
 
+    def test_trace24_point(self):
+        sc = self.get_screen('traces')
 
-class MainScreen(Screen):
-    pass
+        ay = sc.widget_air_temp.height * 0.3
+        w = sc.widget_air_temp.width/3
+        step = 12
+        points = [ay*cos(i*step / w * 4) for i in range(96)]
+
+        sc._update_air_temperature_plot(points) 
 
 class TracesScreen(Screen):
-    dt = NumericProperty(0)
+    '''Display traces of weather data'''
+
+    # The plot areas
+    widget_air_temp   = ObjectProperty(None)
+    widget_wind_speed = ObjectProperty(None)
+    widget_air_press  = ObjectProperty(None)
+    widget_air_relhum = ObjectProperty(None)
+
+    # The plot traces
+    _start_time_str         = StringProperty(time.asctime(time.localtime(time.time())))
+    _end_time_str           = StringProperty(time.asctime(time.localtime(time.time())))
+    _wind_direction_points  = ListProperty([])
     _air_temperature_points = ListProperty([])
+    _wind_speed_points      = ListProperty([])
+    _air_pressure_points    = ListProperty([])
+    _air_relhumidity_points = ListProperty([])
+    _rssi_points            = ListProperty([])
 
-    def __init__(self, **kwargs):
-        super(TracesScreen, self).__init__(**kwargs)
-        Clock.schedule_interval(self.update_points_animation, 5.0)
+    # Sets the transparency of the background color for each trace widget
+    _widget_visible = NumericProperty(0.0)
 
-    def update_points_animation(self, dt):
-        cy = self.height * 0.6
-        cx = self.width * 0.1
-        w = self.width * 0.9
-        step = 50
-        points = []
-        self.dt += dt
-        for i in range(int(w / step)):
-            x = i * step
-            points.append(cx + x)
-            points.append(cy + cos(x / w * 8. + self.dt) * self.height * 0.1)
+    # The x axis offset (common for all traces)
+    _x_offset = dp(100) 
+
+    def update_trace_plots(self, weather_data_trace):
+        '''Update the plots for all traces'''
+
+        # The x axis step (common for all traces)     
+        self._x_step   = (self.widget_air_temp.width - self._x_offset)/weather_data_trace["Time"].maxlen
+
+        # The time labels
+        self._start_time_str = time.asctime(weather_data_trace["Time"][0])    
+        self._end_time_str   = time.asctime(weather_data_trace["Time"][-1])
+
+        # The trace dat values
+        for k in weather_data_trace:
+            if k is not "Time":
+                if k is "N":
+                    self._update_wind_direction_plot(weather_data_trace[k])
+                elif k is "T":
+                    self._update_air_temperature_plot(weather_data_trace[k])
+                elif k is "S":
+                    self._update_wind_speed_plot(weather_data_trace[k])
+                elif k is "P":
+                    self._update_air_pressure_plot(weather_data_trace[k])
+                elif k is "H":
+                    self._update_air_relhumidity_plot(weather_data_trace[k])
+                elif k is "Rssi":
+                    self._update_rssi_plot(weather_data_trace[k])
+            
+
+                    
+    def _update_wind_direction_plot(self, y_values):  
+        '''Update the wind direction trace plot'''
+
+        # TODO
+        self._wind_direction_points = [] 
+
+    def _update_rssi_plot(self, y_values):  
+        '''Update the RSSI trace plot'''
+
+        # TODO
+        self._rssi_points = [] 
+
+
+    def _update_air_temperature_plot(self, y_values):  
+        '''Update the air temperature trace plot'''
+
+        # The x-axis
+        _x_off = self.widget_air_temp.pos[0] + self._x_offset
+        x_axis = [_x_off + i*self._x_step for i in range(len(y_values))]
+        
+        # The y offset and scale
+        _y_sc = 1.0 
+        _y_off = self.widget_air_temp.pos[1] + 0.5*self.widget_air_temp.height 
+         
+        # The points to plot
+        points = [0 for i in range(2*len(y_values))]
+        points[0::2] = x_axis
+        points[1::2] = [_y_off + _y_sc*y for y in y_values]
         self._air_temperature_points = points
 
-class LockScreen(Screen):
-    pass
+    def _update_wind_speed_plot(self, y_values):  
+        '''Update the wind speed trace plot'''
+
+        # The x-axis
+        _x_off = self.widget_wind_speed.pos[0] + self._x_offset
+        x_axis = [_x_off + i*self._x_step for i in range(len(y_values))]
+        
+        # The y offset
+        _y_sc = self.widget_wind_speed.height/35.0
+        _y_off = self.widget_wind_speed.pos[1] + dp(2)   
+
+        # The points to plot
+        points = [0 for i in range(2*len(y_values))]
+        points[0::2] = x_axis
+        points[1::2] = [_y_off + _y_sc*y for y in y_values]
+        self._wind_speed_points = points
+
+    def _update_air_pressure_plot(self, y_values):  
+        '''Update the air pressure trace plot'''
+
+        # The x-axis
+        _x_off = self.widget_air_press.pos[0] + self._x_offset
+        x_axis = [_x_off + i*self._x_step for i in range(len(y_values))]
+        
+        # The y offset and scale
+        # The atm unit is roughly equivalent to the mean sea-level atmospheric pressure on Earth, 
+        # that is, the Earth's atmospheric pressure at sea level is approximately 1 atm = 1013.25 mbar
+        _y_sc = self.widget_wind_speed.height/20.0
+        _y_off = self.widget_air_press.pos[1] + 0.5*self.widget_air_press.height - _y_sc*1013.25
+          
+
+        # The points to plot
+        points = [0 for i in range(2*len(y_values))]
+        points[0::2] = x_axis
+        points[1::2] = [_y_off + _y_sc*y for y in y_values]
+        self._air_pressure_points = points 
+
+    def _update_air_relhumidity_plot(self, y_values):  
+        '''Update the air relative humidity trace plot'''
+
+        # The x-axis
+        _x_off = self.widget_air_relhum.pos[0] + self._x_offset
+        x_axis = [_x_off + i*self._x_step for i in range(len(y_values))]
+        
+        # The y offset and scale
+        _y_sc = self.widget_wind_speed.height/40
+        _y_off = self.widget_air_relhum.pos[1] + 0.25*self.widget_air_relhum.height - _y_sc*50.0 
+
+        # The points to plot
+        points = [0 for i in range(2*len(y_values))]
+        points[0::2] = x_axis
+        points[1::2] = [_y_off + _y_sc*y for y in y_values]
+        self._air_relhumidity_points = points 
+
 
 class RoundedButton(Button):
     background_color = [1,0,0,0]
     color_rgb = ListProperty([1., 0., 0.])
+
+
+class MainScreen(Screen):
+    # The plot area
+    widget_main   = ObjectProperty(None)
+
+    # Sets the transparency of the background color for each trace widget
+    _widget_visible = NumericProperty(0.1)
+
+class Traces15Screen(TracesScreen):
+    pass
+
+class Traces24Screen(TracesScreen):
+    pass
+
+class LockScreen(Screen):
+    # The plot area
+    widget_lock   = ObjectProperty(None)
 
 
 root_widget = Builder.load_file('screens.kv')

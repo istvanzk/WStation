@@ -6,22 +6,23 @@
 MyScreenManager:
     transition: SlideTransition()
     MainScreen:
-    TracesScreen:
+    Traces15Screen:
+    Traces24Screen:   
     LockScreen:
 
 <LabelN@Label>:
     font_size: '40sp'
+    text_size: None, self.parent.height
     color: 1,1,1,1
     outline_color: 0,0,0
     outline_width: 5
-    text_size: self.size
     halign: 'center'
     valign: 'middle'
     bold: True
 
 <LabelNE@Label>:
     font_size: '30sp'
-    text_size: self.size
+    text_size: None, self.parent.height
     color: 0.6,0.6,0.6,1
     outline_color: 0,0,0
     outline_width: 10
@@ -31,9 +32,18 @@ MyScreenManager:
 
 <LabelInfo@Label>:
     font_size: '30sp'
-    text_size: self.size
+    markup: True
+    text_size: None, self.parent.height
     outline_color: 0,0,1
     outline_width: 5
+    halign: 'center'
+    valign: 'middle'
+    bold: True
+
+<LabelInfoSmall@Label>:
+    font_size: '25sp'
+    markup: True
+    text_size: None, self.parent.height
     halign: 'center'
     valign: 'middle'
     bold: True
@@ -47,15 +57,23 @@ MyScreenManager:
             size: self.size
             radius: [dp(20),]
 
+
 <MainScreen>:
     name: 'main'
-    FloatLayout:
+    id: main
+    widget_main: live_disp
+
+    GridLayout:
+        cols: 1
+        padding: dp(20), 0
+
         Widget:
+            id: live_disp
             size_hint: 1.0, 1.0
             pos_hint: {'x':0.0, 'y':0.0}
             canvas.before:      
                 Color:
-                    rgba: 0.5,0,0,0 
+                    rgba: [0,0.5,0.5] + [main._widget_visible]
                 Rectangle:
                     size: self.size
                     pos: self.pos
@@ -66,30 +84,30 @@ MyScreenManager:
                 Line:
                     width: 1.5
                     circle:
-                        (self.center_x, self.center_y, dp(200), 10, 80)
+                        (self.parent.center_x, self.parent.center_y, dp(200), 10, 80)
                 Line:
                     width: 1.5
                     circle:
-                        (self.center_x, self.center_y, dp(200), 100, 170)
+                        (self.parent.center_x, self.parent.center_y, dp(200), 100, 170)
                 Line:
                     width: 1.5
                     circle:
-                        (self.center_x, self.center_y, dp(200), 190, 260)
+                        (self.parent.center_x, self.parent.center_y, dp(200), 190, 260)
                 Line:
                     width: 1.5
                     circle:
-                        (self.center_x, self.center_y, dp(200), 280, 350)
+                        (self.parent.center_x, self.parent.center_y, dp(200), 280, 350)
 
                 Color:
                     hsv: root.manager._wind_speed_hue,1,1
                 Ellipse:
-                    pos: self.center_x-dp(2.5*root.manager._wind_speed), self.center_y-dp(2.5*root.manager._wind_speed)
+                    pos: self.parent.center_x-dp(2.5*root.manager._wind_speed), self.parent.center_y-dp(2.5*root.manager._wind_speed)
                     size: dp(5*root.manager._wind_speed), dp(5*root.manager._wind_speed)
                     angle_start: root.manager._wind_direction-11.25
                     angle_end: root.manager._wind_direction+11.25
                     segments: 2    
                 Ellipse:
-                    pos: self.center_x-dp(10), self.center_y-dp(10)
+                    pos: self.parent.center_x-dp(10), self.parent.center_y-dp(10)
                     size: dp(20),dp(20)
                     angle_start: 0
                     angle_end: 360
@@ -100,71 +118,67 @@ MyScreenManager:
                     width: 2.
                     cap: 'round'
                     joint: 'round'
-                    points: self.center_x, self.center_y, self.center_x+dp(170*cos(radians(-root.manager._wind_direction+90-11.25))), self.center_y+dp(170*sin(radians(-root.manager._wind_direction+90-11.25)))
+                    points: self.parent.center_x, self.parent.center_y, self.parent.center_x+dp(170*cos(radians(-root.manager._wind_direction+90-11.25))), self.parent.center_y+dp(170*sin(radians(-root.manager._wind_direction+90-11.25)))
                 Line:
                     width: 2.
                     cap: 'round'
                     joint: 'round'
-                    points: self.center_x, self.center_y, self.center_x+dp(170*cos(radians(-root.manager._wind_direction+90+11.25))), self.center_y+dp(170*sin(radians(-root.manager._wind_direction+90+11.25)))
+                    points: self.parent.center_x, self.parent.center_y, self.parent.center_x+dp(170*cos(radians(-root.manager._wind_direction+90+11.25))), self.parent.center_y+dp(170*sin(radians(-root.manager._wind_direction+90+11.25)))
  
-        LabelN:
-            text: 'N'
-            pos: 0,dp(200)
-        LabelN:
-            text: 'E'
-            pos: dp(200),00
-        LabelN:
-            text: 'S'
-            pos: 0,dp(-200)
-        LabelN:
-            text: 'W'
-            pos: dp(-200),0
+            LabelN:
+                text: 'N' #'{}'.format(self.parent.center)
+                pos: self.parent.center_x,self.parent.center_y+dp(170)
+            LabelN:
+                text: 'E'
+                pos: self.parent.center_x+dp(200)-50,self.parent.center_y-50
+            LabelN:
+                text: 'S'
+                pos: self.parent.center_x-50,self.parent.center_y-dp(200)-50
+            LabelN:
+                text: 'W'
+                pos: self.parent.center_x-dp(200)-50,self.parent.center_y-50
 
-        LabelNE:
-            text: 'NE'
-            pos: dp(140),dp(140)
-        LabelNE:
-            text: 'SE'
-            pos: dp(140),dp(-140)
-        LabelNE:
-            text: 'SW'
-            pos: dp(-140),dp(-140)
-        LabelNE:
-            text: 'NW'
-            pos: -dp(140),dp(140)
+            LabelNE:
+                text: 'NE'
+                pos: self.parent.center_x+dp(140),self.parent.center_y+dp(140)
+            LabelNE:
+                text: 'SE'
+                pos: self.parent.center_x+dp(140),self.parent.center_y-dp(140)
+            LabelNE:
+                text: 'SW'
+                pos: self.parent.center_x-dp(140),self.parent.center_y-dp(140)
+            LabelNE:
+                text: 'NW'
+                pos: self.parent.center_x-dp(140),self.parent.center_y+dp(140)
 
-        LabelInfo:
-            markup: True
-            text: '{:4.1f} '.format(root.manager._air_temperature) + '[sup]o[/sup]C'
-            pos: dp(-300),dp(200)           
-            color: root.manager._air_temperature_color + [1]
+            LabelInfo:
+                text: '{:4.1f} '.format(root.manager._air_temperature) + '[sup]o[/sup]C'
+                pos: self.parent.center_x-dp(300),self.parent.center_y+dp(200)           
+                color: root.manager._air_temperature_color + [1]
 
-        LabelInfo:
-            markup: True
-            text: '{:6.1f}'.format(root.manager._air_pressure) + '[size=20]mbar[/size]'
-            pos: dp(-300),dp(-200)           
-            color: 0.6,0.6,0.6,1
+            LabelInfo:
+                text: '{:6.1f}'.format(root.manager._air_pressure) + '[size=20]mbar[/size]'
+                pos: self.parent.center_x-dp(300),self.parent.center_y-dp(200)           
+                color: root.manager._air_pressure_color + [1]
 
-        LabelInfo:
-            markup: True
-            text: '{:4.1f}'.format(root.manager._wind_speed) + '[size=20]m/s[/size]'
-            pos: dp(300),dp(200)           
-            color: 0.6,0.6,0.6,1
+            LabelInfo:
+                text: '{:4.1f}'.format(root.manager._wind_speed) + '[size=20]m/s[/size]'
+                pos: self.parent.center_x+dp(300),self.parent.center_y+dp(200)           
+                color: 0.6,0.6,0.6,1
 
-        LabelInfo:
-            markup: True
-            text: '{:4.1f}'.format(root.manager._air_relhumidity) + '[size=20]%[/size]'
-            pos: dp(300),dp(-200)           
-            color: 0.6,0.6,0.6,1
+            LabelInfo:
+                text: '{:4.1f}'.format(root.manager._air_relhumidity) + '[size=20]%[/size]'
+                pos: self.parent.center_x+dp(300),self.parent.center_y-dp(200)           
+                color: root.manager._air_relhumidity_color + [1]
 
+    FloatLayout:
         RoundedButton:
             pos_hint: {'x':0.985, 'y':0.35}
             size_hint: 0.025, 0.30
             color_rgb: 0,0,1
             on_press: 
-                root.manager.current = 'traces'
-                root.manager.transition.direction = 'left'
-        
+                root.manager.current = 'traces15'
+                root.manager.transition.direction = 'left'  
         RoundedButton:
             pos_hint: {'x':-0.01, 'y':0.35}
             size_hint: 0.025, 0.30
@@ -174,15 +188,158 @@ MyScreenManager:
                 root.manager.transition.direction = 'right'
         
 <TracesScreen>:
-    name: 'traces'
-    FloatLayout:
-        canvas:
-            Color:
-                rgba: root.manager._air_temperature_color + [1]
-            Point:
-                points: root._air_temperature_points
-                pointsize: 5
+    id: traces
+    widget_air_temp: air_temp
+    widget_wind_speed: wind_speed
+    widget_air_press: air_press
+    widget_air_relhum: air_relhum
 
+    GridLayout:
+        cols: 1
+        padding: dp(20), 0
+        spacing: 0, dp(5)
+
+        Widget:
+            id: air_temp
+            size_hint: 1.0 ,1.0
+            pos_hint: {'x':0.0, 'y':0.75}
+            canvas.before:      
+                Color:
+                    rgba: [0.5,0.0,0.0] + [traces._widget_visible]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos    
+            canvas:
+                Color:
+                    rgba: 0,0,1,1
+                Line:
+                    width: 1.5
+                    cap: 'round'
+                    joint: 'round'
+                    points: self.pos[0]+traces._x_offset, self.pos[1], self.size[0], self.pos[1]
+
+                Color:
+                    rgba: 1,1,1,1
+                Point:
+                    points: traces._air_temperature_points
+                    pointsize: 5
+
+            LabelInfoSmall:
+                text: '{:4.1f} '.format(root.manager._air_temperature) + '\n[sup]o[/sup]C'
+                pos: self.parent.pos[0], self.parent.center_y
+                color: root.manager._air_temperature_color + [1]
+
+        Widget:
+            id: wind_speed
+            size_hint: 1.0 ,1.0
+            pos_hint: {'x':0.0, 'y':0.5}
+            canvas.before:      
+                Color:
+                    rgba: [0.0,0.5,0.0]+ [traces._widget_visible]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos    
+            canvas:
+                Color:
+                    rgba: 0,0,1,1
+                Line:
+                    width: 1.5
+                    cap: 'round'
+                    joint: 'round'
+                    points: self.pos[0]+traces._x_offset, self.pos[1], self.size[0], self.pos[1]
+
+                Color:
+                    rgba: 1,1,1,1
+                Point:
+                    points: traces._wind_speed_points
+                    pointsize: 5
+
+            LabelInfoSmall:
+                text: '{:4.1f}'.format(root.manager._wind_speed) + '\n[size=20]m/s[/size]'
+                pos: self.parent.pos[0], self.parent.center_y          
+                color: root.manager._wind_speed_hue,1,1,1
+
+        Widget:
+            id: air_press
+            size_hint: 1.0, 1.0
+            pos_hint: {'x':0.0, 'y':0.25}
+            canvas.before:      
+                Color:
+                    rgba: [0.0,0.0,0.5] + [traces._widget_visible] 
+                Rectangle:
+                    size: self.size
+                    pos: self.pos    
+            canvas:
+                Color:
+                    rgba: 0,0,1,1
+                Line:
+                    width: 1.5
+                    cap: 'round'
+                    joint: 'round'
+                    points: self.pos[0]+traces._x_offset, self.pos[1], self.size[0], self.pos[1]
+
+                Color:
+                    rgba: 1,1,1,1
+                Point:
+                    points: traces._air_pressure_points
+                    pointsize: 5
+
+            LabelInfoSmall:
+                text: '{:6.1f}'.format(root.manager._air_pressure) + '\n[size=20]mbar[/size]'
+                pos: self.parent.pos[0], self.parent.center_y             
+                color: root.manager._air_pressure_color + [1]
+
+        Widget:
+            id: air_relhum
+            size_hint: 1.0, 1.0
+            pos_hint: {'x':0.0, 'y':0.0}
+            canvas.before:      
+                Color:
+                    rgba: [0.0,0.5,0.5] + [traces._widget_visible]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos    
+            canvas:
+                Color:
+                    rgba: 0,0,1,1
+                Line:
+                    width: 1.5
+                    cap: 'round'
+                    joint: 'round'
+                    points: self.pos[0]+traces._x_offset, self.pos[1], self.size[0], self.pos[1]
+
+                Color:
+                    rgba: 1,1,1,1
+                Point:
+                    points: traces._air_relhumidity_points
+                    pointsize: 5
+
+            LabelInfoSmall:
+                text: '{:4.1f}'.format(root.manager._air_relhumidity) + '\n[size=20]%[/size]'
+                pos:  self.parent.pos[0], self.parent.center_y             
+                color: root.manager._air_relhumidity_color + [1]
+
+        Widget:
+            id: x_label
+            size_hint: 1.0, 0.2
+            height: dp(20)
+            LabelInfoSmall:
+                text: traces._start_time_str
+                size: self.texture_size
+                halign: 'left'
+                pos:  self.parent.pos[0]+traces._x_offset, self.parent.height*0.3             
+                color: 0.5,0.5,1,1
+            LabelInfoSmall:
+                text: traces._end_time_str
+                size: self.texture_size
+                halign: 'right'
+                pos:  self.parent.width-3*traces._x_offset, self.parent.height*0.3             
+                color: 0.5,0.5,1,1
+
+
+<Traces15Screen@TracesScreen>:
+    name: 'traces15'
+    FloatLayout:
         RoundedButton:
             pos_hint: {'x':-0.01, 'y':0.35}
             size_hint: 0.025, 0.30
@@ -190,11 +347,28 @@ MyScreenManager:
             on_press:
                 root.manager.current = 'main'
                 root.manager.transition.direction = 'right'
+        RoundedButton:
+            pos_hint: {'x':0.985, 'y':0.35}
+            size_hint: 0.025, 0.30
+            color_rgb: 0,0,1
+            on_press: 
+                root.manager.current = 'traces24'
+                root.manager.transition.direction = 'left'
+
+<Traces24Screen@TracesScreen>:
+    name: 'traces24'
+    FloatLayout:
+        RoundedButton:
+            pos_hint: {'x':-0.01, 'y':0.35}
+            size_hint: 0.025, 0.30
+            color_rgb: 0,0,1
+            on_press:
+                root.manager.current = 'traces15'
+                root.manager.transition.direction = 'right'
 
 <LockScreen>:
     name: 'lock'
     FloatLayout:
- 
         RoundedButton:
             pos_hint: {'x':0.985, 'y':0.35}
             size_hint: 0.025, 0.30

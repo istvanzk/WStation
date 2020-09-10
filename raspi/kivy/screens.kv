@@ -12,7 +12,7 @@ MyScreenManager:
 
 <LabelN@Label>:
     font_size: '40sp'
-    text_size: None, self.parent.height
+    text_size: None, None
     color: 1,1,1,1
     outline_color: 0,0,0
     outline_width: 5
@@ -22,7 +22,7 @@ MyScreenManager:
 
 <LabelNE@Label>:
     font_size: '30sp'
-    text_size: None, self.parent.height
+    text_size: None, None
     color: 0.6,0.6,0.6,1
     outline_color: 0,0,0
     outline_width: 10
@@ -33,7 +33,7 @@ MyScreenManager:
 <LabelInfo@Label>:
     font_size: '30sp'
     markup: True
-    text_size: None, self.parent.height
+    text_size: None, None
     outline_color: 0,0,1
     outline_width: 5
     halign: 'center'
@@ -43,7 +43,7 @@ MyScreenManager:
 <LabelInfoSmall@Label>:
     font_size: '25sp'
     markup: True
-    text_size: None, self.parent.height
+    text_size: None, None
     halign: 'center'
     valign: 'middle'
     bold: True
@@ -127,48 +127,48 @@ MyScreenManager:
  
             LabelN:
                 text: 'N' #'{}'.format(self.parent.center)
-                pos: self.parent.center_x,self.parent.center_y+dp(170)
+                pos: self.parent.center_x-self.size[0]/2,self.parent.center_y+dp(200)-self.size[1]/2
             LabelN:
                 text: 'E'
-                pos: self.parent.center_x+dp(200)-50,self.parent.center_y-50
+                pos: self.parent.center_x+dp(200)-self.size[0]/2,self.parent.center_y-self.size[1]/2
             LabelN:
                 text: 'S'
-                pos: self.parent.center_x-50,self.parent.center_y-dp(200)-50
+                pos: self.parent.center_x-self.size[0]/2,self.parent.center_y-dp(200)-self.size[1]/2
             LabelN:
                 text: 'W'
-                pos: self.parent.center_x-dp(200)-50,self.parent.center_y-50
+                pos: self.parent.center_x-dp(200)-self.size[0]/2,self.parent.center_y-self.size[1]/2
 
             LabelNE:
                 text: 'NE'
-                pos: self.parent.center_x+dp(140),self.parent.center_y+dp(140)
+                pos: self.parent.center_x+dp(140)-self.size[0]/2,self.parent.center_y+dp(140)-self.size[1]/2
             LabelNE:
                 text: 'SE'
-                pos: self.parent.center_x+dp(140),self.parent.center_y-dp(140)
+                pos: self.parent.center_x+dp(140)-self.size[0]/2,self.parent.center_y-dp(140)-self.size[1]/2
             LabelNE:
                 text: 'SW'
-                pos: self.parent.center_x-dp(140),self.parent.center_y-dp(140)
+                pos: self.parent.center_x-dp(140)-self.size[0]/2,self.parent.center_y-dp(140)-self.size[1]/2
             LabelNE:
                 text: 'NW'
-                pos: self.parent.center_x-dp(140),self.parent.center_y+dp(140)
+                pos: self.parent.center_x-dp(140)-self.size[0]/2,self.parent.center_y+dp(140)-self.size[1]/2
 
             LabelInfo:
                 text: '{:4.1f} '.format(root.manager._air_temperature) + '[sup]o[/sup]C'
-                pos: self.parent.center_x-dp(300),self.parent.center_y+dp(200)           
+                pos: self.parent.center_x-dp(300)-self.size[0]/2,self.parent.center_y+dp(200)-self.size[1]/2           
                 color: root.manager._air_temperature_color + [1]
 
             LabelInfo:
                 text: '{:6.1f}'.format(root.manager._air_pressure) + '[size=20]mbar[/size]'
-                pos: self.parent.center_x-dp(300),self.parent.center_y-dp(200)           
+                pos: self.parent.center_x-dp(300)-self.size[0]/2,self.parent.center_y-dp(200)-self.size[1]/2           
                 color: root.manager._air_pressure_color + [1]
 
             LabelInfo:
                 text: '{:4.1f}'.format(root.manager._wind_speed) + '[size=20]m/s[/size]'
-                pos: self.parent.center_x+dp(300),self.parent.center_y+dp(200)           
+                pos: self.parent.center_x+dp(300)-self.size[0]/2,self.parent.center_y+dp(200)-self.size[1]/2          
                 color: 0.6,0.6,0.6,1
 
             LabelInfo:
                 text: '{:4.1f}'.format(root.manager._air_relhumidity) + '[size=20]%[/size]'
-                pos: self.parent.center_x+dp(300),self.parent.center_y-dp(200)           
+                pos: self.parent.center_x+dp(300)-self.size[0]/2,self.parent.center_y-dp(200)-self.size[1]/2           
                 color: root.manager._air_relhumidity_color + [1]
 
     FloatLayout:
@@ -203,6 +203,7 @@ MyScreenManager:
             id: air_temp
             size_hint: 1.0 ,1.0
             pos_hint: {'x':0.0, 'y':0.75}
+
             canvas.before:      
                 Color:
                     rgba: [0.5,0.0,0.0] + [traces._widget_visible]
@@ -219,6 +220,14 @@ MyScreenManager:
                     points: self.pos[0]+traces._x_offset, self.pos[1], self.size[0], self.pos[1]
 
                 Color:
+                    rgba: 0.7,0.7,1,1
+                Line:
+                    width: 1.0
+                    cap: 'round'
+                    joint: 'round'
+                    points: self.pos[0]+traces._x_offset, self.pos[1]+self.height/3, self.size[0], self.pos[1]+self.height/3
+
+                Color:
                     rgba: 1,1,1,1
                 Point:
                     points: traces._air_temperature_points
@@ -226,8 +235,15 @@ MyScreenManager:
 
             LabelInfoSmall:
                 text: '{:4.1f} '.format(root.manager._air_temperature) + '\n[sup]o[/sup]C'
-                pos: self.parent.pos[0], self.parent.center_y
+                pos: air_temp.pos[0], air_temp.center_y
                 color: root.manager._air_temperature_color + [1]
+
+            LabelInfoSmall:
+                text: '0'
+                pos: air_temp.pos[0], air_temp.pos[1]-self.size[1]/2+air_temp.height/3
+                color: 0.7,0.7,1,1
+
+
 
         Widget:
             id: wind_speed
@@ -258,6 +274,29 @@ MyScreenManager:
                 text: '{:4.1f}'.format(root.manager._wind_speed) + '\n[size=20]m/s[/size]'
                 pos: self.parent.pos[0], self.parent.center_y          
                 color: root.manager._wind_speed_hue,1,1,1
+
+        Widget:
+            id: wind_dir
+            size_hint: 1.0, 0.3
+            canvas.before:      
+                Color:
+                    rgba: [0.5,0.5,0.0]+ [traces._widget_visible]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos    
+            canvas:
+                Color:
+                    rgba: 0,0,1,1
+                Line:
+                    width: 1.5
+                    cap: 'round'
+                    joint: 'round'
+                    points: self.pos[0]+traces._x_offset, self.pos[1], self.size[0], self.pos[1]
+
+            LabelInfoSmall:
+                text: '{:4.1f}'.format(root.manager._wind_direction) + '\n[size=20]N[/size]'
+                pos: self.parent.pos[0], self.parent.center_y-self.size[1]/2       
+                color: 1,1,1,1
 
         Widget:
             id: air_press
@@ -322,7 +361,7 @@ MyScreenManager:
         Widget:
             id: x_label
             size_hint: 1.0, 0.2
-            height: dp(20)
+            #height: dp(20)
             LabelInfoSmall:
                 text: traces._start_time_str
                 size: self.texture_size

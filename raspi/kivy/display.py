@@ -455,8 +455,8 @@ class TracesScreen(Screen):
         x_axis = [_x_off + i*self._x_step for i in range(len(y_values))]
         
         # The y offset and scale
-        _y_sc = 1.0 
-        _y_off = self.widget_air_temp.pos[1] + 0.5*self.widget_air_temp.height 
+        _y_sc = self.widget_air_temp.height/60 
+        _y_off = self.widget_air_temp.pos[1] + self.widget_air_temp.height/3 
          
         # The points to plot
         points = [0 for i in range(2*len(y_values))]

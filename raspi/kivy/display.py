@@ -14,12 +14,14 @@ from kivy.clock import Clock
 from kivy.base import runTouchApp
 from kivy.lang import Builder
 from kivy.properties import ListProperty, NumericProperty, StringProperty, ObjectProperty
+from kivy.graphics import Color, Ellipse, Line
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.settings import SettingsWithSidebar, SettingsWithSpinner
+from kivy.gesture import Gesture, GestureDatabase
 
 from kivy.core.window import Window
 Window.size = (dp(800), dp(480))
@@ -589,6 +591,10 @@ class LockScreen(Screen):
     '''Screen for configuration settings'''
     widget_lock   = ObjectProperty(None)
 
+    def __init__(self, *args, **kwargs):
+        super(LockScreen, self).__init__()
+        self.gdb = GestureDatabase()
+
     def on_touch_down(self, touch):
         # start collecting points in touch.ud
         # create a line to display the points
@@ -605,17 +611,29 @@ class LockScreen(Screen):
         try:
             touch.ud['line'].points += [touch.x, touch.y]
             return True
-        except (KeyError) as e:
+        except KeyError:
             pass
 
     def on_touch_up(self, touch):
         # touch is over, display informations, and check if it matches some
         # known gesture.
-        g = simplegesture('', list(zip(touch.ud['line'].points[::2],
+        g = Gesture()
+        g.add_stroke(list(zip(touch.ud['line'].points[::2],
                                        touch.ud['line'].points[1::2])))
+        g.normalize()
+        g.name = ''
+
         # gestures to my_gestures.py
         print("gesture representation:", self.gdb.gesture_to_str(g))
 
+        # use database to find the more alike gesture, if any
+        g2 = self.gdb.find(g, minscore=0.70)
+        
+        print(g2)
+
+        # erase the lines on the screen, this is a bit quick&dirty, since we
+        # can have another touch event on the way...
+        self.canvas.clear()
 
 # Build the GUI
 root_widget = Builder.load_file('screens.kv')

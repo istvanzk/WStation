@@ -407,7 +407,71 @@ MyScreenManager:
 
 <LockScreen>:
     name: 'lock'
+    id: lock
+    widget_lock: lock_pattern
+
+    GridLayout:
+        cols: 1
+        padding: dp(20), 0
+
+        Widget:
+            id: lock_pattern
+            size_hint: 1.0, 1.0
+            pos_hint: {'x':0.0, 'y':0.0}
+            canvas.before:      
+                Color:
+                    rgba: [0.5,0.5,0.5] + [0]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+
+            canvas:
+                Color:
+                    rgb: 0,0,1
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x,self.center_y+dp(200), dp(20))
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x,self.center_y-dp(200), dp(20))
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x+dp(200),self.center_y, dp(20))
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x-dp(200),self.center_y, dp(20))
+
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x+dp(140),self.center_y+dp(140), dp(20))
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x+dp(140),self.center_y-dp(140), dp(20))
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x-dp(140),self.center_y+dp(140), dp(20))
+                Line:
+                    width: 1.5
+                    circle:
+                        (self.center_x-dp(140),self.center_y-dp(140), dp(20))
+
+
     FloatLayout:
+        RoundedButton:
+            pos_hint: {'x':0.05, 'y':0.05}
+            size_hint: 0.9, 0.9
+            text: 'Settings'
+            font_size: '50sp'
+            color_rgb: 0.1,0.1,0.1
+            on_release: app.open_settings()
+
         RoundedButton:
             pos_hint: {'x':0.985, 'y':0.35}
             size_hint: 0.025, 0.30

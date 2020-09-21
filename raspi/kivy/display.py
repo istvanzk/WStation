@@ -5,6 +5,7 @@ from collections import deque
 from math import log10, cos
 from statistics import mean, median, mode
 import posix_ipc
+import json
 
 # Kivy
 from kivy.app import App
@@ -18,6 +19,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.settings import SettingsWithSidebar, SettingsWithSpinner
+
 from kivy.core.window import Window
 Window.size = (dp(800), dp(480))
 Window.resizable = '0'
@@ -27,6 +30,42 @@ Window.borderless = True
 # Message queue parameters
 RXQUEUE_NAME  = "/rf22b_server_tx"
 MAX_RXMSG_SIZE = 255
+
+wssettings = json.dumps([
+    {'type': 'title',
+     'title': 'Home Weather Station'},
+    {'type': 'bool',
+     'title': 'Dark mode',
+     'desc': 'Switch between dark and light mode',
+     'section': 'general',
+     'key': 'dark_mode'},
+    {'type': 'numeric',
+     'title': 'Wind direction steps',
+     'desc': 'Number of steps for wind direction angle (integer)',
+     'section': 'calibration',
+     'key': 'wind_direction_steps'},
+    {'type': 'numeric',
+     'title': 'North direction index',
+     'desc': 'Index 1..<Wind direction steps> for the North direction (integer)',
+     'section': 'calibration',
+     'key': 'north_index'},
+    {'type': 'options',
+     'title': 'An options setting',
+     'desc': 'Options description text',
+     'section': 'example',
+     'key': 'optionsexample',
+     'options': ['option1', 'option2', 'option3']},
+    {'type': 'string',
+     'title': 'A string setting',
+     'desc': 'String description text',
+     'section': 'example',
+     'key': 'stringexample'},
+    {'type': 'path',
+     'title': 'A path setting',
+     'desc': 'Path description text',
+     'section': 'example',
+     'key': 'pathexample'}])
+
 
 class ClientMq(object):
 
@@ -145,6 +184,11 @@ class MyScreenManager(ScreenManager):
     weather_data_trace24["P"] = deque([],96)
     weather_data_trace24["H"] = deque([],96)
 
+    # Settings (configurable, see app.on_config_change(...))
+    darkMode     = True
+    windDirSteps = 16 #1..16
+    northIndex   = 16
+
     # Create the receive message queue
     # _msg_queue.mqRX is set to None when no MessageQueue has been instantiated!
     _msg_queue = ClientMq()
@@ -190,8 +234,11 @@ class MyScreenManager(ScreenManager):
                 if _weather_data["Header"][11] == 20:
                     self.weather_data["IniMsg"] = None
 
-                    # TODO: adjust North direction based on calibration data
-                    self._wind_direction   = _weather_data["N"]*22.5
+                    # Adjust North direction based on calibration data
+                    _weather_data["N"]     = _weather_data["N"] - self.northIndex
+                    if _weather_data["N"] <= 0:
+                        _weather_data["N"] += self.windDirSteps 
+                    self._wind_direction   = (360/self.windDirSteps) * _weather_data["N"]
 
                     self._air_temperature  = _weather_data["T"]           
                     self._wind_speed       = _weather_data["S"]
@@ -229,7 +276,7 @@ class MyScreenManager(ScreenManager):
                 self._wind_speed = 35*random()
 
             if random() > 0.5:
-                self._wind_direction = 22.5*randint(1,16)
+                self._wind_direction = (360/self.windDirSteps) * randint(1, self.windDirSteps)
         
             if random() > 0.5:
                 self._rssi_dBm = -(60+42*random())
@@ -255,8 +302,6 @@ class MyScreenManager(ScreenManager):
         self.weather_data["H"] = self._air_relhumidity
 
         print(self.weather_data)
-
-        #self.test_trace24_point()
 
         # Process and store weather data       
         if self.weather_data["IniMsg"] is None:
@@ -370,16 +415,16 @@ class MyScreenManager(ScreenManager):
         #time_secs = time.mktime(time.localtime(time.time()))
 
         return _TimeAvg
+ 
+    def north_check(self):
+        '''Check the North direction index vs. number of wind direction steps'''
+        if self.northIndex > self.windDirSteps:
+            self.northIndex = self.windDirSteps
 
-    def test_trace24_point(self):
-        sc = self.get_screen('traces')
+    #def display_settings(self, settings):
+    #    self.back_screen_name = self.current
+    #    self.current = 'lock'
 
-        ay = sc.widget_air_temp.height * 0.3
-        w = sc.widget_air_temp.width/3
-        step = 12
-        points = [ay*cos(i*step / w * 4) for i in range(96)]
-
-        sc._update_air_temperature_plot(points) 
 
 class TracesScreen(Screen):
     '''Display traces of weather data'''
@@ -520,33 +565,97 @@ class TracesScreen(Screen):
 
 
 class RoundedButton(Button):
+    '''Generate a rounded button with custom color'''
     background_color = [1,0,0,0]
     color_rgb = ListProperty([1., 0., 0.])
 
 
 class MainScreen(Screen):
-    # The plot area
+    '''Display live weather data'''
     widget_main   = ObjectProperty(None)
 
-    # Sets the transparency of the background color for each trace widget
+    # Sets the transparency of the background color for each trace widget (DEBUG)
     _widget_visible = NumericProperty(0.1)
 
 class Traces15Screen(TracesScreen):
+    '''Display traces with last 15 minues weather data'''
     pass
 
 class Traces24Screen(TracesScreen):
+    '''Display traces with last 24 hours weather data'''
     pass
 
 class LockScreen(Screen):
-    # The plot area
+    '''Screen for configuration settings'''
     widget_lock   = ObjectProperty(None)
 
+    def on_touch_down(self, touch):
+        # start collecting points in touch.ud
+        # create a line to display the points
+        userdata = touch.ud
+        with self.canvas:
+            Color(1, 1, 0)
+            d = 30.
+            Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d))
+            userdata['line'] = Line(points=(touch.x, touch.y))
+        return True
 
+    def on_touch_move(self, touch):
+        # store points of the touch movement
+        try:
+            touch.ud['line'].points += [touch.x, touch.y]
+            return True
+        except (KeyError) as e:
+            pass
+
+    def on_touch_up(self, touch):
+        # touch is over, display informations, and check if it matches some
+        # known gesture.
+        g = simplegesture('', list(zip(touch.ud['line'].points[::2],
+                                       touch.ud['line'].points[1::2])))
+        # gestures to my_gestures.py
+        print("gesture representation:", self.gdb.gesture_to_str(g))
+
+
+# Build the GUI
 root_widget = Builder.load_file('screens.kv')
 
 class HomeWeatherStationApp(App):
+    '''The Kivy App'''
+
     def build(self):
         self.title = 'Home Weather Station V0'
+
+        self.settings_cls = SettingsWithSpinner
+        self.use_kivy_settings = True
+        
+        self.manager = root_widget
+        root_widget.app = self
+
         return root_widget
+
+    def build_config(self, config):
+        config.setdefaults('general', {'dark_mode': True})
+        config.setdefaults('calibration', {'north_index': 16, 'wind_direction_steps': 16})
+        config.setdefaults('example',{'optionsexample': 'option2', 'stringexample': 'some_string','pathexample': '/some/path'})
+
+    def build_settings(self, settings):
+        settings.add_json_panel('WS',
+                                self.config,
+                                data=wssettings)
+
+    def on_config_change(self, config, section,
+                         key, value):
+        #print(config, section, key, value)
+        if config is self.config:
+            token = (section, key)
+            if token == ('general', 'dark_mode'):
+                self.manager.darkMode = value
+            elif token == ('calibration', 'north_index'):
+                self.manager.northIndex = int(value)
+                self.manager.north_check()
+            elif token == ('calibration', 'wind_direction_steps'):
+                self.manager.windDirSteps = int(value)
+                self.manager.north_check()
 
 HomeWeatherStationApp().run()

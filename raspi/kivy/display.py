@@ -233,6 +233,7 @@ class MyScreenManager(ScreenManager):
             _weather_data = self._msg_queue.read_weather_data(1.0)
             if _weather_data is not None:
 
+                # Data received: update info
                 if _weather_data["Header"][11] == 20:
                     self.weather_data["IniMsg"] = None
 
@@ -250,10 +251,27 @@ class MyScreenManager(ScreenManager):
                 else:
                     self.weather_data["IniMsg"] = _weather_data["IniMsg"]
 
-                # TODO: convert tuple and extract time stamp, rssi, etc.
+                # Header info
                 _weather_data["Header"][5] += 1900
                 _weather_data["Header"][10] -= 256
                 self.weather_data["Header"] = _weather_data["Header"]
+                
+                # RSSI
+                self._rssi_dBm = _weather_data["Header"][10]
+
+            else:
+                # Data not received: keep last reading
+                # Header info
+                struc_t = time.localtime(time.time())
+                self.weather_data["Header"] = (
+                    struc_t.tm_sec,
+                    struc_t.tm_min,
+                    struc_t.tm_hour,
+                    struc_t.tm_mday,
+                    struc_t.tm_mon,
+                    struc_t.tm_year,
+                    0,0,0,0, self._rssi_dBm, 20)
+                self.weather_data["IniMsg"] = 'No Data'
 
 
         # Generate random test data        

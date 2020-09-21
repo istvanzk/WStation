@@ -23,6 +23,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.settings import SettingsWithSidebar, SettingsWithSpinner
 from kivy.gesture import Gesture, GestureDatabase
 
+from glock import check
+
 from kivy.core.window import Window
 Window.size = (dp(800), dp(480))
 Window.resizable = '0'
@@ -255,7 +257,7 @@ class MyScreenManager(ScreenManager):
                 _weather_data["Header"][5] += 1900
                 _weather_data["Header"][10] -= 256
                 self.weather_data["Header"] = _weather_data["Header"]
-                
+
                 # RSSI
                 self._rssi_dBm = _weather_data["Header"][10]
 
@@ -613,45 +615,74 @@ class LockScreen(Screen):
         super(LockScreen, self).__init__()
         self.gdb = GestureDatabase()
 
-    def on_touch_down(self, touch):
-        # start collecting points in touch.ud
-        # create a line to display the points
-        userdata = touch.ud
-        with self.canvas:
-            Color(1, 1, 0)
-            d = 30.
-            Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d))
-            userdata['line'] = Line(points=(touch.x, touch.y))
-        return True
+        self.gdb.add_gesture(check)
 
+    def on_touch_down(self, touch):
+        if touch.x > self.center_x + dp(300) or touch.x < self.center_x - dp(300):
+            return super(LockScreen, self).on_touch_down(touch)
+
+        # Start collecting points in touch.ud
+        # Create a line to display the points
+        if self.collide_point(*touch.pos):
+            touch.grab(self)
+            ud = touch.ud
+            ud['group'] = g = str(touch.uid)
+            with self.canvas:
+                Color(0.5, 0.5, 1)
+                d = 60.
+                Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d), group=g)
+                ud['line'] = Line(points=(touch.x, touch.y), width=10, group=g)
+                ret = True
+        else:
+            ret = super(LockScreen, self).on_touch_down(touch)
+
+        return ret
+ 
     def on_touch_move(self, touch):
-        # store points of the touch movement
+        # Store points of the touch movement
+        #if touch.grab_current is not self:
+        #    return
         try:
             touch.ud['line'].points += [touch.x, touch.y]
-            return True
         except KeyError:
             pass
-
+ 
     def on_touch_up(self, touch):
-        # touch is over, display informations, and check if it matches some
-        # known gesture.
-        g = Gesture()
-        g.add_stroke(list(zip(touch.ud['line'].points[::2],
-                                       touch.ud['line'].points[1::2])))
-        g.normalize()
-        g.name = ''
+        # Touch is over
+        ret = False
+        if touch.grab_current is self:
+         
+            # Add gesture to database
+            try:
+                g = Gesture()
+                g.add_stroke(list(zip(touch.ud['line'].points[::2],
+                                            touch.ud['line'].points[1::2])))
+                g.normalize()
+                g.name = 'try'
 
-        # gestures to my_gestures.py
-        print("gesture representation:", self.gdb.gesture_to_str(g))
+                # Delete trace line
+                self.canvas.remove_group(touch.ud['group'])
 
-        # use database to find the more alike gesture, if any
-        g2 = self.gdb.find(g, minscore=0.70)
-        
-        print(g2)
+                # Compare gesture to my_gestures.py
+                #print("gesture representation:", self.gdb.gesture_to_str(g))
+                #print("check:", g.get_score(check))
 
-        # erase the lines on the screen, this is a bit quick&dirty, since we
-        # can have another touch event on the way...
-        self.canvas.clear()
+                # use database to find the more alike gesture, if any
+                g2 = self.gdb.find(g, minscore=0.90)
+
+                #print(g2)
+                if g2 and g2[1] == check:
+                    self.manager.app.open_settings()
+
+                ret = True
+
+            except KeyError:
+                ret = super(LockScreen, self).on_touch_up(touch)
+
+            touch.ungrab(self)
+
+        return ret
+
 
 # Build the GUI
 root_widget = Builder.load_file('screens.kv')
@@ -693,5 +724,8 @@ class HomeWeatherStationApp(App):
             elif token == ('calibration', 'wind_direction_steps'):
                 self.manager.windDirSteps = int(value)
                 self.manager.north_check()
+
+    def on_pause(self):
+        return True
 
 HomeWeatherStationApp().run()

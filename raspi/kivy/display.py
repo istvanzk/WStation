@@ -9,6 +9,7 @@ import json
 
 # Kivy
 from kivy.app import App
+from kivy.config import Config
 from kivy.metrics import dp
 from kivy.core.window import Window
 from kivy.clock import Clock
@@ -38,7 +39,7 @@ wssettings = json.dumps([
      'desc': 'Reduce app window size',
      'section': 'general',
      'key': 'small_mode'},
-     {'type': 'path',
+     {'type': 'string',
      'title': 'RX message queue',
      'desc': 'The message queue name for receiving weather data',
      'section': 'general',
@@ -204,6 +205,7 @@ class MyScreenManager(ScreenManager):
     #     Blue: 241 and 300 degrees.
     #     Magenta: 301 and 360 degrees.
     _wind_speed_hue = NumericProperty(160)
+    _wind_speed_color = ListProperty([0,1,0])
     _air_temperature = NumericProperty(23.5)
     _air_temperature_color = ListProperty([0,1,0])
     _air_pressure = NumericProperty(1013.25)
@@ -354,7 +356,8 @@ class MyScreenManager(ScreenManager):
         elif self._air_temperature > 35:
             self._air_temperature_color = [1,0,0]
 
-        self._wind_speed_hue = (160-20*log10(1+self._wind_speed/5))/360
+        self._wind_speed_hue = (160-200*log10(1+self._wind_speed/5))/360
+        #self._wind_speed_color = Color(self._wind_speed_hue, 1, 1, mode='hsv'))
 
     # Process and store weather data
     def procstore_weather_data(self):
@@ -601,7 +604,7 @@ class MainScreen(Screen):
     widget_main   = ObjectProperty(None)
 
     # Sets the transparency of the background color for each trace widget (DEBUG)
-    _widget_visible = NumericProperty(0.1)
+    _widget_visible = NumericProperty(0.)
 
 
 class LockScreen(Screen):
@@ -689,11 +692,16 @@ class HomeWeatherStationApp(App):
 
     def __init__(self, **kwargs):
         super(HomeWeatherStationApp, self).__init__(**kwargs)
-        Window.bind(on_close=self.on_stop)
-        Window.size = (dp(800), dp(480))
-        Window.resizable = '0'
-        Window.borderless = True
+        #Window.bind(on_close=self.on_stop)
+        #Window.size = (dp(800), dp(480))
+        #Window.resizable = '0'
+        #Window.borderless = True
         #Window.fullscreen = True
+        Config.set('kivy', 'exit_on_escape', 1)
+        Config.set('graphics', 'borderless', 0)
+        #Config.set('graphics', 'height', dp(480))
+        #Config.set('graphics', 'width', dp(800))
+        Config.set('graphics', 'resizable', 1)
 
     def build(self):
         self.title = 'Home Weather Station V0'
@@ -724,10 +732,10 @@ class HomeWeatherStationApp(App):
             if token == ('general', 'small_mode'):
                 self.manager.smallMode = value
                 if value is '1':
-                    Window.resizable = '1'
+                    #Window.resizable = '1'
                     Window.size = (dp(400), dp(240))
                 else:
-                    Window.resizable = '0'
+                    #Window.resizable = '0'
                     Window.size = (dp(800), dp(480))
             elif token == ('calibration', 'north_index'):
                 self.manager.northIndex = int(value)

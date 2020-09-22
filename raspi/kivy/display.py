@@ -10,6 +10,7 @@ import json
 # Kivy
 from kivy.app import App
 from kivy.metrics import dp
+from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.base import runTouchApp
 from kivy.lang import Builder
@@ -22,14 +23,8 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.settings import SettingsWithSidebar, SettingsWithSpinner
 from kivy.gesture import Gesture, GestureDatabase
-
 from glock import check
 
-from kivy.core.window import Window
-Window.size = (dp(800), dp(480))
-Window.resizable = '0'
-Window.borderless = True
-#Window.fullscreen = True
 
 # Message queue parameters
 RXQUEUE_NAME  = "/rf22b_server_tx"
@@ -39,10 +34,15 @@ wssettings = json.dumps([
     {'type': 'title',
      'title': 'Home Weather Station'},
     {'type': 'bool',
-     'title': 'Dark mode',
-     'desc': 'Switch between dark and light mode',
+     'title': 'Small mode',
+     'desc': 'Reduce app window size',
      'section': 'general',
-     'key': 'dark_mode'},
+     'key': 'small_mode'},
+     {'type': 'path',
+     'title': 'RX message queue',
+     'desc': 'The message queue name for receiving weather data',
+     'section': 'general',
+     'key': 'rxqueue_name'},    
     {'type': 'numeric',
      'title': 'Wind direction steps',
      'desc': 'Number of steps for wind direction angle (integer)',
@@ -58,35 +58,29 @@ wssettings = json.dumps([
      'desc': 'Options description text',
      'section': 'example',
      'key': 'optionsexample',
-     'options': ['option1', 'option2', 'option3']},
-    {'type': 'string',
-     'title': 'A string setting',
-     'desc': 'String description text',
-     'section': 'example',
-     'key': 'stringexample'},
-    {'type': 'path',
-     'title': 'A path setting',
-     'desc': 'Path description text',
-     'section': 'example',
-     'key': 'pathexample'}])
+     'options': ['option1', 'option2', 'option3']}])
 
 
 class ClientMq(object):
 
-    # Create the message queue
-    # The umask is not relevant for reading, when the queue has been created as RW!
-    #old_umask = os.umask(0)
-    #os.umask(old_umask)
-    if hasattr(posix_ipc, 'MessageQueue'):
-        try:
-            mqRX = posix_ipc.MessageQueue(RXQUEUE_NAME, posix_ipc.O_RDONLY | posix_ipc.O_CREAT)
-            # Request notifications
-            #mqRX.request_notification((self.process_notification, mqRX))
-        except:
-            mqRX = None
-            pass
-    else:
-        mqRX = None
+    # The message queue
+    mqRX = None
+
+    def __init__(self, rxqueue_name):
+        # Create the message queue
+        # The umask is not relevant for reading, when the queue has been created as RW!
+        #old_umask = os.umask(0)
+        #os.umask(old_umask)
+        if hasattr(posix_ipc, 'MessageQueue'):
+            try:
+                self.mqRX = posix_ipc.MessageQueue(rxqueue_name, posix_ipc.O_RDONLY | posix_ipc.O_CREAT)
+                # Request notifications
+                #mqRX.request_notification((self.process_notification, mqRX))
+            except:
+                self.mqRX = None
+                pass
+        else:
+            self.mqRX = None
 
 
     def process_notification(self,mq):
@@ -189,13 +183,13 @@ class MyScreenManager(ScreenManager):
     weather_data_trace24["H"] = deque([],96)
 
     # Settings (configurable, see app.on_config_change(...))
-    darkMode     = True
+    smallMode    = False
     windDirSteps = 16 #1..16
     northIndex   = 16
+    rxqueueName  = RXQUEUE_NAME
 
-    # Create the receive message queue
-    # _msg_queue.mqRX is set to None when no MessageQueue has been instantiated!
-    _msg_queue = ClientMq()
+    # The message queue
+    _msg_queue = None
 
     # Displayed info and their color
     #(access with root.manager.* from the kv file)
@@ -222,12 +216,22 @@ class MyScreenManager(ScreenManager):
     _start_secs = 0
     _crt_secs = 0
 
+    # Current time as string
+    _crt_time_str = StringProperty(time.asctime(time.localtime(time.time())))
+
 
     def __init__(self, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
         _update_mainscreen_sch = Clock.schedule_interval(self.update_mainscreen_info, 5.0)
 
+        # Create the receive message queue
+        # _msg_queue.mqRX is set to None when no MessageQueue is available (e.g. MacOS)!
+        self._msg_queue = ClientMq(self.rxqueueName)
+
     def update_mainscreen_info(self, *args):
+
+        # Current time as string
+        self._crt_time_str = time.asctime(time.localtime(time.time()))
 
         # Get real data from the remote weather station (via RF22B and local MessageQueue)
         if self._msg_queue.mqRX is not None:
@@ -295,7 +299,7 @@ class MyScreenManager(ScreenManager):
                 self._air_relhumidity -= random()
 
             if random() > 0.5:
-                self._wind_speed = 35*random()
+                self._wind_speed = 25*random()
 
             if random() > 0.5:
                 self._wind_direction = (360/self.windDirSteps) * randint(1, self.windDirSteps)
@@ -350,7 +354,7 @@ class MyScreenManager(ScreenManager):
         elif self._air_temperature > 35:
             self._air_temperature_color = [1,0,0]
 
-        self._wind_speed_hue = (160-205*log10(1+self._wind_speed/5))/360
+        self._wind_speed_hue = (160-20*log10(1+self._wind_speed/5))/360
 
     # Process and store weather data
     def procstore_weather_data(self):
@@ -599,13 +603,6 @@ class MainScreen(Screen):
     # Sets the transparency of the background color for each trace widget (DEBUG)
     _widget_visible = NumericProperty(0.1)
 
-class Traces15Screen(TracesScreen):
-    '''Display traces with last 15 minues weather data'''
-    pass
-
-class Traces24Screen(TracesScreen):
-    '''Display traces with last 24 hours weather data'''
-    pass
 
 class LockScreen(Screen):
     '''Screen for configuration settings'''
@@ -690,10 +687,18 @@ root_widget = Builder.load_file('screens.kv')
 class HomeWeatherStationApp(App):
     '''The Kivy App'''
 
+    def __init__(self, **kwargs):
+        super(HomeWeatherStationApp, self).__init__(**kwargs)
+        Window.bind(on_close=self.on_stop)
+        Window.size = (dp(800), dp(480))
+        Window.resizable = '0'
+        Window.borderless = True
+        #Window.fullscreen = True
+
     def build(self):
         self.title = 'Home Weather Station V0'
 
-        self.settings_cls = SettingsWithSpinner
+        self.settings_cls = SettingsWithSidebar
         self.use_kivy_settings = True
         
         self.manager = root_widget
@@ -702,9 +707,9 @@ class HomeWeatherStationApp(App):
         return root_widget
 
     def build_config(self, config):
-        config.setdefaults('general', {'dark_mode': True})
+        config.setdefaults('general', {'small_mode': False, 'rxqueue_name': RXQUEUE_NAME})
         config.setdefaults('calibration', {'north_index': 16, 'wind_direction_steps': 16})
-        config.setdefaults('example',{'optionsexample': 'option2', 'stringexample': 'some_string','pathexample': '/some/path'})
+        config.setdefaults('example',{'optionsexample': 'option2'})
 
     def build_settings(self, settings):
         settings.add_json_panel('WS',
@@ -716,8 +721,14 @@ class HomeWeatherStationApp(App):
         #print(config, section, key, value)
         if config is self.config:
             token = (section, key)
-            if token == ('general', 'dark_mode'):
-                self.manager.darkMode = value
+            if token == ('general', 'small_mode'):
+                self.manager.smallMode = value
+                if value is '1':
+                    Window.resizable = '1'
+                    Window.size = (dp(400), dp(240))
+                else:
+                    Window.resizable = '0'
+                    Window.size = (dp(800), dp(480))
             elif token == ('calibration', 'north_index'):
                 self.manager.northIndex = int(value)
                 self.manager.north_check()
@@ -725,7 +736,19 @@ class HomeWeatherStationApp(App):
                 self.manager.windDirSteps = int(value)
                 self.manager.north_check()
 
+    def on_start(self):
+        #print("\non_start:")
+        return True
+
     def on_pause(self):
         return True
+
+    def on_resume(self):
+        pass
+
+    def on_stop(self):
+        #print("\non_stop:")
+        return True
+    
 
 HomeWeatherStationApp().run()

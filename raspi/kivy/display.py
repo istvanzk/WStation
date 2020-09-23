@@ -463,6 +463,7 @@ class TracesScreen(Screen):
     widget_wind_speed = ObjectProperty(None)
     widget_air_press  = ObjectProperty(None)
     widget_air_relhum = ObjectProperty(None)
+    progress_bar      = ObjectProperty(None)
 
     # The plot traces
     _start_time_str         = StringProperty(time.asctime(time.localtime(time.time())))
@@ -475,7 +476,10 @@ class TracesScreen(Screen):
     _rssi_points            = ListProperty([])
 
     # Sets the transparency of the background color for each trace widget
-    _widget_visible = NumericProperty(0.0)
+    _widget_visible = 0.0
+
+    # The padding_x value for the child widgets
+    _x_padding = dp(30) 
 
     # The x axis offset (common for all traces)
     _x_offset = dp(100) 
@@ -484,13 +488,13 @@ class TracesScreen(Screen):
         '''Update the plots for all traces'''
 
         # The x axis step (common for all traces)     
-        self._x_step   = (self.widget_air_temp.width - self._x_offset)/weather_data_trace["Time"].maxlen
+        self._x_step   = (self.widget_air_temp.width - self._x_offset - dp(20))/weather_data_trace["Time"].maxlen
 
         # The time labels
         self._start_time_str = time.asctime(weather_data_trace["Time"][0])    
         self._end_time_str   = time.asctime(weather_data_trace["Time"][-1])
 
-        # The trace dat values
+        # The trace data values
         for k in weather_data_trace:
             if k is not "Time":
                 if k is "N":
@@ -506,7 +510,10 @@ class TracesScreen(Screen):
                 elif k is "Rssi":
                     self._update_rssi_plot(weather_data_trace[k])
             
-
+        # Update the progress bar
+        self.progress_bar.min = 0
+        self.progress_bar.max = weather_data_trace["Time"].maxlen
+        self.progress_bar.value += 1
                     
     def _update_wind_direction_plot(self, y_values):  
         '''Update the wind direction trace plot'''
@@ -603,13 +610,22 @@ class MainScreen(Screen):
     '''Display live weather data'''
     widget_main   = ObjectProperty(None)
 
-    # Sets the transparency of the background color for each trace widget (DEBUG)
-    _widget_visible = NumericProperty(0.)
+    # Sets the transparency of the background color for each widget
+    _widget_visible = 0.0
+
+    # The padding_x value for the child widgets
+    _x_padding = dp(30) 
 
 
 class LockScreen(Screen):
     '''Screen for configuration settings'''
     widget_lock   = ObjectProperty(None)
+
+    # Sets the transparency of the background color for each widget
+    _widget_visible = 0.0
+
+    # The padding_x value for the child widgets
+    _x_padding = dp(30) 
 
     def __init__(self, *args, **kwargs):
         super(LockScreen, self).__init__()
@@ -698,10 +714,10 @@ class HomeWeatherStationApp(App):
         #Window.borderless = True
         #Window.fullscreen = True
         Config.set('kivy', 'exit_on_escape', 1)
-        Config.set('graphics', 'borderless', 0)
+        Config.set('graphics', 'borderless', 1)
         #Config.set('graphics', 'height', dp(480))
         #Config.set('graphics', 'width', dp(800))
-        Config.set('graphics', 'resizable', 1)
+        Config.set('graphics', 'resizable', 0)
 
     def build(self):
         self.title = 'Home Weather Station V0'

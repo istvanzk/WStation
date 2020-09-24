@@ -231,6 +231,10 @@ class MyScreenManager(ScreenManager):
     # Current time as string
     _crt_time_str = StringProperty(time.asctime(time.localtime(time.time())))
 
+    # Info string
+    _crt_msg_str   = StringProperty('None')
+    _crt_msg_color = ListProperty([0,1,0])
+    _crt_msg_vis   = NumericProperty(0)
 
     def __init__(self, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
@@ -277,6 +281,22 @@ class MyScreenManager(ScreenManager):
                 # RSSI
                 self._rssi_dBm = _weather_data["Header"][10]
 
+                # Info
+                self._crt_msg_str = "RXMQ:OK. Data:OK"
+                self._crt_msg_vis = 0.7
+                if self._rssi_dBm > -80:
+                    self._crt_msg_color = [0,1,0]
+                if self._rssi_dBm <= -80 and self._rssi_dBm > -85:
+                    self._crt_msg_color = [0.5,1,0]
+                elif self._rssi_dBm <= -85 and self._rssi_dBm > -90:
+                    self._crt_msg_color = [1,1,0]
+                elif self._rssi_dBm <= -90 and self._rssi_dBm > -95:
+                    self._crt_msg_color = [1,0.5,0]
+                elif self._rssi_dBm <= -95 and self._rssi_dBm > -100:
+                    self._crt_msg_color = [1,0.5,0.5]    
+                elif self._rssi_dBm <= -100:
+                    self._crt_msg_color = [1,0,0]    
+
             else:
                 # Data not received: keep last reading
                 # Header info
@@ -291,6 +311,10 @@ class MyScreenManager(ScreenManager):
                     0,0,0,0, self._rssi_dBm, 20)
                 self.weather_data["IniMsg"] = 'No Data'
 
+                # Info
+                self._crt_msg_str = "RXMQ:OK. Data:N/A"
+                self._crt_msg_vis = 0.7
+                self._crt_msg_color = [1,0.5,0.5]  
 
         # Generate random test data        
         else:
@@ -331,6 +355,11 @@ class MyScreenManager(ScreenManager):
                 0,0,0,0,self._rssi_dBm, 20)
             self.weather_data["IniMsg"] = None
 
+            # Info
+            self._crt_msg_str = "RXMQ:N/A. Data:RND"
+            self._crt_msg_vis = 0.7
+            self._crt_msg_color = [1,1,0]  
+
 
         # Store last weather data reading   
         self.weather_data["N"] = self._wind_direction  
@@ -358,11 +387,11 @@ class MyScreenManager(ScreenManager):
         if self._air_temperature < -10:
             self._air_temperature_color = [0,0,1]
         elif self._air_temperature < 0 and self._air_temperature > -10:
-            self._air_temperature_color = [0,0.5,0.5]
+            self._air_temperature_color = [0,1,1]
         elif self._air_temperature > 0 and self._air_temperature < 20:
             self._air_temperature_color = [0,1,0]
         elif self._air_temperature > 20 and self._air_temperature < 35:
-            self._air_temperature_color = [0.5,0.5,0]
+            self._air_temperature_color = [1,1,0]
         elif self._air_temperature > 35:
             self._air_temperature_color = [1,0,0]
 
@@ -428,30 +457,14 @@ class MyScreenManager(ScreenManager):
             self.weather_data_trace24["H"].append(mean(self.weather_data_trace15["H"]))
             self.weather_data_trace24["Rssi"].append(mean(self.weather_data_trace15["Rssi"]))
 
-            # Store first values of the new 15 minutes window in the trace15 deques
-            #for k in self.weather_data_trace15:
-            #    self.weather_data_trace15[k].clear()
-
-            self._crtTime = (
+            self._start_secs = time.mktime((
                 self.weather_data["Header"][5], 
                 self.weather_data["Header"][4], 
                 self.weather_data["Header"][3], 
                 self.weather_data["Header"][2], 
                 self.weather_data["Header"][1], 
                 self.weather_data["Header"][0], 
-                0, 0, 0)
-            self._start_secs = time.mktime(self._crtTime)
-
-            self.weather_data_trace15["Time"].append(self._crtTime)
-            self.weather_data_trace15["N"].append(self.weather_data["N"])
-            self.weather_data_trace15["T"].append(self.weather_data["T"])
-            self.weather_data_trace15["S"].append(self.weather_data["S"])
-            self.weather_data_trace15["P"].append(self.weather_data["P"])
-            self.weather_data_trace15["H"].append(self.weather_data["H"])
-            self.weather_data_trace15["Rssi"].append(self.weather_data["Header"][10])
-
-        # Current time
-        #time_secs = time.mktime(time.localtime(time.time()))
+                0, 0, 0))
 
         return _TimeAvg
  
@@ -776,7 +789,7 @@ class HomeWeatherStationApp(App):
         print("\non_start:")
         self._win_width = int(Config.get('graphics', 'width'))
         self._win_height = int(Config.get('graphics', 'height'))
-        print(self._win_width, self._win_height)
+        #print(self._win_width, self._win_height)
         
 
     def on_pause(self):

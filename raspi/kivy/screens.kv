@@ -180,6 +180,14 @@ MyScreenManager:
                 pos:  self.parent.center_x+dp(300)-self.size[0]/2, self.parent.center_y+dp(230)-self.size[1]/2             
                 color: 0.7,1.0,0.7,0.5
 
+            LabelInfoSmall:
+                font_size: '15sp'
+                text: root.manager._crt_msg_str
+                size: self.texture_size
+                halign: 'left'
+                pos:  self.parent.center_x-dp(300)-self.size[0]/2, self.parent.center_y+dp(230)-self.size[1]/2             
+                color: root.manager._crt_msg_color + [root.manager._crt_msg_vis]
+
     FloatLayout:
         RoundedButton:
             pos_hint: {'x':0.985, 'y':0.35}

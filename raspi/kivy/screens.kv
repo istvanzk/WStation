@@ -245,7 +245,7 @@ MyScreenManager:
 
             LabelInfoSmall:
                 text: '{:4.1f} '.format(root.manager._air_temperature) + '\n[sup]o[/sup][size=15sp]C[/size]'
-                pos: air_temp.pos[0], air_temp.pos[1]+air_temp.height/4
+                pos: air_temp.pos[0], air_temp.pos[1]-self.size[1]/2+air_temp.height/4
                 color: root.manager._air_temperature_color + [1]
 
             LabelInfoSmall:
@@ -282,7 +282,7 @@ MyScreenManager:
 
             LabelInfoSmall:
                 text: '{:4.1f}'.format(root.manager._wind_speed) + '\n[size=15sp]m/s[/size]'
-                pos: wind_speed.pos[0], wind_speed.pos[1]+wind_speed.height/4          
+                pos: wind_speed.pos[0], wind_speed.pos[1]-self.size[1]/2+wind_speed.height/4          
                 color: root.manager._wind_speed_hue,1,1,1
 
         Widget:
@@ -305,7 +305,7 @@ MyScreenManager:
 
             LabelInfoSmall:
                 text: '{:4.1f}'.format(root.manager._wind_direction) + '\n[sup]o[/sup][size=15sp]N[/size]'
-                pos: wind_dir.pos[0], wind_dir.pos[1]      
+                pos: wind_dir.pos[0], wind_dir.pos[1]-self.size[1]/2      
                 color: 1,1,1,1
 
         Widget:
@@ -335,7 +335,7 @@ MyScreenManager:
 
             LabelInfoSmall:
                 text: '{:6.1f}'.format(root.manager._air_pressure) + '\n[size=15sp]mbar[/size]'
-                pos: air_press.pos[0], air_press.pos[1]+air_press.height/4              
+                pos: air_press.pos[0], air_press.pos[1]-self.size[1]/2+air_press.height/4              
                 color: root.manager._air_pressure_color + [1]
 
         Widget:
@@ -365,7 +365,7 @@ MyScreenManager:
 
             LabelInfoSmall:
                 text: '{:4.1f}'.format(root.manager._air_relhumidity) + '\n[size=15sp]%[/size]'
-                pos:  air_relhum.pos[0], air_relhum.pos[1]+air_relhum.height/4               
+                pos:  air_relhum.pos[0], air_relhum.pos[1]-self.size[1]/2+air_relhum.height/4               
                 color: root.manager._air_relhumidity_color + [1]
             
 

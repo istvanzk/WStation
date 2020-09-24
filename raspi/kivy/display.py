@@ -710,14 +710,14 @@ class HomeWeatherStationApp(App):
         super(HomeWeatherStationApp, self).__init__(**kwargs)
         #Window.bind(on_close=self.on_stop)
         #Window.size = (dp(800), dp(480))
-        #Window.resizable = '0'
+        Window.resizable = '0'
         #Window.borderless = True
         #Window.fullscreen = True
         Config.set('kivy', 'exit_on_escape', 1)
         Config.set('graphics', 'borderless', 1)
-        #Config.set('graphics', 'height', dp(480))
-        #Config.set('graphics', 'width', dp(800))
-        Config.set('graphics', 'resizable', 0)
+        Config.set('graphics', 'height', '480')
+        Config.set('graphics', 'width', '800')
+        Config.set('graphics', 'resizable', False)
 
     def build(self):
         self.title = 'Home Weather Station V0'
@@ -747,12 +747,16 @@ class HomeWeatherStationApp(App):
             token = (section, key)
             if token == ('general', 'small_mode'):
                 self.manager.smallMode = value
-                if value is '1':
-                    #Window.resizable = '1'
+                if value is '0':
+                    #Window.fullscreen = True
+                    Window.borderless = True
+                    Window.resizable = False
                     Window.size = (dp(400), dp(240))
                 else:
-                    #Window.resizable = '0'
-                    Window.size = (dp(800), dp(480))
+                    Window.fullscreen = False
+                    Window.borderless = False
+                    Window.resizable = False
+                    Window.size = (dp(200), dp(120))
             elif token == ('calibration', 'north_index'):
                 self.manager.northIndex = int(value)
                 self.manager.north_check()

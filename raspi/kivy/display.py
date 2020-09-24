@@ -422,14 +422,7 @@ class MyScreenManager(ScreenManager):
         self.weather_data_trace15["H"].append(self.weather_data["H"])
 
         if len(self.weather_data_trace15["Time"]) < 2:
-            self._start_secs = time.mktime((
-                self.weather_data["Header"][5], 
-                self.weather_data["Header"][4], 
-                self.weather_data["Header"][3], 
-                self.weather_data["Header"][2], 
-                self.weather_data["Header"][1], 
-                self.weather_data["Header"][0], 
-                0, 0, 0))
+            self._start_secs = self._crtTime
             return None
 
         # At the end of each ~15 minutes time window:
@@ -458,14 +451,7 @@ class MyScreenManager(ScreenManager):
             self.weather_data_trace24["H"].append(mean(self.weather_data_trace15["H"]))
             self.weather_data_trace24["Rssi"].append(mean(self.weather_data_trace15["Rssi"]))
 
-            self._start_secs = time.mktime((
-                self.weather_data["Header"][5], 
-                self.weather_data["Header"][4], 
-                self.weather_data["Header"][3], 
-                self.weather_data["Header"][2], 
-                self.weather_data["Header"][1], 
-                self.weather_data["Header"][0], 
-                0, 0, 0))
+            self._start_secs = self._crtTime
 
         return _TimeAvg
  
@@ -473,10 +459,6 @@ class MyScreenManager(ScreenManager):
         '''Check the North direction index vs. number of wind direction steps'''
         if self.northIndex > self.windDirSteps:
             self.northIndex = self.windDirSteps
-
-    #def display_settings(self, settings):
-    #    self.back_screen_name = self.current
-    #    self.current = 'lock'
 
 
 class TracesScreen(Screen):

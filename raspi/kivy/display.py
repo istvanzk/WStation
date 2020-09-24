@@ -9,9 +9,8 @@ import json
 
 # Kivy
 from kivy.app import App
-from kivy.config import Config
-from kivy.metrics import dp
 from kivy.core.window import Window
+from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.base import runTouchApp
 from kivy.lang import Builder
@@ -26,6 +25,13 @@ from kivy.uix.settings import SettingsWithSidebar, SettingsWithSpinner
 from kivy.gesture import Gesture, GestureDatabase
 from glock import check
 
+# Set window (before it's created)
+from kivy.config import Config
+Config.set('kivy', 'exit_on_escape', 1)
+Config.set('graphics', 'borderless', 1)
+Config.set('graphics', 'height', '480')
+Config.set('graphics', 'width', '800')
+Config.set('graphics', 'resizable', False)
 
 # Message queue parameters
 RXQUEUE_NAME  = "/rf22b_server_tx"
@@ -33,7 +39,7 @@ MAX_RXMSG_SIZE = 255
 
 wssettings = json.dumps([
     {'type': 'title',
-     'title': 'Home Weather Station'},
+     'title': 'General'},
     {'type': 'bool',
      'title': 'Small mode',
      'desc': 'Reduce app window size',
@@ -44,6 +50,8 @@ wssettings = json.dumps([
      'desc': 'The message queue name for receiving weather data',
      'section': 'general',
      'key': 'rxqueue_name'},    
+    {'type': 'title',
+     'title': 'Calibration'},
     {'type': 'numeric',
      'title': 'Wind direction steps',
      'desc': 'Number of steps for wind direction angle (integer)',
@@ -54,6 +62,8 @@ wssettings = json.dumps([
      'desc': 'Index 1..<Wind direction steps> for the North direction (integer)',
      'section': 'calibration',
      'key': 'north_index'},
+    {'type': 'title',
+     'title': 'Options'},
     {'type': 'options',
      'title': 'An options setting',
      'desc': 'Options description text',
@@ -419,8 +429,8 @@ class MyScreenManager(ScreenManager):
             self.weather_data_trace24["Rssi"].append(mean(self.weather_data_trace15["Rssi"]))
 
             # Store first values of the new 15 minutes window in the trace15 deques
-            for k in self.weather_data_trace15:
-                self.weather_data_trace15[k].clear()
+            #for k in self.weather_data_trace15:
+            #    self.weather_data_trace15[k].clear()
 
             self._crtTime = (
                 self.weather_data["Header"][5], 
@@ -709,15 +719,6 @@ class HomeWeatherStationApp(App):
     def __init__(self, **kwargs):
         super(HomeWeatherStationApp, self).__init__(**kwargs)
         #Window.bind(on_close=self.on_stop)
-        #Window.size = (dp(800), dp(480))
-        Window.resizable = '0'
-        #Window.borderless = True
-        #Window.fullscreen = True
-        Config.set('kivy', 'exit_on_escape', 1)
-        Config.set('graphics', 'borderless', 1)
-        Config.set('graphics', 'height', '480')
-        Config.set('graphics', 'width', '800')
-        Config.set('graphics', 'resizable', False)
 
     def build(self):
         self.title = 'Home Weather Station V0'
@@ -728,12 +729,19 @@ class HomeWeatherStationApp(App):
         self.manager = root_widget
         root_widget.app = self
 
+        self.config.set('general', 'small_mode', False)
+        self.config.set('general', 'rxqueue_name', RXQUEUE_NAME)
+        self.config.set('example','optionsexample', 'option1')
+        self.config.write()
+
         return root_widget
 
     def build_config(self, config):
         config.setdefaults('general', {'small_mode': False, 'rxqueue_name': RXQUEUE_NAME})
         config.setdefaults('calibration', {'north_index': 16, 'wind_direction_steps': 16})
         config.setdefaults('example',{'optionsexample': 'option2'})
+
+        #print(f"build_config: {config.get('general', 'small_mode')}")
 
     def build_settings(self, settings):
         settings.add_json_panel('WS',
@@ -747,16 +755,16 @@ class HomeWeatherStationApp(App):
             token = (section, key)
             if token == ('general', 'small_mode'):
                 self.manager.smallMode = value
-                if value is '0':
+                if int(value)==0:
                     #Window.fullscreen = True
                     Window.borderless = True
                     Window.resizable = False
-                    Window.size = (dp(400), dp(240))
+                    Window.size = (self._win_width, self._win_height)
                 else:
-                    Window.fullscreen = False
+                    #Window.fullscreen = False
                     Window.borderless = False
-                    Window.resizable = False
-                    Window.size = (dp(200), dp(120))
+                    Window.resizable = True
+                    Window.size = (self._win_width/2, self._win_height/2)
             elif token == ('calibration', 'north_index'):
                 self.manager.northIndex = int(value)
                 self.manager.north_check()
@@ -765,8 +773,11 @@ class HomeWeatherStationApp(App):
                 self.manager.north_check()
 
     def on_start(self):
-        #print("\non_start:")
-        return True
+        print("\non_start:")
+        self._win_width = int(Config.get('graphics', 'width'))
+        self._win_height = int(Config.get('graphics', 'height'))
+        print(self._win_width, self._win_height)
+        
 
     def on_pause(self):
         return True
@@ -776,7 +787,6 @@ class HomeWeatherStationApp(App):
 
     def on_stop(self):
         #print("\non_stop:")
-        return True
+        pass
     
-
 HomeWeatherStationApp().run()

@@ -371,8 +371,7 @@ MyScreenManager:
 
         Widget:
             id: x_label
-            size_hint: 1.0, 0.1
-            #height: dp(20)
+            size_hint: 1.0, 0.15
             LabelInfoSmall:
                 font_size: '10sp'
                 text: traces._start_time_str
@@ -389,7 +388,7 @@ MyScreenManager:
                 color: 0.5,0.5,1,1
             ProgressBar:
                 id: pb_time
-                size: self.parent.width-traces._x_offset-traces._x_padding, 3.0
+                size: self.parent.width-traces._x_offset-traces._x_padding, dp(10)
                 color: 0.5,0.5,1,1
                 pos: self.parent.pos[0]+traces._x_offset, self.parent.pos[1]
 

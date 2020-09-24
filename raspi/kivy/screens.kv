@@ -153,7 +153,7 @@ MyScreenManager:
                 pos: self.parent.center_x-dp(140)-self.size[0]/2,self.parent.center_y+dp(140)-self.size[1]/2
 
             LabelInfo:
-                text: '{:4.1f} '.format(root.manager._air_temperature) + '[size=20sp][sup]o[/sup]C[/size]'
+                text: '{:4.1f} '.format(root.manager._air_temperature) + '[sup]o[/sup][size=20sp]C[/size]'
                 pos: self.parent.center_x-dp(300)-self.size[0]/2,self.parent.center_y+dp(200)-self.size[1]/2           
                 color: root.manager._wind_speed_color + [1]
 
@@ -379,7 +379,7 @@ MyScreenManager:
 
         Widget:
             id: x_label
-            size_hint: 1.0, 0.15
+            size_hint: 1.0, 0.2
             LabelInfoSmall:
                 font_size: '10sp'
                 text: traces._start_time_str

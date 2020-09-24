@@ -153,22 +153,22 @@ MyScreenManager:
                 pos: self.parent.center_x-dp(140)-self.size[0]/2,self.parent.center_y+dp(140)-self.size[1]/2
 
             LabelInfo:
-                text: '{:4.1f} '.format(root.manager._air_temperature) + '[size=40][sup]o[/sup]C[/size]'
+                text: '{:4.1f} '.format(root.manager._air_temperature) + '[size=20sp][sup]o[/sup]C[/size]'
                 pos: self.parent.center_x-dp(300)-self.size[0]/2,self.parent.center_y+dp(200)-self.size[1]/2           
                 color: root.manager._wind_speed_color + [1]
 
             LabelInfo:
-                text: '{:6.1f}'.format(root.manager._air_pressure) + '[size=40]mbar[/size]'
+                text: '{:6.1f}'.format(root.manager._air_pressure) + '[size=20sp]mbar[/size]'
                 pos: self.parent.center_x-dp(300)-self.size[0]/2,self.parent.center_y-dp(200)-self.size[1]/2           
                 color: root.manager._air_pressure_color + [1]
 
             LabelInfo:
-                text: '{:4.1f}'.format(root.manager._wind_speed) + '[size=40]m/s[/size]'
+                text: '{:4.1f}'.format(root.manager._wind_speed) + '[size=20sp]m/s[/size]'
                 pos: self.parent.center_x+dp(300)-self.size[0]/2,self.parent.center_y+dp(200)-self.size[1]/2          
                 color: root.manager._wind_speed_color + [1]
 
             LabelInfo:
-                text: '{:4.1f}'.format(root.manager._air_relhumidity) + '[size=40]%[/size]'
+                text: '{:4.1f}'.format(root.manager._air_relhumidity) + '[size=20sp]%[/size]'
                 pos: self.parent.center_x+dp(300)-self.size[0]/2,self.parent.center_y-dp(200)-self.size[1]/2           
                 color: root.manager._air_relhumidity_color + [1]
 
@@ -244,7 +244,7 @@ MyScreenManager:
 
 
             LabelInfoSmall:
-                text: '{:4.1f} '.format(root.manager._air_temperature) + '\n[sup]o[/sup][size=30]C[/size]'
+                text: '{:4.1f} '.format(root.manager._air_temperature) + '\n[sup]o[/sup][size=10sp]C[/size]'
                 pos: air_temp.pos[0], air_temp.pos[1]+air_temp.height/3
                 color: root.manager._air_temperature_color + [1]
 
@@ -281,7 +281,7 @@ MyScreenManager:
                     pointsize: 5
 
             LabelInfoSmall:
-                text: '{:4.1f}'.format(root.manager._wind_speed) + '\n[size=30]m/s[/size]'
+                text: '{:4.1f}'.format(root.manager._wind_speed) + '\n[size=10sp]m/s[/size]'
                 pos: wind_speed.pos[0], wind_speed.pos[1]+wind_speed.height/3          
                 color: root.manager._wind_speed_hue,1,1,1
 
@@ -304,7 +304,7 @@ MyScreenManager:
                     points: self.pos[0]+traces._x_offset, self.pos[1], self.size[0], self.pos[1]
 
             LabelInfoSmall:
-                text: '{:4.1f}'.format(root.manager._wind_direction) + '\n[sup]o[/sup][size=30]N[/size]'
+                text: '{:4.1f}'.format(root.manager._wind_direction) + '\n[sup]o[/sup][size=10sp]N[/size]'
                 pos: wind_dir.pos[0], wind_dir.pos[1]      
                 color: 1,1,1,1
 
@@ -364,7 +364,7 @@ MyScreenManager:
                     pointsize: 5
 
             LabelInfoSmall:
-                text: '{:4.1f}'.format(root.manager._air_relhumidity) + '\n[size=30]%[/size]'
+                text: '{:4.1f}'.format(root.manager._air_relhumidity) + '\n[size=10sp]%[/size]'
                 pos:  air_relhum.pos[0], air_relhum.pos[1]+air_relhum.height/3               
                 color: root.manager._air_relhumidity_color + [1]
             

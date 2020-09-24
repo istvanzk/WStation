@@ -6,6 +6,7 @@ from math import log10, cos
 from statistics import mean, median, mode
 import posix_ipc
 import json
+from colorsys import hsv_to_rgb
 
 # Kivy
 from kivy.app import App
@@ -205,7 +206,7 @@ class MyScreenManager(ScreenManager):
     # Displayed info and their color
     #(access with root.manager.* from the kv file)
     _wind_direction = NumericProperty(22.5)
-    _wind_speed = NumericProperty(0.11)
+    _wind_speed = NumericProperty(35)
     _wind_speed_trace24 = ListProperty([])
     # HSV: Hue = degrees/360
     #     Red: 0 and 60 degrees.
@@ -395,8 +396,8 @@ class MyScreenManager(ScreenManager):
         elif self._air_temperature > 35:
             self._air_temperature_color = [1,0,0]
 
-        self._wind_speed_hue = (160-200*log10(1+self._wind_speed/5))/360
-        #self._wind_speed_color = Color(self._wind_speed_hue, 1, 1, mode='hsv'))
+        self._wind_speed_hue = (160-210*log10(1+self._wind_speed/5))/360
+        self._wind_speed_color = hsv_to_rgb(self._wind_speed_hue, 1, 1)
 
     # Process and store weather data
     def procstore_weather_data(self):

@@ -422,7 +422,7 @@ class MyScreenManager(ScreenManager):
         self.weather_data_trace15["H"].append(self.weather_data["H"])
 
         if len(self.weather_data_trace15["Time"]) < 2:
-            self._start_secs = self._crtTime
+            self._start_secs = time.mktime(self._crtTime)
             return None
 
         # At the end of each ~15 minutes time window:
@@ -451,7 +451,7 @@ class MyScreenManager(ScreenManager):
             self.weather_data_trace24["H"].append(mean(self.weather_data_trace15["H"]))
             self.weather_data_trace24["Rssi"].append(mean(self.weather_data_trace15["Rssi"]))
 
-            self._start_secs = self._crtTime
+            self._start_secs = time.mktime(self._crtTime)
 
         return _TimeAvg
  

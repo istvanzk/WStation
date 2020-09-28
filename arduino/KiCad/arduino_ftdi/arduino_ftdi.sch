@@ -6,8 +6,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "RS422 5V to UART 3V3 interface"
-Date "2020-09-16"
-Rev "2.1"
+Date "2020-09-28"
+Rev "2.2"
 Comp ""
 Comment1 "Interface to provide UART from RS442 on Ethernet cable"
 Comment2 ""
@@ -7150,8 +7150,6 @@ Wire Wire Line
 Connection ~ 2125 5600
 Text Label 2700 5800 0    51   ~ 0
 VCC-Arduino(Red)
-Text Label 2700 5900 0    51   ~ 0
-GND-Arduino(Black)
 Wire Wire Line
 	1925 5450 2325 5450
 Wire Wire Line
@@ -14038,7 +14036,7 @@ VCCB\n
 Text Label 2700 5800 0    51   ~ 0
 VCC-Arduino(Red)
 Text Label 2700 5900 0    51   ~ 0
-GND-Arduino(Black)
+GND-Arduino(Blue)
 Text Label 2700 4975 0    51   ~ 0
 DTR-Arduino(Transparent)
 Text Label 2700 5075 0    51   ~ 0

@@ -239,7 +239,7 @@ class MyScreenManager(ScreenManager):
 
     def __init__(self, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
-        _update_mainscreen_sch = Clock.schedule_interval(self.update_mainscreen_info, 5.0)
+        _update_mainscreen_sch = Clock.schedule_interval(self.update_mainscreen_info, 15.0)
 
         # Create the receive message queue
         # _msg_queue.mqRX is set to None when no MessageQueue is available (e.g. MacOS)!
@@ -253,7 +253,7 @@ class MyScreenManager(ScreenManager):
         # Get real data from the remote weather station (via RF22B and local MessageQueue)
         if self._msg_queue.mqRX is not None:
 
-            _weather_data = self._msg_queue.read_weather_data(0.5)
+            _weather_data = self._msg_queue.read_weather_data(1.0)
             if _weather_data is not None:
 
                 # Data received: update info

@@ -307,8 +307,9 @@ int main (int argc, const char* argv[] )
     // We're ready to listen for incoming message
     rf22.setModeRx();
 
-#ifdef STDOUT_MSG
     tm_now    = time(NULL);
+
+#ifdef STDOUT_MSG
     char_time = ctime(&tm_now);
     char_time[24] = '\0' ;
     fprintf(stdout, "%s - RF22B: Init OK. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw\n", char_time, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
@@ -324,7 +325,7 @@ int main (int argc, const char* argv[] )
     rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon;
     rf22_message.tm_year  = (uint16_t) timeinfo->tm_year;
 
-    rf22_message.len = (uint8_t) snprintf((char*) rf22_message.buf, RH_RF22_MAX_MESSAGE_LEN, "RF22B: Init OK. CS=GPIO%d, IRQ=GPIO%d. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw", char_time, RF_CS_PIN, RF_IRQ_PIN, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
+    rf22_message.len = (uint8_t) snprintf((char*) rf22_message.buf, RH_RF22_MAX_MESSAGE_LEN, "RF22B: Init OK. CS=GPIO%d, IRQ=GPIO%d. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw", RF_CS_PIN, RF_IRQ_PIN, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
 
     memset(mqTX_buffer, 0, MAX_TXMSG_SIZE);
     memcpy(mqTX_buffer, (const char*)&rf22_message, sizeof(struct rf22msg_t));

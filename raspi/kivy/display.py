@@ -253,7 +253,7 @@ class MyScreenManager(ScreenManager):
         # Get real data from the remote weather station (via RF22B and local MessageQueue)
         if self._msg_queue.mqRX is not None:
 
-            _weather_data = self._msg_queue.read_weather_data(1.0)
+            _weather_data = self._msg_queue.read_weather_data(0.5)
             if _weather_data is not None:
 
                 # Data received: update info
@@ -302,14 +302,14 @@ class MyScreenManager(ScreenManager):
                 # Data not received: keep last reading
                 # Header info
                 struc_t = time.localtime(time.time())
-                self.weather_data["Header"] = (
+                self.weather_data["Header"] = [
                     struc_t.tm_sec,
                     struc_t.tm_min,
                     struc_t.tm_hour,
                     struc_t.tm_mday,
                     struc_t.tm_mon,
                     struc_t.tm_year,
-                    0,0,0,0, self._rssi_dBm, 20)
+                    0,0,0,0, self._rssi_dBm, 20]
                 self.weather_data["IniMsg"] = 'No Data'
 
                 # Info
@@ -346,14 +346,14 @@ class MyScreenManager(ScreenManager):
 
             # Header info
             struc_t = time.localtime(time.time())
-            self.weather_data["Header"] = (
+            self.weather_data["Header"] = [
                 struc_t.tm_sec,
                 struc_t.tm_min,
                 struc_t.tm_hour,
                 struc_t.tm_mday,
                 struc_t.tm_mon,
                 struc_t.tm_year,
-                0,0,0,0,self._rssi_dBm, 20)
+                0,0,0,0,self._rssi_dBm, 20]
             self.weather_data["IniMsg"] = None
 
             # Info

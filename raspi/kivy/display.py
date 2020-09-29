@@ -526,7 +526,7 @@ class TracesScreen(Screen):
     # The x axis offset (common for all traces)
     _x_offset = dp(100) 
 
-    # The plot step
+    # The default plot step
     _x_step = dp(100)
 
     def update_trace_plots(self, weather_data_trace):
@@ -535,7 +535,7 @@ class TracesScreen(Screen):
         # The x axis step (common for all traces)     
         self._x_step   = (self.widget_air_temp.width - self._x_offset - self._x_padding)/weather_data_trace["Time"].maxlen
 
-        print(weather_data_trace["Time"].maxlen)
+        #print(weather_data_trace["Time"].maxlen)
 
         # The time labels
         self._start_time_str = time.asctime(weather_data_trace["Time"][0])    

@@ -83,9 +83,9 @@ unsigned int TXmsg_prio = 0;
 
 
 // Time and time string
-//time_t tm_now       = time(NULL);
-//char *char_time     = ctime(&tm_now);
-//struct tm *timeinfo = localtime(&tm_now);
+time_t tm_now;
+char *char_time;
+struct tm *timeinfo;
 
 struct rf22msg_t {
     //struct tm timeinfo; //= localtime(&tm_now);
@@ -235,12 +235,9 @@ int main (int argc, const char* argv[] )
     bcm2835_gpio_set_pud(RF_IRQ_PIN, BCM2835_GPIO_PUD_UP);
 
 #ifdef TXQUEUE_NAME
-    time_t tm_now       = time(NULL);
-    struct tm *timeinfo = localtime(&tm_now);
-
     // Send msg on the queue
-    //tm_now                = time(NULL);
-    //timeinfo              = localtime(&tm_now);
+    tm_now                = time(NULL);
+    timeinfo              = localtime(&tm_now);
     rf22_message.tm_sec   = (uint16_t) timeinfo->tm_sec;
     rf22_message.tm_min   = (uint16_t) timeinfo->tm_min;
     rf22_message.tm_hour  = (uint16_t) timeinfo->tm_hour;
@@ -315,7 +312,7 @@ int main (int argc, const char* argv[] )
     tm_now    = time(NULL);
 
 #ifdef STDOUT_MSG
-    char *char_time     = ctime(&tm_now);
+    char_time = ctime(&tm_now);
     char_time[24] = '\0' ;
     fprintf(stdout, "%s - RF22B: Init OK. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw\n", char_time, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
 #endif

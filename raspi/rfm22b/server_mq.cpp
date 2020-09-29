@@ -242,7 +242,7 @@ int main (int argc, const char* argv[] )
     rf22_message.tm_min   = (uint16_t) timeinfo->tm_min;
     rf22_message.tm_hour  = (uint16_t) timeinfo->tm_hour;
     rf22_message.tm_mday  = (uint16_t) timeinfo->tm_mday;
-    rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon;
+    rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon + 1;
     rf22_message.tm_year  = (uint16_t) timeinfo->tm_year;
 
     rf22_message.len   = (uint8_t) snprintf((char*) rf22_message.buf, RH_RF22_MAX_MESSAGE_LEN, "BCM2835: Init OK. IRQ=GPIO%d", RF_IRQ_PIN);
@@ -252,10 +252,10 @@ int main (int argc, const char* argv[] )
     if ( mq_send(mqTX, mqTX_buffer, MAX_TXMSG_SIZE, TXmsg_prio) ) {
         perror("TX MQ init send#1 failed");
     }
-
+#ifdef STDOUT_MSG
     fprintf(stderr, "MQ: First TX message sent with header (%d,%d,%d,%d,%d,%d,%d)\n", rf22_message.tm_sec, rf22_message.tm_min, rf22_message.tm_hour, rf22_message.tm_mday, rf22_message.tm_mon, rf22_message.tm_year, rf22_message.len);
 #endif
-
+#endif
 
 
     // Init the RF22B module
@@ -324,7 +324,7 @@ int main (int argc, const char* argv[] )
     rf22_message.tm_min   = (uint16_t) timeinfo->tm_min;
     rf22_message.tm_hour  = (uint16_t) timeinfo->tm_hour;
     rf22_message.tm_mday  = (uint16_t) timeinfo->tm_mday;
-    rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon;
+    rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon + 1;
     rf22_message.tm_year  = (uint16_t) timeinfo->tm_year;
 
     rf22_message.len = (uint8_t) snprintf((char*) rf22_message.buf, RH_RF22_MAX_MESSAGE_LEN, "RF22B: Init OK. CS=GPIO%d, IRQ=GPIO%d. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw", RF_CS_PIN, RF_IRQ_PIN, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
@@ -382,7 +382,7 @@ int main (int argc, const char* argv[] )
                 rf22_message.tm_min   = (uint16_t) timeinfo->tm_min;
                 rf22_message.tm_hour  = (uint16_t) timeinfo->tm_hour;
                 rf22_message.tm_mday  = (uint16_t) timeinfo->tm_mday;
-                rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon;
+                rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon + 1;
                 rf22_message.tm_year  = (uint16_t) timeinfo->tm_year;
                 rf22_message.from     = from;
                 rf22_message.to       = to;

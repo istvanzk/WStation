@@ -436,6 +436,7 @@ class MyScreenManager(ScreenManager):
     def procstore_weather_data(self):
 
         # Update current time info
+        struc_t = time.localtime(time.time())
         _crtTime = (
             self.weather_data["Header"][5], 
             self.weather_data["Header"][4], 
@@ -443,7 +444,9 @@ class MyScreenManager(ScreenManager):
             self.weather_data["Header"][2], 
             self.weather_data["Header"][1], 
             self.weather_data["Header"][0], 
-            0, 0, 0)
+            struc_t.tm_wday, 
+            struc_t.tm_yday, 
+            struc_t.tm_isdst)
         self._crt_secs = time.mktime(_crtTime)
 
         # Update trace15 deques
@@ -477,7 +480,9 @@ class MyScreenManager(ScreenManager):
                 struc_t.tm_hour,
                 struc_t.tm_min,
                 struc_t.tm_sec,
-                0,0,0)
+                struc_t.tm_wday, 
+                struc_t.tm_yday, 
+                struc_t.tm_isdst)
             self.weather_data_trace24["Time"].append(_TimeAvg)
             self.weather_data_trace24["N"].append(mode(self.weather_data_trace15["N"]))
             self.weather_data_trace24["T"].append(mean(self.weather_data_trace15["T"]))

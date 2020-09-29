@@ -22,7 +22,7 @@
 #include <string.h>
 #include <errno.h>
 #include <mqueue.h>
-#include <ctime.h>
+#include <ctime>
 
 #include <RH_RF22.h>
 

@@ -114,10 +114,18 @@ class ClientMq(object):
         if self.mqRX is None:
             return None
 
-        # Receive from the MessageQueue     
-        try:
-            msg, pri = self.mqRX.receive(timeout=timeout_sec)
-        except posix_ipc.BusyError:
+        # Receive from the MessageQueue
+        # Read all available messages and keep the last one only
+        bendRX = False
+        bmsgRX = False
+        while not bendRX:
+            try:
+                msg, pri = self.mqRX.receive(timeout=timeout_sec)
+                bmsgRX = True
+            except posix_ipc.BusyError:
+                bendRX = True
+
+        if not bmsgRX:
             return None
 
         # Unpack header info    

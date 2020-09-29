@@ -252,6 +252,8 @@ int main (int argc, const char* argv[] )
     if ( mq_send(mqTX, mqTX_buffer, MAX_TXMSG_SIZE, TXmsg_prio) ) {
         perror("TX MQ init send#1 failed");
     }
+
+    fprintf(stderr, "\nTX MQ: First message sent with header (%d,%d,%d,%d,%d,%d,%d)", rf22_message.tm_sec, rf22_message.tm_min, rf22_message.tm_hour, rf22_message.tm_mday, rf22_message.tm_mon, rf22_message.tm_year, rf22_message.len);
 #endif
 
 

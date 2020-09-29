@@ -35,8 +35,16 @@ Config.set('graphics', 'width', '800')
 Config.set('graphics', 'resizable', False)
 
 # Message queue parameters
+# Message queue read interval (seconds)
+RXQUEUE_TIME  = 15 
+# Message queue name
 RXQUEUE_NAME  = "/rf22b_server_tx"
+# Max message length (bytes)
 MAX_RXMSG_SIZE = 255
+
+# Wind direction steps and North index/step
+DIR_STEPS      = 16
+NORTHDIR_INDX  = 16
 
 wssettings = json.dumps([
     {'type': 'title',
@@ -46,11 +54,18 @@ wssettings = json.dumps([
      'desc': 'Reduce app window size',
      'section': 'general',
      'key': 'small_mode'},
+    {'type': 'title',
+     'title': 'READ ONLY at runtime!'},
      {'type': 'string',
      'title': 'RX message queue',
      'desc': 'The message queue name for receiving weather data',
      'section': 'general',
      'key': 'rxqueue_name'},    
+    {'type': 'numeric',
+     'title': 'RX message queue read time interval',
+     'desc': 'The interval for reading from the meesage queue (seconds)',
+     'section': 'general',
+     'key': 'rxqueue_timeintv'},
     {'type': 'title',
      'title': 'Calibration'},
     {'type': 'numeric',
@@ -179,34 +194,22 @@ class MyScreenManager(ScreenManager):
 
     screen_traces = ObjectProperty(None)
 
+    # Settings (configurable, see app.on_config_change(...))
+    smallMode    = False
+    windDirSteps = DIR_STEPS
+    northIndex   = NORTHDIR_INDX
+    # Note: these parameters cannot be changed during runtime!
+    rxqueueName  = RXQUEUE_NAME
+    rxtimeIntv   = RXQUEUE_TIME
+
     # The dictionary storing the most recent weather data read from the message queue 
     weather_data = {'Header': tuple(), 'IniMsg': None, 'N': 0,'S':0, 'T':0, 'P':0,'H':0}
  
-    # Dictionary of deques with weather data for the past ~15 minutes in steps corresponding to the received rate (~15*12 values)
+    # Dictionary of deques with weather data for the past ~15 minutes in steps corresponding to the received rate (15*60/rxtimeIntv values)
     weather_data_trace15 = {}
-    weather_data_trace15["Time"] = deque([],180)
-    weather_data_trace15["Rssi"] = deque([],180)
-    weather_data_trace15["N"] = deque([],180)
-    weather_data_trace15["T"] = deque([],180)
-    weather_data_trace15["S"] = deque([],180)
-    weather_data_trace15["P"] = deque([],180)
-    weather_data_trace15["H"] = deque([],180)
 
     # Dictionary of deques with weather data for the past 24 hours in 15 minutes steps (24*4 values)
     weather_data_trace24 = {}
-    weather_data_trace24["Time"] = deque([],96)
-    weather_data_trace24["Rssi"] = deque([],96)
-    weather_data_trace24["N"] = deque([],96)
-    weather_data_trace24["T"] = deque([],96)
-    weather_data_trace24["S"] = deque([],96)
-    weather_data_trace24["P"] = deque([],96)
-    weather_data_trace24["H"] = deque([],96)
-
-    # Settings (configurable, see app.on_config_change(...))
-    smallMode    = False
-    windDirSteps = 16 #1..16
-    northIndex   = 16
-    rxqueueName  = RXQUEUE_NAME
 
     # The message queue
     _msg_queue = None
@@ -214,7 +217,7 @@ class MyScreenManager(ScreenManager):
     # Displayed info and their color
     #(access with root.manager.* from the kv file)
     _wind_direction = NumericProperty(22.5)
-    _wind_speed = NumericProperty(35)
+    _wind_speed = NumericProperty(0)
     _wind_speed_trace24 = ListProperty([])
     # HSV: Hue = degrees/360
     #     Red: 0 and 60 degrees.
@@ -247,7 +250,29 @@ class MyScreenManager(ScreenManager):
 
     def __init__(self, **kwargs):
         super(MyScreenManager, self).__init__(**kwargs)
-        _update_mainscreen_sch = Clock.schedule_interval(self.update_mainscreen_info, 15.0)
+
+    def init(self):
+
+        # The clock schedule    
+        _update_mainscreen_sch = Clock.schedule_interval(self.update_mainscreen_info, self.rxtimeIntv)
+
+        # Dictionary of deques with weather data for the past ~15 minutes in steps corresponding to the received rate (15*60/rxtimeIntv values)
+        self.weather_data_trace15["Time"] = deque([],int(900/self.rxtimeIntv))
+        self.weather_data_trace15["Rssi"] = deque([],int(900/self.rxtimeIntv))
+        self.weather_data_trace15["N"]    = deque([],int(900/self.rxtimeIntv))
+        self.weather_data_trace15["T"]    = deque([],int(900/self.rxtimeIntv))
+        self.weather_data_trace15["S"]    = deque([],int(900/self.rxtimeIntv))
+        self.weather_data_trace15["P"]    = deque([],int(900/self.rxtimeIntv))
+        self.weather_data_trace15["H"]    = deque([],int(900/self.rxtimeIntv))
+
+        # Dictionary of deques with weather data for the past 24 hours in 15 minutes steps (24*4 values)
+        self.weather_data_trace24["Time"] = deque([],96)
+        self.weather_data_trace24["Rssi"] = deque([],96)
+        self.weather_data_trace24["N"] = deque([],96)
+        self.weather_data_trace24["T"] = deque([],96)
+        self.weather_data_trace24["S"] = deque([],96)
+        self.weather_data_trace24["P"] = deque([],96)
+        self.weather_data_trace24["H"] = deque([],96)
 
         # Create the receive message queue
         # _msg_queue.mqRX is set to None when no MessageQueue is available (e.g. MacOS)!
@@ -344,7 +369,7 @@ class MyScreenManager(ScreenManager):
                 self._air_relhumidity -= random()
 
             if random() > 0.5:
-                self._wind_speed = 25*random()
+                self._wind_speed = 35*random()
 
             if random() > 0.5:
                 self._wind_direction = (360/self.windDirSteps) * randint(1, self.windDirSteps)
@@ -404,14 +429,14 @@ class MyScreenManager(ScreenManager):
         elif self._air_temperature > 35:
             self._air_temperature_color = [1,0,0]
 
-        self._wind_speed_hue = (160-210*log10(1+self._wind_speed/5))/360
+        self._wind_speed_hue = (160-170*log10(1+self._wind_speed/5))/360
         self._wind_speed_color = hsv_to_rgb(self._wind_speed_hue, 1, 1)
 
     # Process and store weather data
     def procstore_weather_data(self):
 
-        # Update trace15 deques
-        self._crtTime = (
+        # Update current time info
+        _crtTime = (
             self.weather_data["Header"][5], 
             self.weather_data["Header"][4], 
             self.weather_data["Header"][3], 
@@ -419,9 +444,10 @@ class MyScreenManager(ScreenManager):
             self.weather_data["Header"][1], 
             self.weather_data["Header"][0], 
             0, 0, 0)
-        self._crt_secs = time.mktime(self._crtTime)
+        self._crt_secs = time.mktime(_crtTime)
 
-        self.weather_data_trace15["Time"].append(self._crtTime)
+        # Update trace15 deques
+        self.weather_data_trace15["Time"].append(_crtTime)
         self.weather_data_trace15["Rssi"].append(self.weather_data["Header"][10])
         self.weather_data_trace15["N"].append(self.weather_data["N"])
         self.weather_data_trace15["T"].append(self.weather_data["T"])
@@ -430,7 +456,7 @@ class MyScreenManager(ScreenManager):
         self.weather_data_trace15["H"].append(self.weather_data["H"])
 
         if len(self.weather_data_trace15["Time"]) < 2:
-            self._start_secs = time.mktime(self._crtTime)
+            self._start_secs = time.mktime(_crtTime)
             return None
 
         # At the end of each ~15 minutes time window:
@@ -444,7 +470,8 @@ class MyScreenManager(ScreenManager):
             # The wind direction 'average' is the most frequent direction
             # The time stamp 'average' is the mid-time
             struc_t = time.localtime(self._start_secs+450)
-            _TimeAvg = (struc_t.tm_year,
+            _TimeAvg = (
+                struc_t.tm_year,
                 struc_t.tm_mon,
                 struc_t.tm_mday,
                 struc_t.tm_hour,
@@ -459,7 +486,8 @@ class MyScreenManager(ScreenManager):
             self.weather_data_trace24["H"].append(mean(self.weather_data_trace15["H"]))
             self.weather_data_trace24["Rssi"].append(mean(self.weather_data_trace15["Rssi"]))
 
-            self._start_secs = time.mktime(self._crtTime)
+            # Update start time info
+            self._start_secs = time.mktime(_crtTime)
 
         return _TimeAvg
  
@@ -498,11 +526,16 @@ class TracesScreen(Screen):
     # The x axis offset (common for all traces)
     _x_offset = dp(100) 
 
+    # The plot step
+    _x_step = dp(100)
+
     def update_trace_plots(self, weather_data_trace):
         '''Update the plots for all traces'''
 
         # The x axis step (common for all traces)     
-        self._x_step   = (self.widget_air_temp.width - self._x_offset - dp(20))/weather_data_trace["Time"].maxlen
+        self._x_step   = (self.widget_air_temp.width - self._x_offset - self._x_padding)/weather_data_trace["Time"].maxlen
+
+        print(weather_data_trace["Time"].maxlen)
 
         # The time labels
         self._start_time_str = time.asctime(weather_data_trace["Time"][0])    
@@ -727,23 +760,36 @@ class HomeWeatherStationApp(App):
     def build(self):
         self.title = 'Home Weather Station V0'
 
+        # Settings
         self.settings_cls = SettingsWithSidebar
         self.use_kivy_settings = True
         
+        # Book keeping
         self.manager = root_widget
         root_widget.app = self
 
-        self.config.set('general', 'small_mode', False)
-        self.config.set('general', 'rxqueue_name', RXQUEUE_NAME)
-        self.config.set('example','optionsexample', 'option1')
-        self.config.write()
+        # Set these values in the config file
+        #self.config.set('general', 'small_mode', False)
+        #self.config.set('general', 'rxqueue_name', RXQUEUE_NAME)
+        #self.config.set('example','optionsexample', 'option1')
+        #self.config.write()
+
+        # Read these config parameter values when App starts
+        self.manager.northIndex = int(self.config.get('calibration','north_index',fallback=NORTHDIR_INDX))
+        self.manager.northIndex = int(self.config.get('calibration','wind_direction_steps',fallback=DIR_STEPS))
+        # Note: these parameter values cannot be changed during runtime!
+        self.manager.rxqueueName = self.config.get('general','rxqueue_name',fallback=RXQUEUE_NAME)
+        self.manager.rxtimeIntv  = float(self.config.get('general','rxqueue_timeintv',fallback=RXQUEUE_TIME))
+
+        # Init and apply config parameter values
+        self.manager.init()
 
         return root_widget
 
     def build_config(self, config):
-        config.setdefaults('general', {'small_mode': False, 'rxqueue_name': RXQUEUE_NAME})
-        config.setdefaults('calibration', {'north_index': 16, 'wind_direction_steps': 16})
-        config.setdefaults('example',{'optionsexample': 'option2'})
+        config.setdefaults('general', {'small_mode': False, 'rxqueue_name': RXQUEUE_NAME, 'rxqueue_timeintv': RXQUEUE_TIME})
+        config.setdefaults('calibration', {'north_index': NORTHDIR_INDX , 'wind_direction_steps': DIR_STEPS})
+        config.setdefaults('example',{'optionsexample': 'option1'})
 
         #print(f"build_config: {config.get('general', 'small_mode')}")
 

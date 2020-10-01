@@ -1,13 +1,13 @@
 // rf22b_server_mq.cpp
 // -*- mode: C++ -*-
-// Test RH_RF22B based server on Raspberry Pi, with POSIX IPC Message Queue interface
+// An RH_RF22B radio based server on Raspberry Pi, with POSIX IPC Message Queue interface
 // Uses the bcm2835 library to access the GPIO pins to drive the RFM22B module
 // Uses POSIX inter-process message queue to make available the received data packet and other info
 // Requires bcm2835 library to be already installed: http://www.airspayce.com/mikem/bcm2835/
 // Requires boot/config.txt contains the line dtoverlay=gpio-no-irq
 //
-// Based on sample code rf22b_server.cpp
-// By Istvan Z. Kovacs
+// Author: Istvan Z. Kovacs, 2019-2020
+//
 
 #include <bcm2835.h>
 #include <stdio.h>
@@ -26,9 +26,10 @@
 
 #include <RH_RF22.h>
 
-// Undef/comment to remove output to stdout
+// Undef/comment to remove debug info to stdout
 // Output to stderr is always active
-#define STDOUT_MSG
+#define DEBUG_LEV1
+#define DEBUG_LEV2
 
 // RFM22B board
 #define BOARD_RFM22B
@@ -88,13 +89,15 @@ char *char_time;
 struct tm *timeinfo;
 
 struct rf22msg_t {
-    //struct tm timeinfo; //= localtime(&tm_now);
     uint16_t tm_sec;
     uint16_t tm_min;
     uint16_t tm_hour;
     uint16_t tm_mday;
     uint16_t tm_mon;
     uint16_t tm_year;
+    uint16_t tm_wday;
+    uint16_t tm_yday;
+    uint16_t tm_isdst;
     uint8_t from;        //= rf22.headerFrom();
     uint8_t to;          //= rf22.headerTo();
     uint8_t id;          //= rf22.headerId();
@@ -114,7 +117,7 @@ volatile sig_atomic_t force_stop = false;
 // Signal handler
 void end_sig_handler(int sig)
 {
-#ifdef STDOUT_MSG
+#ifdef DEBUG_LEV1
     fprintf(stdout, "\n%s Interrupt signal (%d) received. Exiting!\n", __BASEFILE__, sig);
 #endif
 
@@ -137,17 +140,32 @@ void end_sig_handler(int sig)
         exit(sig);
 }
 
+// Set current time info in the rf22_message
+void set_rf22msg_timeinfo()
+{
+    // Convert some of the fields to match Python time.struct_time
+    struct tm *timeinfo   = localtime(&tm_now);
+    rf22_message.tm_sec   = (uint16_t) timeinfo->tm_sec;
+    rf22_message.tm_min   = (uint16_t) timeinfo->tm_min;
+    rf22_message.tm_hour  = (uint16_t) timeinfo->tm_hour;
+    rf22_message.tm_mday  = (uint16_t) timeinfo->tm_mday;
+    rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon + 1; // => months since January: 1-12
+    rf22_message.tm_year  = (uint16_t) (timeinfo->tm_year + 1900); // => absolute year
+    if (timeinfo->tm_wday == 0) {                            // => days since Monday: 0-6
+        rf22_message.tm_wday  = (uint16_t) 6;    
+    } else {
+        rf22_message.tm_wday  = (uint16_t) (timeinfo->tm_wday - 1); 
+    }    
+    rf22_message.tm_yday  = (uint16_t) timeinfo->tm_yday + 1;// => days since January 1: 1-366
+    rf22_message.tm_isdst = (uint16_t) timeinfo->tm_isdst;
+}
 
 // Main Function
 // TODOs:
 // - Re-start if the bcm2835_init fails or hangs
-// - Put RX radio packet data into a structure to be sent over MQ msg - Done
-// - Open/create msg queue for data write - Done
-// - Open/create msg queue for data read - Done
 // - Put RX data msg to the TX queue - Partly done. timeout, priorities?
 // - Read TX data msg from the RX queue - timout, priorities?
 // - Infinite loop with error detection
-// - ...
 int main (int argc, const char* argv[] )
 {
     uint8_t syncwords[2];
@@ -160,7 +178,7 @@ int main (int argc, const char* argv[] )
     int8_t rssi_dBm;
     uint8_t last_id = 0;
 
-#ifdef STDOUT_MSG
+#ifdef DEBUG_LEV1
     fprintf(stdout, "%s started\n", __BASEFILE__);
 #endif
 
@@ -187,7 +205,7 @@ int main (int argc, const char* argv[] )
         perror("TX MQ open failed");
         exit(1);
     }
-#ifdef STDOUT_MSG
+#ifdef DEBUG_LEV2
     fprintf(stdout,"MQ: TX open() OK. rf22msg_t: %02dB\n", sizeof(struct rf22msg_t));
 #endif
 
@@ -205,16 +223,12 @@ int main (int argc, const char* argv[] )
         perror("RX MQ open failed");
         exit(1);
     }
-#ifdef STDOUT_MSG
+#ifdef DEBUG_LEV2
     fprintf(stdout,"MQ: RX open() OK\n");
 #endif
 
     memset(mqRX_buffer, 0, MAX_RXMSG_SIZE);
 #endif
-
-
-    // Delay needed?
-    //bcm2835_delay(100);
 
     //
     // Init the bcm2835 library
@@ -235,39 +249,35 @@ int main (int argc, const char* argv[] )
     bcm2835_gpio_set_pud(RF_IRQ_PIN, BCM2835_GPIO_PUD_UP);
 
 #ifdef TXQUEUE_NAME
-    // Send msg on the queue
-    tm_now                = time(NULL);
-    timeinfo              = localtime(&tm_now);
-    rf22_message.tm_sec   = (uint16_t) timeinfo->tm_sec;
-    rf22_message.tm_min   = (uint16_t) timeinfo->tm_min;
-    rf22_message.tm_hour  = (uint16_t) timeinfo->tm_hour;
-    rf22_message.tm_mday  = (uint16_t) timeinfo->tm_mday;
-    rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon + 1;
-    rf22_message.tm_year  = (uint16_t) timeinfo->tm_year;
+    // Send init msg on the queue
+    tm_now  = time(NULL);
+    set_rf22msg_timeinfo();
 
     rf22_message.len   = (uint8_t) snprintf((char*) rf22_message.buf, RH_RF22_MAX_MESSAGE_LEN, "BCM2835: Init OK. IRQ=GPIO%d", RF_IRQ_PIN);
 
     memset(mqTX_buffer, 0, MAX_TXMSG_SIZE);
     memcpy(mqTX_buffer, (const char*)&rf22_message, sizeof(struct rf22msg_t));
     if ( mq_send(mqTX, mqTX_buffer, MAX_TXMSG_SIZE, TXmsg_prio) ) {
-        perror("TX MQ init send#1 failed");
+        perror("MQ: TX Init message send failed!");
     }
-#ifdef STDOUT_MSG
-    fprintf(stderr, "MQ: First TX message sent with header (%d,%d,%d,%d,%d,%d,%d)\n", rf22_message.tm_sec, rf22_message.tm_min, rf22_message.tm_hour, rf22_message.tm_mday, rf22_message.tm_mon, rf22_message.tm_year, rf22_message.len);
+#ifdef DEBUG_LEV2
+    fprintf(stderr, "MQ: TX Init message sent with header (%d,%d,%d,%d,%d,%d,%d)\n", rf22_message.tm_sec, rf22_message.tm_min, rf22_message.tm_hour, rf22_message.tm_mday, rf22_message.tm_mon, rf22_message.tm_year, rf22_message.len);
 #endif
+
 #endif
 
 
     // Init the RF22B module
     if (!rf22.init()) {
-        fprintf(stderr, "\nRF22B: Module init() failed. Please verify wiring/module\n");
+        fprintf(stderr, "\nRF22B: Module init failed. Please verify wiring/module\n");
         end_sig_handler(1);
-    } else {
+    } 
+#ifdef DEBUG_LEV2    
+    else {
         // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36, 8dBm Tx power
-#ifdef STDOUT_MSG
-        fprintf(stdout, "RF22B: Module seen OK. Using: CS=GPIO%d, IRQ=GPIO%d\n", RF_CS_PIN, RF_IRQ_PIN);
-#endif
+        fprintf(stdout, "RF22B: Module init OK. Using: CS=GPIO%d, IRQ=GPIO%d\n", RF_CS_PIN, RF_IRQ_PIN);
     }
+#endif
 
     // Since we check IRQ line with bcm_2835 level detection
     // in case radio already have a packet, IRQ is low and will never
@@ -278,7 +288,7 @@ int main (int argc, const char* argv[] )
     // Enable Low Detect for the RF_IRQ_PIN pin
     // When a low level is detected, sets the appropriate pin in Event Detect Status
     bcm2835_gpio_len(RF_IRQ_PIN);
-#ifdef STDOUT_MSG
+#ifdef DEBUG_LEV2
     fprintf(stdout, "BCM2835: Low detect enabled on GPIO%d\n", RF_IRQ_PIN);
 #endif
 
@@ -309,9 +319,10 @@ int main (int argc, const char* argv[] )
     // We're ready to listen for incoming message
     rf22.setModeRx();
 
+    // Current time
     tm_now    = time(NULL);
 
-#ifdef STDOUT_MSG
+#ifdef DEBUG_LEV1
     char_time = ctime(&tm_now);
     char_time[24] = '\0' ;
     fprintf(stdout, "%s - RF22B: Init OK. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw\n", char_time, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
@@ -319,25 +330,17 @@ int main (int argc, const char* argv[] )
 
 #ifdef TXQUEUE_NAME
     // Send msg on the queue
-    timeinfo              = localtime(&tm_now);
-    rf22_message.tm_sec   = (uint16_t) timeinfo->tm_sec;
-    rf22_message.tm_min   = (uint16_t) timeinfo->tm_min;
-    rf22_message.tm_hour  = (uint16_t) timeinfo->tm_hour;
-    rf22_message.tm_mday  = (uint16_t) timeinfo->tm_mday;
-    rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon + 1;
-    rf22_message.tm_year  = (uint16_t) timeinfo->tm_year;
-
+    set_rf22msg_timeinfo();
     rf22_message.len = (uint8_t) snprintf((char*) rf22_message.buf, RH_RF22_MAX_MESSAGE_LEN, "RF22B: Init OK. CS=GPIO%d, IRQ=GPIO%d. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw", RF_CS_PIN, RF_IRQ_PIN, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
-
     memset(mqTX_buffer, 0, MAX_TXMSG_SIZE);
     memcpy(mqTX_buffer, (const char*)&rf22_message, sizeof(struct rf22msg_t));
     if ( mq_send(mqTX, mqTX_buffer, MAX_TXMSG_SIZE, TXmsg_prio) ) {
-        perror("TX MQ init send#2 failed");
+        perror("MQ: TX Start message send failed!");
     }
 #endif
 
 
-#ifdef STDOUT_MSG
+#ifdef DEBUG_LEV2
     fprintf(stdout, "\tListening ...\n");
 #endif
 
@@ -349,7 +352,7 @@ int main (int argc, const char* argv[] )
 
         // Clear the eds flag
         bcm2835_gpio_set_eds(RF_IRQ_PIN);
-#ifdef STDOUT_MSG
+#ifdef DEBUG_LEV2
         fprintf(stdout, "BCM2835: LOW detected for pin GPIO%d\n", RF_IRQ_PIN);
 #endif
         // Get the packet, header information and RSSI
@@ -357,7 +360,7 @@ int main (int argc, const char* argv[] )
             rssi_dBm = rf22.lastRssi();
             tm_now = time(NULL);
 
-#ifdef STDOUT_MSG
+#ifdef DEBUG_LEV1
             char_time = ctime(&tm_now);
             char_time[24] = '\0' ;
             fprintf(stdout, "%s - RF22B: Packet received, %02d bytes, from 0x%02X to 0x%02X, ID: 0x%02X, F: 0x%02X, with %ddBm => '", char_time, len, from, to, id, flags, rssi_dBm);
@@ -374,16 +377,11 @@ int main (int argc, const char* argv[] )
                 last_id = id;
             }
 
-            // Send msg on the TX queue. Initial packet only.
 #ifdef TXQUEUE_NAME
+            // Send msg on the TX queue. Initial packet only.
             if (flags == 0x0) {
-                timeinfo              = localtime(&tm_now);
-                rf22_message.tm_sec   = (uint16_t) timeinfo->tm_sec;
-                rf22_message.tm_min   = (uint16_t) timeinfo->tm_min;
-                rf22_message.tm_hour  = (uint16_t) timeinfo->tm_hour;
-                rf22_message.tm_mday  = (uint16_t) timeinfo->tm_mday;
-                rf22_message.tm_mon   = (uint16_t) timeinfo->tm_mon + 1;
-                rf22_message.tm_year  = (uint16_t) timeinfo->tm_year;
+                // Send msg on the queue
+                set_rf22msg_timeinfo();
                 rf22_message.from     = from;
                 rf22_message.to       = to;
                 rf22_message.id       = id;
@@ -391,22 +389,21 @@ int main (int argc, const char* argv[] )
                 rf22_message.rssi_dBm = rssi_dBm;
                 rf22_message.len      = len;
                 memcpy(rf22_message.buf, buf, len);
-
                 memset(mqTX_buffer, 0, MAX_TXMSG_SIZE);
                 memcpy(mqTX_buffer, (const char*)&rf22_message, sizeof(struct rf22msg_t));
                 if ( mq_send(mqTX, mqTX_buffer, sizeof(struct rf22msg_t), TXmsg_prio) ) {
-                    perror("TX MQ loop send failed");
+                    perror(""MQ: TX Loop message send failed!");
                     // When MQ is full, this returns "TX MQ loop send failed: Resource temporarily unavailable" corresponding to EAGAIN error code
                 }
             }
 #endif
 
-
-        } else {
-#ifdef STDOUT_MSG
+        } 
+#ifdef DEBUG_LEV2
+        else {
             fprintf(stdout,"RF22B: Packet receive failed\n");
-#endif
         }
+#endif
       }
 
       // Check RX queue for ctrl msg
@@ -414,7 +411,7 @@ int main (int argc, const char* argv[] )
       //force_stop = true;
 
 
-#ifdef STDOUT_MSG
+#if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
       fflush(stdout);
 #endif
       // Let OS do other tasks
@@ -423,7 +420,7 @@ int main (int argc, const char* argv[] )
     }
 
     // End & close
-#ifdef STDOUT_MSG
+#ifdef DEBUG_LEV1
     fprintf(stdout, "\n%s Ending\n", __BASEFILE__ );
 #endif
     end_sig_handler(0);

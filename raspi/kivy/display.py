@@ -572,9 +572,9 @@ class TracesScreen(Screen):
                     self._update_rssi_plot(weather_data_trace[k])
             
         # Update the progress bar
-        self.progress_bar.min = 0
-        self.progress_bar.max = weather_data_trace["Time"].maxlen
-        self.progress_bar.value += 1
+        #self.progress_bar.min = 0
+        #self.progress_bar.max = weather_data_trace["Time"].maxlen
+        #self.progress_bar.value += 1
                     
     def _update_wind_direction_plot(self, y_values):  
         '''Update the wind direction trace plot'''

@@ -210,7 +210,7 @@ MyScreenManager:
     widget_wind_speed: wind_speed
     widget_air_press: air_press
     widget_air_relhum: air_relhum
-    progress_bar: pb_time
+    #progress_bar: pb_time
 
     GridLayout:
         cols: 1
@@ -394,11 +394,11 @@ MyScreenManager:
                 halign: 'right'
                 pos:  self.parent.width-self.width, self.parent.height*0.3             
                 color: 0.5,0.5,1,1
-            ProgressBar:
-                id: pb_time
-                size: self.parent.width-traces._x_offset-traces._x_padding, dp(10)
-                color: 0.5,0.5,1,1
-                pos: self.parent.pos[0]+traces._x_offset, self.parent.pos[1]
+            #ProgressBar:
+            #    id: pb_time
+            #    size: self.parent.width-traces._x_offset-traces._x_padding, dp(10)
+            #    color: 0.5,0.5,1,1
+            #    pos: self.parent.pos[0]+traces._x_offset, self.parent.pos[1]
 
 
 <Traces15Screen@TracesScreen>:

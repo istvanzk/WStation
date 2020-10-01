@@ -28,8 +28,8 @@
 
 // Undef/comment to remove debug info to stdout
 // Output to stderr is always active
-#define DEBUG_LEV1
-#define DEBUG_LEV2
+//#define DEBUG_LEV1
+//#define DEBUG_LEV2
 
 // RFM22B board
 #define BOARD_RFM22B
@@ -117,7 +117,7 @@ volatile sig_atomic_t force_stop = false;
 // Signal handler
 void end_sig_handler(int sig)
 {
-#ifdef DEBUG_LEV1
+#ifdef DEBUG_LEV2
     fprintf(stdout, "\n%s Interrupt signal (%d) received. Exiting!\n", __BASEFILE__, sig);
 #endif
 
@@ -178,9 +178,7 @@ int main (int argc, const char* argv[] )
     int8_t rssi_dBm;
     uint8_t last_id = 0;
 
-#ifdef DEBUG_LEV1
     fprintf(stdout, "%s started\n", __BASEFILE__);
-#endif
 
     // Signal handler
     signal(SIGABRT, end_sig_handler);
@@ -322,11 +320,9 @@ int main (int argc, const char* argv[] )
     // Current time
     tm_now    = time(NULL);
 
-#ifdef DEBUG_LEV1
     char_time = ctime(&tm_now);
     char_time[24] = '\0' ;
     fprintf(stdout, "%s - RF22B: Init OK. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw\n", char_time, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
-#endif
 
 #ifdef TXQUEUE_NAME
     // Send msg on the queue
@@ -420,9 +416,7 @@ int main (int argc, const char* argv[] )
     }
 
     // End & close
-#ifdef DEBUG_LEV1
     fprintf(stdout, "\n%s Ending\n", __BASEFILE__ );
-#endif
     end_sig_handler(0);
 
     return 0;

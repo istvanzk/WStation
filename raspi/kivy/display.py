@@ -144,19 +144,19 @@ class ClientMq(object):
             return None
 
         # Unpack header info    
-        _unpacked_msgheader = struct.unpack('HHHHHHBBBBBb', msg[:18])
+        _unpacked_msgheader = struct.unpack('HHHHHHHHHBBBBBb', msg[:24])
         _weather_data["Header"] = list(_unpacked_msgheader)
 
         # Show raw data
         #print(F"Message ({p:d}):")
         #print(unpacked_msgheader)
-        #print(":".join("{:1s}".format(chr(c)) for c in msg[18:38]))
+        #print(":".join("{:1s}".format(chr(c)) for c in msg[24:44]))
 
         # Decode the 20 bytes weather data (from the RF22B/Arduino)
         if _weather_data["Header"][11] == 20:
-            ii = 18
+            ii = 24
             lng = 0
-            while ii < 38:
+            while ii < 44:
                 if chr(msg[ii]) == 'N':
                     val = msg[ii+1]
                     lng = 1
@@ -290,7 +290,7 @@ class MyScreenManager(ScreenManager):
             if _weather_data is not None:
 
                 # Data received: update info
-                if _weather_data["Header"][11] == 20:
+                if _weather_data["Header"][14] == 20:
                     self.weather_data["IniMsg"] = None
 
                     # Adjust North direction based on calibration data
@@ -308,12 +308,11 @@ class MyScreenManager(ScreenManager):
                     self.weather_data["IniMsg"] = _weather_data["IniMsg"]
 
                 # Header info
-                _weather_data["Header"][5] += 1900
-                _weather_data["Header"][10] -= 256
+                _weather_data["Header"][13] -= 256
                 self.weather_data["Header"] = _weather_data["Header"]
 
                 # RSSI
-                self._rssi_dBm = _weather_data["Header"][10]
+                self._rssi_dBm = _weather_data["Header"][13]
 
                 # Info
                 self._crt_msg_str = "RXMQ:OK. Data:OK"
@@ -342,7 +341,12 @@ class MyScreenManager(ScreenManager):
                     struc_t.tm_mday,
                     struc_t.tm_mon,
                     struc_t.tm_year,
-                    0,0,0,0, self._rssi_dBm, 20]
+                    struc_t.tm_wday,
+                    struc_t.tm_yday,
+                    struc_t.tm_isdst,
+                    0,0,0,0, 
+                    self._rssi_dBm, 
+                    20]
                 self.weather_data["IniMsg"] = 'No Data'
 
                 # Info
@@ -386,7 +390,12 @@ class MyScreenManager(ScreenManager):
                 struc_t.tm_mday,
                 struc_t.tm_mon,
                 struc_t.tm_year,
-                0,0,0,0,self._rssi_dBm, 20]
+                struc_t.tm_wday,
+                struc_t.tm_yday,
+                struc_t.tm_isdst,
+                0,0,0,0,
+                self._rssi_dBm, 
+                20]
             self.weather_data["IniMsg"] = None
 
             # Info
@@ -444,9 +453,9 @@ class MyScreenManager(ScreenManager):
             self.weather_data["Header"][2], 
             self.weather_data["Header"][1], 
             self.weather_data["Header"][0], 
-            struc_t.tm_wday, 
-            struc_t.tm_yday, 
-            struc_t.tm_isdst)
+            self.weather_data["Header"][6], 
+            self.weather_data["Header"][7], 
+            self.weather_data["Header"][8])
         self._crt_secs = time.mktime(_crtTime)
 
         # Update trace15 deques

@@ -392,7 +392,7 @@ int main (int argc, const char* argv[] )
                 memset(mqTX_buffer, 0, MAX_TXMSG_SIZE);
                 memcpy(mqTX_buffer, (const char*)&rf22_message, sizeof(struct rf22msg_t));
                 if ( mq_send(mqTX, mqTX_buffer, sizeof(struct rf22msg_t), TXmsg_prio) ) {
-                    perror(""MQ: TX Loop message send failed!");
+                    perror("MQ: TX Loop message send failed!");
                     // When MQ is full, this returns "TX MQ loop send failed: Resource temporarily unavailable" corresponding to EAGAIN error code
                 }
             }

@@ -12,9 +12,9 @@ RADIOHEADBASE = ../../../RadioHead
 INCLUDE       = -I$(RADIOHEADBASE)
 
 ifdef RFM22
-CFLAGS += -DRH_RF22
+CFLAGS += -DRHRF22
 else
-CFLAGS += -DRH_RF69
+CFLAGS += -DRHRF69
 endif
 
 all: server_mq

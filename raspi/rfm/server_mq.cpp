@@ -29,10 +29,10 @@
 
 // Select the radio to use. Can be done in the Makefile.
 // RFM22B based module
-//#define RH_RF22
+//#define RHRF22
 // OR
 // RFM69HCW based module
-//#define RH_RF69
+//#define RHRF69
 
 // Select debug info level to stdout
 // Output to stderr is always active!
@@ -44,9 +44,9 @@
 #define USE_MQ
 
 // Select the radio driver to use
-#if defined (RH_RF22)
+#if defined (RHRF22)
 #include <RH_RF22.h>
-#elif defined (RH_RF69)
+#elif defined (RHRF69)
 #include <RH_RF69.h>
 #else
 fprintf(stderr, "%s: The RH_RF22 or RH_RF69 macro must be defined!\n", __BASEFILE__);
@@ -75,7 +75,7 @@ fprintf(stderr, "%s: The RH_RF22 or RH_RF69 macro must be defined!\n", __BASEFIL
 #define MAX_TXMSG_SIZE 255
 #endif
 
-#if defined (RH_RF22)
+#if defined (RHRF22)
 
 // RFM22B Configuration
 #define RF_TXPOW      RH_RF22_TXPOW_11DBM
@@ -85,7 +85,7 @@ fprintf(stderr, "%s: The RH_RF22 or RH_RF69 macro must be defined!\n", __BASEFIL
 #define TXQUEUE_NAME  "/rf22_server_tx"
 #endif
 
-#elif defined (RH_RF69)
+#elif defined (RHRF69)
 
 // RFM69HCW Configuration
 // Since the radio is the high power HCW model, the Tx power is set in the range 14 to 20
@@ -120,10 +120,10 @@ unsigned int TXmsg_prio = 0;
 #endif
 
 // Create an instance of the RFM driver
-#if defined (RH_RF22)
+#if defined (RHRF22)
 RH_RF22 rfmdrv(RF_CS_PIN, RF_IRQ_PIN);
 #define RH_RFM_MAX_MESSAGE_LEN RH_RF22_MAX_MESSAGE_LEN
-#elif defined (RH_RF69)
+#elif defined (RHRF69)
 RH_RF69 rfmdrv(RF_CS_PIN, RF_IRQ_PIN);
 #define RH_RFM_MAX_MESSAGE_LEN RH_RF69_MAX_MESSAGE_LEN
 #endif

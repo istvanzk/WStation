@@ -83,11 +83,11 @@ Notes:
 The RadioHead/RH_ASK driver uses a timer-driven interrupt to generate 8 interrupts per bit period. By default it takes over Timer 1.
 This sketch uses Timer 2, therefore the RH_ASK timer does not need to be changed.
 
-Without Serial.print()'s:
+RFM-22B version, without debug output
   Sketch uses 18368 bytes (59%) of program storage space. Maximum is 30720 bytes.
   Global variables use 1027 bytes (50%) of dynamic memory, leaving 1021 bytes for local variables. Maximum is 2048 bytes.
 
-With all Serial.print()'s:
+RFM-22B version, with all debug output:
   Sketch uses 21990 bytes (71%) of program storage space. Maximum is 30720 bytes.
   Global variables use 1065 bytes (52%) of dynamic memory, leaving 983 bytes for local variables. Maximum is 2048 bytes.
 
@@ -111,7 +111,7 @@ With all Serial.print()'s:
 
 // Select debug info level for Serial.print()
 //#define DEBUG_LEV1
-//#define DEBUG_LEV2
+#define DEBUG_LEV2
 
 
 // Loop delay value (milliseconds)

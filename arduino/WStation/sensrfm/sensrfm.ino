@@ -1,11 +1,14 @@
-/* Home Weather Sation code for Arduino
+/* Home Weather Staion code for Arduino
  
-Collects measurements of:
+Collects measurements from:
   * wind direction & speed (OBH eHome Wind Meter)
   * pressure (BMP180)
   * temperature & humidity (SHT15)
-and transmits combined data using RFM22B radio module.
+Transmits combined data using a RH69HCW or RFM22B radio module
 
+Author: Istvan Z. Kovacs, 2019-2020
+
+------------------------------------
 Connections:
 
 BMP180 Connections:
@@ -23,11 +26,22 @@ SCK  -> A3
 OBH eHome Wind Meter Connections:
 D3    	-> Enable 74HC245
 D4-D9 	-> Ports B0-B7 (input) 74HC245, IR LEDs Pw
-A0		-> Wind speed Reed relay Output
+A0		  -> Wind speed Reed relay Output
 A1 (DO)	-> Wind direction IR Sensor Pw
-A7 		-> Wind direction IR Sensor Output
+A7 		  -> Wind direction IR Sensor Output
+
+RFM-69 Connections:
+              Arduino      RFM69HCW
+                GND----------GND   (ground in)
+                3V3----------VCC   (3.3V in)
+interrupt 0 pin D2-----------DIO0  (interrupt request out)
+         SS pin D10----------NSS   (chip select in)
+        SCK pin D13----------SCK   (SPI clock in)
+       MOSI pin D11----------SDI   (SPI Data in)
+       MISO pin D12----------SDO   (SPI data out)
 
 RFM-22B Connections:
+              Arduino       RFM22B
                 GND----------GND-\ (ground in)
                              SDN-/ (shutdown in)
                 3V3----------VCC   (3.3V in)
@@ -41,13 +55,15 @@ interrupt 0 pin D2-----------NIRQ  (interrupt request out)
 						  /--GPIO1 (GPIO1 out to control receiver antenna RX_ANT)
 						  \--RX_ANT (RX antenna control in) RFM22B only
 
+------------------------------------
 Requires:
 
 Sparkfun BMP180 Arduino Library: https://github.com/sparkfun/BMP180_Breakout
 SparkFun_SHT1X Arduino Library: https://github.com/sparkfun/SHT15_Breakout/
-RadioHead RH_RF22 Arduino Library: http://www.airspayce.com/mikem/arduino/RadioHead/index.html
+RadioHead Arduino Library: http://www.airspayce.com/mikem/arduino/RadioHead/index.html
 
-Output:
+------------------------------------
+Output (example):
 
 Wind data:
  direction: 14
@@ -61,9 +77,10 @@ SHT data:
  temperature: 18.94 C, 66.13 F
  humidity: 67.77%
 
+------------------------------------
 Notes:
 
-The RH_ASK driver uses a timer-driven interrupt to generate 8 interrupts per bit period. By default it takes over Timer 1.
+The RadioHead/RH_ASK driver uses a timer-driven interrupt to generate 8 interrupts per bit period. By default it takes over Timer 1.
 This sketch uses Timer 2, therefore the RH_ASK timer does not need to be changed.
 
 Without Serial.print()'s:
@@ -71,8 +88,8 @@ Without Serial.print()'s:
   Global variables use 1027 bytes (50%) of dynamic memory, leaving 1021 bytes for local variables. Maximum is 2048 bytes.
 
 With all Serial.print()'s:
-  Sketch uses 21806 bytes (70%) of program storage space. Maximum is 30720 bytes.
-  Global variables use 1043 bytes (50%) of dynamic memory, leaving 1005 bytes for local variables. Maximum is 2048 bytes.
+  Sketch uses 21990 bytes (71%) of program storage space. Maximum is 30720 bytes.
+  Global variables use 1065 bytes (52%) of dynamic memory, leaving 983 bytes for local variables. Maximum is 2048 bytes.
 
 */
 
@@ -83,11 +100,22 @@ With all Serial.print()'s:
 #include <SHT1X.h>
 #include <Wire.h>
 
-// Enable Serial.print() for debugging
-#define SERIAL_PRINT
+/// High level configurations
+
+// Select the radio to use.
+// RFM69HCW based module
+#define RHRF69
+// OR
+// RFM22B based module
+//#define RHRF22
+
+// Select debug info level for Serial.print()
+//#define DEBUG_LEV1
+//#define DEBUG_LEV2
+
 
 // Loop delay value (milliseconds)
-#define LOOP_DELAY 5000
+#define LOOP_DELAY 10000
 
 // Reference altitude (m) of Home Weather Station
 #define ALTITUDE 43.0
@@ -95,7 +123,10 @@ With all Serial.print()'s:
 // Anemometer scaling (meters per revolution), for sensor with 1 pulse per revolution
 #define ANEMOMETER_MPR 0.345708 
 
-// RFM22B communication addresses
+
+/// Low level configurations
+
+// RFM69/22B communication addresses
 #define RF_GROUP_ID   22 // All devices
 #define RF_GATEWAY_ID 1  // Server ID (where to send packets)
 #define RF_NODE_ID    10 // Client ID (device sending the packets)
@@ -104,9 +135,15 @@ With all Serial.print()'s:
 // Implementation specific parameters. 
 // DO NOT change these unless you absolutely need to and you know what you are doing!
 
+#if defined(RHRF69)
+// RF69 messge length (bytes). The same length must be set in RH_RF69.h !
+#define RH_RF69_MAX_MESSAGE_LEN 20 
+#include <RH_RF69.h>
+#elif defined(RHRF22)
 // RF22B messge length (bytes). The same length must be set in RH_RF22.h !
 #define RH_RF22_MAX_MESSAGE_LEN 20 
 #include <RH_RF22.h>
+#endif
 #include <RHReliableDatagram.h>
 
 // SFE_BMP180 object "pressure":
@@ -115,21 +152,28 @@ SFE_BMP180 pressure;
 // SHT15 object
 SHT1x sht15(A2, A3); //Data, SCK
 
-// RFM22B radio driver
-RH_RF22 driver;
-// Class to manage message delivery and receipt, using the driver declared above
-RHReliableDatagram manager(driver, RF_NODE_ID);
+// RFM69/22B radio driver
+#if defined(RH_RF69)
+RH_RF69 rfmdrv;
+#define RH_RFM_MAX_MESSAGE_LEN RH_RF69_MAX_MESSAGE_LEN
+#elif defined(RH_RF22)
+RH_RF22 rfmdrv;
+#define RH_RFM_MAX_MESSAGE_LEN RH_RF22_MAX_MESSAGE_LEN
+#endif
 
-uint8_t tx_data[RH_RF22_MAX_MESSAGE_LEN+1];
-// Dont put this on the stack:
-uint8_t rx_buf[RH_RF22_MAX_MESSAGE_LEN+1];
+// RadioHead class to manage message delivery and receipt, using the driver declared above
+RHReliableDatagram manager(rfmdrv, RF_NODE_ID);
+
+// Local data buffers
+uint8_t tx_data[RH_RFM_MAX_MESSAGE_LEN+1];
+uint8_t rx_buf[RH_RFM_MAX_MESSAGE_LEN+1];
 
 // Hwd status flags
+boolean rfm_OK    = false;
 boolean windM_OK  = false;
 boolean bmp180_OK = false;
 boolean sht15_OK  = false;
-boolean rfm22_OK  = false;
-boolean rfm22_sentOK = false;
+
 
 // Wind Meter Control pins
 int windIntfEnable   = 3;  //active low; enables the 74HC245 3-state buffers
@@ -161,12 +205,12 @@ volatile unsigned long lastAnemometerEvent = 42;
 void setup()
 {
   // Hwd status flags
+  rfm_OK    = false;
   bmp180_OK = false;
   sht15_OK  = false;
-  rfm22_OK  = false;
   windM_OK  = false;
 
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV2)
   Serial.begin(9600);
   Serial.println(F("REBOOT"));
 #endif
@@ -175,22 +219,23 @@ void setup()
   // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36, 8dBm Tx power
   if (manager.init())
   {
-#if defined(SERIAL_PRINT)
-    Serial.println(F("RFM22B initialized"));
+    rfmdrv.setTxPower(RH_RF22_TXPOW_11DBM);
+#if defined(DEBUG_LEV1)
+    Serial.println(F("RFM initialized"));
 #endif
-    rfm22_OK = true;
+    rfm_OK = true;
   }
 
   // Initialize the BMP180 sensor (it is important to get calibration values stored on the device).
   if (pressure.begin())
   {
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV1)
     Serial.println(F("BMP180 initialized"));
 #endif
     bmp180_OK = true;
   }
 
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV1)
   Serial.println(F("SHT15 init"));
 #endif
   sht15_OK = true;
@@ -221,7 +266,7 @@ void setup()
 
   analogReference(DEFAULT);
  
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV1)
   Serial.println(F("WIND meter initialized"));
 #endif
   windM_OK = true;
@@ -294,19 +339,19 @@ void loop()
     			  a = pressure.altitude(P,p0);
     
     			}
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV2)
     			else Serial.println(F("error retrieving BMP pressure measurement\n"));
 #endif
 	  	  }
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV2)
 		    else Serial.println(F("error starting BMP pressure measurement\n"));
 #endif
 		  }
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV2)
 		  else Serial.println(F("error retrieving BMP temperature measurement\n"));
 #endif
 	  }
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV2)
 	  else Serial.println(F("error starting BMP temperature measurement\n"));
 #endif
   }
@@ -357,7 +402,7 @@ void loop()
   			// Power off
   			digitalWrite(windDirGrp2Seq[grp2], LOW);
 
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV2)
         Serial.print(F("grp4:grp2 = "));
         Serial.print(grp4);
         Serial.print(F(":"));
@@ -395,7 +440,7 @@ void loop()
 	  // Power off the direction sensor
 	  //digitalWrite(windDirSensPw, LOW);
 
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV2)
         Serial.print(F("dir_val: "));
         Serial.println(dir_val);        
 #endif       
@@ -450,7 +495,7 @@ void loop()
   //tx_data[20] = 0x0;
 
 
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV1)
   // Print BMP180 info
   Serial.println(F("BMP data:"));
 
@@ -498,7 +543,7 @@ void loop()
   Serial.println(AnemometerSpeed);
   Serial.print(F(" last time: "));  
   Serial.println(lastAnemometerEvent);
-  Serial.print(F(" period count: "));
+  //Serial.print(F(" period count: "));
   //Serial.println(AnemometerPeriodReadingCount);
 
   // Print RFM22 TX data
@@ -513,26 +558,41 @@ void loop()
 
 
   // Send a RFM22B message
-  if (rfm22_OK)
+  if (rfm_OK)
   {
       if (manager.sendtoWait(tx_data, RH_RF22_MAX_MESSAGE_LEN, RF_GATEWAY_ID))
       {
-        rfm22_sentOK = true;
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV2)
         Serial.print(F("sendtoWait ACK: "));
 #endif
       }
       else
       {
-        rfm22_sentOK = false;
-#if defined(SERIAL_PRINT)
+#if defined(DEBUG_LEV2)
         Serial.print(F("sendtoWait failed: "));
 #endif        
       }
-#if defined(SERIAL_PRINT)      
+#if defined(DEBUG_LEV2)      
       Serial.println(manager.headerId(), HEX);
       Serial.println();
 #endif
+  }
+  else
+  {
+#if defined(DEBUG_LEV1)      
+      Serial.println(F("Data not sent on RFM!"));
+      Serial.println();
+#endif    
+
+    if (manager.init())
+    {
+      rfmdrv.setTxPower(RH_RF22_TXPOW_11DBM);
+ #if defined(DEBUG_LEV1)
+      Serial.println(F("RFM initialized"));
+ #endif
+      rfm_OK = true;
+    }
+    
   }
 
   delay(LOOP_DELAY);

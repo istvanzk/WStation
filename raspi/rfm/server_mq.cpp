@@ -37,7 +37,7 @@
 // Select debug info level to stdout
 // Output to stderr is always active!
 //#define DEBUG_LEV1
-//#define DEBUG_LEV2
+#define DEBUG_LEV2
 
 // Select use of Meessage Queue (POSIX IPC)
 // Undef to disable the meessage quueue
@@ -77,7 +77,7 @@ fprintf(stderr, "%s: The RH_RF22 or RH_RF69 macro must be defined!\n", __BASEFIL
 
 
 // Message queues parameter
-#if defined(USE_MQ)
+#if defined (USE_MQ)
 #define MAX_TXMSG_SIZE 255
 #endif
 
@@ -87,7 +87,7 @@ fprintf(stderr, "%s: The RH_RF22 or RH_RF69 macro must be defined!\n", __BASEFIL
 #define RF_TXPOW      RH_RF22_TXPOW_11DBM
 
 // Message queue name
-#if defined(USE_MQ)
+#if defined (USE_MQ)
 #define TXQUEUE_NAME  "/rf22_server_tx"
 #endif
 
@@ -98,7 +98,7 @@ fprintf(stderr, "%s: The RH_RF22 or RH_RF69 macro must be defined!\n", __BASEFIL
 #define RF_TXPOW      14 
 
 // Message queue name
-#if defined(USE_MQ)
+#if defined (USE_MQ)
 #define TXQUEUE_NAME  "/rf69_server_tx"
 #endif
 
@@ -114,7 +114,7 @@ fprintf(stderr, "%s: The RH_RF22 or RH_RF69 macro must be defined!\n", __BASEFIL
     } while (0) \
 
 
-#if defined(USE_MQ)
+#if defined (USE_MQ)
 // Message queue descriptor
 mqd_t mqTX;
 // Message queues attributes
@@ -164,7 +164,7 @@ volatile sig_atomic_t force_stop = false;
 void close_mq()
 {
     // Close & unlink message queue
-#if defined(TXQUEUE_NAME)
+#if defined (TXQUEUE_NAME)
     CHECK((mqd_t)-1 != mq_close(mqTX));
     CHECK((mqd_t)-1 != mq_unlink(TXQUEUE_NAME));
 #endif
@@ -173,7 +173,7 @@ void close_mq()
 // Signal handler
 void end_sig_handler(int sig)
 {
-#if defined(DEBUG_LEV2)
+#if defined (DEBUG_LEV2)
     fprintf(stdout, "\n%s Interrupt signal (%d) received. Exiting!\n", __BASEFILE__, sig);
 #endif
 
@@ -236,7 +236,7 @@ int main (int argc, const char* argv[] )
     //
 
     // Data from RFM module & additional info from this server app made available to other client app
-#if defined(TXQUEUE_NAME)
+#if defined (TXQUEUE_NAME)
     tx_attr.mq_flags   = 0;                 /* Flags (ignored for mq_open()): 0 or O_NONBLOCK */
     tx_attr.mq_maxmsg  = 10;                /* Max. # of messages on queue; /proc/sys/fs/mqueue/msg_max */
     tx_attr.mq_msgsize = MAX_TXMSG_SIZE;    /* Max. message size (bytes); /proc/sys/fs/mqueue/msgsize_max */
@@ -249,7 +249,7 @@ int main (int argc, const char* argv[] )
         perror("TX MQ open failed");
         exit(1);
     }
-#if defined(DEBUG_LEV2)
+#if defined (DEBUG_LEV2)
     fprintf(stdout,"MQ: TX open() OK. rfmmsg_t: %02dB\n", sizeof(struct rfmmsg_t));
 #endif
 
@@ -270,7 +270,7 @@ int main (int argc, const char* argv[] )
         usleep(100000);
     }
 
-#if defined(SYSTEMD)
+#if defined (SYSTEMD)
     // Notify SystemD daemon that server has started succesfully
     sd_notify (0, "READY=1");
     // Get the WatchdogSec value from service file
@@ -287,7 +287,7 @@ int main (int argc, const char* argv[] )
     bcm2835_gpio_fsel(RF_IRQ_PIN, BCM2835_GPIO_FSEL_INPT);
     bcm2835_gpio_set_pud(RF_IRQ_PIN, BCM2835_GPIO_PUD_UP);
 
-#if defined(TXQUEUE_NAME)
+#if defined (TXQUEUE_NAME)
     // Send init msg on the queue
     tm_now  = time(NULL);
     set_rfmmsg_timeinfo();
@@ -299,7 +299,7 @@ int main (int argc, const char* argv[] )
     if ( mq_send(mqTX, mqTX_buffer, MAX_TXMSG_SIZE, TXmsg_prio) ) {
         perror("MQ: TX Init message send failed!");
     }
-#if defined(DEBUG_LEV2)
+#if defined (DEBUG_LEV2)
     fprintf(stderr, "MQ: TX Init message sent with header (%d,%d,%d,%d,%d,%d,%d)\n", rfm_message.tm_sec, rfm_message.tm_min, rfm_message.tm_hour, rfm_message.tm_mday, rfm_message.tm_mon, rfm_message.tm_year, rfm_message.len);
 #endif
 
@@ -311,10 +311,10 @@ int main (int argc, const char* argv[] )
         fprintf(stderr, "\nRFM: Module init failed. Please verify wiring/module\n");
         end_sig_handler(1);
     } 
-#if defined(DEBUG_LEV2)    
+#if defined (DEBUG_LEV2)    
     else {
         // Defaults after init are:
-        //  RF69: 434.0MHz, modulation GFSK_Rb250Fd250, 13dBm Tx power
+        //  RF69: 434.0MHz, AFC BW == RX BW == 500KHz, modulation GFSK_Rb250Fd250, 13dBm Tx power
         //  RF22B: 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36, 8dBm Tx power
         fprintf(stdout, "RFM: Module init OK. Using: CS=GPIO%d, IRQ=GPIO%d\n", RF_CS_PIN, RF_IRQ_PIN);
     }
@@ -329,7 +329,7 @@ int main (int argc, const char* argv[] )
     // Enable Low Detect for the RF_IRQ_PIN pin
     // When a low level is detected, sets the appropriate pin in Event Detect Status
     bcm2835_gpio_len(RF_IRQ_PIN);
-#if defined(DEBUG_LEV2)
+#if defined (DEBUG_LEV2)
     fprintf(stdout, "BCM2835: Low detect enabled on GPIO%d\n", RF_IRQ_PIN);
 #endif
 
@@ -367,7 +367,7 @@ int main (int argc, const char* argv[] )
     char_time[24] = '\0' ;
     fprintf(stdout, "%s - RFM: Init OK. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw\n", char_time, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
 
-#if defined(TXQUEUE_NAME)
+#if defined (TXQUEUE_NAME)
     // Send msg on the queue
     set_rfmmsg_timeinfo();
     rfm_message.len = (uint8_t) snprintf((char*) rfm_message.buf, RH_RFM_MAX_MESSAGE_LEN, "RFM: Init OK. CS=GPIO%d, IRQ=GPIO%d. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw", RF_CS_PIN, RF_IRQ_PIN, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
@@ -384,7 +384,7 @@ int main (int argc, const char* argv[] )
 
 #endif
 
-#if defined(DEBUG_LEV2)
+#if defined (DEBUG_LEV2)
     fprintf(stdout, "\tListening ...\n");
 #endif
 
@@ -396,7 +396,7 @@ int main (int argc, const char* argv[] )
 
         // Clear the eds flag
         bcm2835_gpio_set_eds(RF_IRQ_PIN);
-#if defined(DEBUG_LEV2)
+#if defined (DEBUG_LEV2)
         fprintf(stdout, "BCM2835: LOW detected for pin GPIO%d\n", RF_IRQ_PIN);
 #endif
         // Get the packet, header information and RSSI
@@ -404,7 +404,7 @@ int main (int argc, const char* argv[] )
             rssi_dBm = rfmdrv.lastRssi();
             tm_now = time(NULL);
 
-#if defined(DEBUG_LEV1)
+#if defined (DEBUG_LEV1) || defined (DEBUG_LEV2)
             char_time = ctime(&tm_now);
             char_time[24] = '\0' ;
             fprintf(stdout, "%s - RFM: Packet received, %02d bytes, from 0x%02X to 0x%02X, ID: 0x%02X, F: 0x%02X, with %ddBm => '", char_time, len, from, to, id, flags, rssi_dBm);
@@ -421,7 +421,7 @@ int main (int argc, const char* argv[] )
                 last_id = id;
             }
 
-#if defined(TXQUEUE_NAME)
+#if defined (TXQUEUE_NAME)
             // Send msg on the TX queue. Payload: the first-transmission (not re-transmssion) packets.
             if (flags == 0x0) {
                 // Send msg on the queue
@@ -443,14 +443,14 @@ int main (int argc, const char* argv[] )
 #endif
 
         } 
-#if defined(DEBUG_LEV2)
+#if defined (DEBUG_LEV2)
         else {
             fprintf(stdout,"RFM: Packet receive failed\n");
         }
 #endif
       }
 
-#if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
+#if defined (DEBUG_LEV1) || defined( DEBUG_LEV2)
       fflush(stdout);
 #endif
       // Let OS do other tasks

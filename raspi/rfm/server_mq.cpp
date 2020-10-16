@@ -22,7 +22,7 @@
 #include <string.h>
 #include <errno.h>
 #include <mqueue.h>
-#include <ctime.h>
+#include <time.h>
 
 
 /// High level configurations
@@ -43,6 +43,9 @@
 // Undef to disable the meessage quueue
 #define USE_MQ
 
+// Select use of the SystemD notifications
+//#define SYSTEMD
+
 // Select the radio driver to use
 #if defined (RHRF22)
 #include <RH_RF22.h>
@@ -52,6 +55,9 @@
 fprintf(stderr, "%s: The RH_RF22 or RH_RF69 macro must be defined!\n", __BASEFILE__);
 #endif
 
+#if defined (SYSTEMD)
+#include <systemd/sd-daemon.h>
+#endif
 
 /// Low level configurations
 
@@ -264,6 +270,18 @@ int main (int argc, const char* argv[] )
         usleep(100000);
     }
 
+#if defined(SYSTEMD)
+    // Notify SystemD daemon that server has started succesfully
+    sd_notify (0, "READY=1");
+    // Get the WatchdogSec value from service file
+    char *env;
+    int sysd_wd_msec = 0;
+    unsigned long sysd_wd_starttime = millis();
+    env = getenv("WATCHDOG_USEC");
+    if (env)
+        sysd_wd_msec = atoi(env)/(2*1000);        
+#endif
+
     // IRQ Pin input/pull up
     // When RX packet is available the pin is pulled down (IRQ is low on RFM!)
     bcm2835_gpio_fsel(RF_IRQ_PIN, BCM2835_GPIO_FSEL_INPT);
@@ -274,7 +292,7 @@ int main (int argc, const char* argv[] )
     tm_now  = time(NULL);
     set_rfmmsg_timeinfo();
 
-    rfm_message.len   = (uint8_t) snprintf((char*) rfm_message.buf, RH_RF22_MAX_MESSAGE_LEN, "BCM2835: Init OK. IRQ=GPIO%d", RF_IRQ_PIN);
+    rfm_message.len   = (uint8_t) snprintf((char*) rfm_message.buf, RH_RFM_MAX_MESSAGE_LEN, "BCM2835: Init OK. IRQ=GPIO%d", RF_IRQ_PIN);
 
     memset(mqTX_buffer, 0, MAX_TXMSG_SIZE);
     memcpy(mqTX_buffer, (const char*)&rfm_message, sizeof(struct rfmmsg_t));
@@ -350,7 +368,7 @@ int main (int argc, const char* argv[] )
 #if defined(TXQUEUE_NAME)
     // Send msg on the queue
     set_rfmmsg_timeinfo();
-    rfm_message.len = (uint8_t) snprintf((char*) rfm_message.buf, RH_RF22_MAX_MESSAGE_LEN, "RFM: Init OK. CS=GPIO%d, IRQ=GPIO%d. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw", RF_CS_PIN, RF_IRQ_PIN, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
+    rfm_message.len = (uint8_t) snprintf((char*) rfm_message.buf, RH_RFM_MAX_MESSAGE_LEN, "RFM: Init OK. CS=GPIO%d, IRQ=GPIO%d. Group #%d, GW 0x%02X to Node 0x%02X. %3.2fMHz, 0x%02X TxPw", RF_CS_PIN, RF_IRQ_PIN, RF_GROUP_ID, RF_GATEWAY_ID, RF_NODE_ID, RF_FREQUENCY, RF_TXPOW);
     memset(mqTX_buffer, 0, MAX_TXMSG_SIZE);
     memcpy(mqTX_buffer, (const char*)&rfm_message, sizeof(struct rfmmsg_t));
     if ( mq_send(mqTX, mqTX_buffer, MAX_TXMSG_SIZE, TXmsg_prio) ) {
@@ -358,6 +376,11 @@ int main (int argc, const char* argv[] )
     }
 #endif
 
+#if defined (SYSTEMD)      
+      // Notify SystemD daemon
+      sd_notify (0, "WATCHDOG=1");   
+
+#endif
 
 #if defined(DEBUG_LEV2)
     fprintf(stdout, "\tListening ...\n");
@@ -430,6 +453,14 @@ int main (int argc, const char* argv[] )
 #endif
       // Let OS do other tasks
       bcm2835_delay(100);
+
+#if defined (SYSTEMD)      
+      // Notify SystemD daemon
+      if ((millis() - sysd_wd_starttime) > sysd_wd_msec) {
+          sd_notify (0, "WATCHDOG=1");   
+          sysd_wd_starttime = millis();
+      }
+#endif
 
     }
 

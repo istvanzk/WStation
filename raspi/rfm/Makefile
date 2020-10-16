@@ -14,7 +14,7 @@ INCLUDE       = -I$(RADIOHEADBASE)
 ifdef RFM22
 CFLAGS += -DRHRF22
 else
-CFLAGS += -DRHRF69
+CFLAGS += -DRHRF69 -DRFM69_HW
 endif
 
 all: server_mq

@@ -313,7 +313,9 @@ int main (int argc, const char* argv[] )
     } 
 #if defined(DEBUG_LEV2)    
     else {
-        // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36, 8dBm Tx power
+        // Defaults after init are:
+        //  RF69: 434.0MHz, modulation GFSK_Rb250Fd250, 13dBm Tx power
+        //  RF22B: 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36, 8dBm Tx power
         fprintf(stdout, "RFM: Module init OK. Using: CS=GPIO%d, IRQ=GPIO%d\n", RF_CS_PIN, RF_IRQ_PIN);
     }
 #endif

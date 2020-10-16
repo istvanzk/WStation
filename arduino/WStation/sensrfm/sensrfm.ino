@@ -83,13 +83,21 @@ Notes:
 The RadioHead/RH_ASK driver uses a timer-driven interrupt to generate 8 interrupts per bit period. By default it takes over Timer 1.
 This sketch uses Timer 2, therefore the RH_ASK timer does not need to be changed.
 
-RFM-22B version, without debug output
+RFM-22B version, with no debug output
   Sketch uses 18368 bytes (59%) of program storage space. Maximum is 30720 bytes.
   Global variables use 1027 bytes (50%) of dynamic memory, leaving 1021 bytes for local variables. Maximum is 2048 bytes.
 
-RFM-22B version, with all debug output:
+RFM-22B version, with DEBUG_LEV2 output:
   Sketch uses 21990 bytes (71%) of program storage space. Maximum is 30720 bytes.
   Global variables use 1065 bytes (52%) of dynamic memory, leaving 983 bytes for local variables. Maximum is 2048 bytes.
+
+RFM-69 version, with DEBUG_LEV1 output:
+  Sketch uses 20608 bytes (67%) of program storage space.. Maximum is 30720 bytes.
+  Global variables use 1037 bytes (50%) of dynamic memory, leaving 1011 bytes for local variables. Maximum is 2048 bytes.
+
+RFM-69 version, with DEBUG_LEV2 output:
+  Sketch uses 21222 bytes (69%) of program storage space. Maximum is 30720 bytes.
+  Global variables use 1037 bytes (50%) of dynamic memory, leaving 1011 bytes for local variables. Maximum is 2048 bytes.
 
 */
 
@@ -110,8 +118,8 @@ RFM-22B version, with all debug output:
 //#define RHRF22
 
 // Select debug info level for Serial.print()
-//#define DEBUG_LEV1
-#define DEBUG_LEV2
+#define DEBUG_LEV1
+//#define DEBUG_LEV2
 
 
 // Loop delay value (milliseconds)
@@ -153,12 +161,14 @@ SFE_BMP180 pressure;
 SHT1x sht15(A2, A3); //Data, SCK
 
 // RFM69/22B radio driver
-#if defined(RH_RF69)
+#if defined(RHRF69)
 RH_RF69 rfmdrv;
 #define RH_RFM_MAX_MESSAGE_LEN RH_RF69_MAX_MESSAGE_LEN
-#elif defined(RH_RF22)
+#define RH_RFM_TXPOW 14
+#elif defined(RHRF22)
 RH_RF22 rfmdrv;
 #define RH_RFM_MAX_MESSAGE_LEN RH_RF22_MAX_MESSAGE_LEN
+#define RH_RFM_TXPOW RH_RF22_TXPOW_11DBM
 #endif
 
 // RadioHead class to manage message delivery and receipt, using the driver declared above
@@ -210,17 +220,17 @@ void setup()
   sht15_OK  = false;
   windM_OK  = false;
 
-#if defined(DEBUG_LEV2)
+#if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
   Serial.begin(9600);
   Serial.println(F("REBOOT"));
 #endif
 
-  // Initialize RFM22B
+  // Initialize RFM
   // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36, 8dBm Tx power
   if (manager.init())
   {
-    rfmdrv.setTxPower(RH_RF22_TXPOW_11DBM);
-#if defined(DEBUG_LEV1)
+    rfmdrv.setTxPower(RH_RFM_TXPOW);
+#if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
     Serial.println(F("RFM initialized"));
 #endif
     rfm_OK = true;
@@ -229,13 +239,13 @@ void setup()
   // Initialize the BMP180 sensor (it is important to get calibration values stored on the device).
   if (pressure.begin())
   {
-#if defined(DEBUG_LEV1)
+#if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
     Serial.println(F("BMP180 initialized"));
 #endif
     bmp180_OK = true;
   }
 
-#if defined(DEBUG_LEV1)
+#if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
   Serial.println(F("SHT15 init"));
 #endif
   sht15_OK = true;
@@ -266,7 +276,7 @@ void setup()
 
   analogReference(DEFAULT);
  
-#if defined(DEBUG_LEV1)
+#if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
   Serial.println(F("WIND meter initialized"));
 #endif
   windM_OK = true;
@@ -461,7 +471,7 @@ void loop()
   }
 
 
-  // Construct RFM22B message of 20 Bytes
+  // Construct RFM message payload of 20 Bytes
   tx_data[0] = 0x4E; // N
   tx_data[1] = dir_val;
 
@@ -495,7 +505,7 @@ void loop()
   //tx_data[20] = 0x0;
 
 
-#if defined(DEBUG_LEV1)
+#if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
   // Print BMP180 info
   Serial.println(F("BMP data:"));
 
@@ -546,9 +556,9 @@ void loop()
   //Serial.print(F(" period count: "));
   //Serial.println(AnemometerPeriodReadingCount);
 
-  // Print RFM22 TX data
+  // Print RFM TX data
   Serial.print(F("TXdata: "));
-  for(uint8_t bb=0; bb < RH_RF22_MAX_MESSAGE_LEN; bb++)
+  for(uint8_t bb=0; bb < RH_RFM_MAX_MESSAGE_LEN; bb++)
   {
 	  Serial.print(tx_data[bb], HEX);
 	  Serial.print(":");
@@ -557,10 +567,10 @@ void loop()
 #endif
 
 
-  // Send a RFM22B message
+  // Send a RFM message
   if (rfm_OK)
   {
-      if (manager.sendtoWait(tx_data, RH_RF22_MAX_MESSAGE_LEN, RF_GATEWAY_ID))
+      if (manager.sendtoWait(tx_data, RH_RFM_MAX_MESSAGE_LEN, RF_GATEWAY_ID))
       {
 #if defined(DEBUG_LEV2)
         Serial.print(F("sendtoWait ACK: "));
@@ -579,15 +589,15 @@ void loop()
   }
   else
   {
-#if defined(DEBUG_LEV1)      
+#if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)     
       Serial.println(F("Data not sent on RFM!"));
       Serial.println();
 #endif    
 
     if (manager.init())
     {
-      rfmdrv.setTxPower(RH_RF22_TXPOW_11DBM);
- #if defined(DEBUG_LEV1)
+      rfmdrv.setTxPower(RH_RFM_TXPOW);
+ #if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
       Serial.println(F("RFM initialized"));
  #endif
       rfm_OK = true;

@@ -161,6 +161,15 @@ struct rfmmsg_t {
 // Flag for stop
 volatile sig_atomic_t force_stop = false;
 
+void close_mq()
+{
+    // Close & unlink message queue
+#if defined(TXQUEUE_NAME)
+    CHECK((mqd_t)-1 != mq_close(mqTX));
+    CHECK((mqd_t)-1 != mq_unlink(TXQUEUE_NAME));
+#endif
+}
+
 // Signal handler
 void end_sig_handler(int sig)
 {
@@ -178,15 +187,6 @@ void end_sig_handler(int sig)
 
     if(sig>0)
         exit(sig);
-}
-
-void close_mq()
-{
-    // Close & unlink message queue
-#if defined(TXQUEUE_NAME)
-    CHECK((mqd_t)-1 != mq_close(mqTX));
-    CHECK((mqd_t)-1 != mq_unlink(TXQUEUE_NAME));
-#endif
 }
 
 // Set current time info in the rfm_message

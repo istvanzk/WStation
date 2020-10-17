@@ -126,12 +126,12 @@ unsigned int TXmsg_prio = 0;
 #endif
 
 // Create an instance of the RFM driver
-#if defined (RHRF22)
-RH_RF22 rfmdrv(RF_CS_PIN, RF_IRQ_PIN);
-#define RH_RFM_MAX_MESSAGE_LEN RH_RF22_MAX_MESSAGE_LEN
-#elif defined (RHRF69)
+#if defined (RHRF69)
 RH_RF69 rfmdrv(RF_CS_PIN, RF_IRQ_PIN);
 #define RH_RFM_MAX_MESSAGE_LEN RH_RF69_MAX_MESSAGE_LEN
+#elif defined (RHRF22)
+RH_RF22 rfmdrv(RF_CS_PIN, RF_IRQ_PIN);
+#define RH_RFM_MAX_MESSAGE_LEN RH_RF22_MAX_MESSAGE_LEN
 #endif
 
 // Time and time string
@@ -307,18 +307,18 @@ int main (int argc, const char* argv[] )
 
 
     // Init the RFM module
-    if (!rfmdrv.init()) {
+    // Defaults after init are:
+    //  RF69: 434.0MHz, AFC BW == RX BW == 500KHz, modulation GFSK_Rb250Fd250, 13dBm Tx power
+    //  RF22B: 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36, 8dBm Tx power
+    if (rfmdrv.init()) {
+#if defined (DEBUG_LEV2)    
+        fprintf(stdout, "RFM: Module init OK. Using: CS=GPIO%d, IRQ=GPIO%d\n", RF_CS_PIN, RF_IRQ_PIN);
+#endif
+    } 
+    else { 
         fprintf(stderr, "\nRFM: Module init failed. Please verify wiring/module\n");
         end_sig_handler(1);
-    } 
-#if defined (DEBUG_LEV2)    
-    else {
-        // Defaults after init are:
-        //  RF69: 434.0MHz, AFC BW == RX BW == 500KHz, modulation GFSK_Rb250Fd250, 13dBm Tx power
-        //  RF22B: 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36, 8dBm Tx power
-        fprintf(stdout, "RFM: Module init OK. Using: CS=GPIO%d, IRQ=GPIO%d\n", RF_CS_PIN, RF_IRQ_PIN);
     }
-#endif
 
     // Since we check IRQ line with bcm_2835 level detection
     // in case radio already have a packet, IRQ is low and will never
@@ -333,18 +333,20 @@ int main (int argc, const char* argv[] )
     fprintf(stdout, "BCM2835: Low detect enabled on GPIO%d\n", RF_IRQ_PIN);
 #endif
 
-
-    // Set transmitter power to at least 11 dBm (up to 20dBm)
-    rfmdrv.setTxPower(RF_TXPOW);
+    // Adjust transmission/reception parameters
+    rfmdrv.setTxPower(RH_RFM_TXPOW);
+#if defined (RHRF69)
+    rfmdrv.setFrequency(RF_FREQUENCY);
+    rfmdrv.setModemConfig(FSK_Rb2_4Fd4_8);
+#elif defined (RHRF22)
+    rfmdrv.setFrequency(RF_FREQUENCY,0.05);
+#endif
 
     // Set Network ID (by sync words)
     // Use this for any non-default setup, else leave commented out
     syncwords[0] = 0x2d;
     syncwords[1] = 0xd4; //RF_GROUP_ID;
     rfmdrv.setSyncWords(syncwords, sizeof(syncwords));
-
-    // Adjust Frequency
-    //rfmdrv.setFrequency(RF_FREQUENCY,0.05);
 
     // This is our Gateway ID
     rfmdrv.setThisAddress(RF_GATEWAY_ID);

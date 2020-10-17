@@ -334,13 +334,13 @@ int main (int argc, const char* argv[] )
 #endif
 
     // Adjust transmission/reception parameters
-    rfmdrv.setTxPower(RH_RFM_TXPOW);
 #if defined (RHRF69)
+    rfmdrv.setModemConfig(RH_RF69::FSK_Rb2_4Fd4_8);
     rfmdrv.setFrequency(RF_FREQUENCY);
-    rfmdrv.setModemConfig(FSK_Rb2_4Fd4_8);
 #elif defined (RHRF22)
     rfmdrv.setFrequency(RF_FREQUENCY,0.05);
 #endif
+    rfmdrv.setTxPower(RF_TXPOW);
 
     // Set Network ID (by sync words)
     // Use this for any non-default setup, else leave commented out

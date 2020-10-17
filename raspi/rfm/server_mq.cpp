@@ -36,8 +36,8 @@
 
 // Select debug info level to stdout
 // Output to stderr is always active!
-//#define DEBUG_LEV1
-#define DEBUG_LEV2
+#define DEBUG_LEV1
+//#define DEBUG_LEV2
 
 // Select use of Meessage Queue (POSIX IPC)
 // Undef to disable the meessage quueue

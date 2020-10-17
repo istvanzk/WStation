@@ -92,8 +92,8 @@ RFM-22B version, with DEBUG_LEV2 output:
   Global variables use 1065 bytes (52%) of dynamic memory, leaving 983 bytes for local variables. Maximum is 2048 bytes.
 
 RFM-69 version, with DEBUG_LEV1 output:
-  Sketch uses 20608 bytes (67%) of program storage space.. Maximum is 30720 bytes.
-  Global variables use 1037 bytes (50%) of dynamic memory, leaving 1011 bytes for local variables. Maximum is 2048 bytes.
+  Sketch uses 20616 bytes (67%) of program storage space. Maximum is 30720 bytes.
+  Global variables use 1041 bytes (50%) of dynamic memory, leaving 1007 bytes for local variables. Maximum is 2048 bytes.
 
 RFM-69 version, with DEBUG_LEV2 output:
   Sketch uses 21222 bytes (69%) of program storage space. Maximum is 30720 bytes.
@@ -123,7 +123,7 @@ RFM-69 version, with DEBUG_LEV2 output:
 
 
 // Loop delay value (milliseconds)
-#define LOOP_DELAY 10000
+#define LOOP_DELAY 7000
 
 // Reference altitude (m) of Home Weather Station
 #define ALTITUDE 43.0
@@ -135,6 +135,7 @@ RFM-69 version, with DEBUG_LEV2 output:
 /// Low level configurations
 
 // RFM69/22B communication addresses
+#define RF_FREQUENCY  434.0
 #define RF_GROUP_ID   22 // All devices
 #define RF_GATEWAY_ID 1  // Server ID (where to send packets)
 #define RF_NODE_ID    10 // Client ID (device sending the packets)
@@ -144,11 +145,13 @@ RFM-69 version, with DEBUG_LEV2 output:
 // DO NOT change these unless you absolutely need to and you know what you are doing!
 
 #if defined(RHRF69)
-// RF69 messge length (bytes). The same length must be set in RH_RF69.h !
-#define RH_RF69_MAX_MESSAGE_LEN 20 
+// RF69 messge length (bytes). Includes payload + 4 bytes of address and header.
+#define RH_RF69_MAX_MESSAGE_LEN 24 
+// This is a high power radio module (see RH_RF69.h line 71)
+#define RFM69_HW
 #include <RH_RF69.h>
 #elif defined(RHRF22)
-// RF22B messge length (bytes). The same length must be set in RH_RF22.h !
+// RF22B messge length (bytes). Includes payload only. The same length must be set in RH_RF22.h !
 #define RH_RF22_MAX_MESSAGE_LEN 20 
 #include <RH_RF22.h>
 #endif
@@ -163,12 +166,12 @@ SHT1x sht15(A2, A3); //Data, SCK
 // RFM69/22B radio driver
 #if defined(RHRF69)
 RH_RF69 rfmdrv;
-#define RH_RFM_MAX_MESSAGE_LEN RH_RF69_MAX_MESSAGE_LEN
-#define RH_RFM_TXPOW 14
+#define RH_RFM_MAX_MESSAGE_LEN RH_RF69_MAX_MESSAGE_LEN - 4
+#define RF_TXPOW 15
 #elif defined(RHRF22)
 RH_RF22 rfmdrv;
 #define RH_RFM_MAX_MESSAGE_LEN RH_RF22_MAX_MESSAGE_LEN
-#define RH_RFM_TXPOW RH_RF22_TXPOW_11DBM
+#define RF_TXPOW RH_RF22_TXPOW_11DBM
 #endif
 
 // RadioHead class to manage message delivery and receipt, using the driver declared above
@@ -226,10 +229,20 @@ void setup()
 #endif
 
   // Initialize RFM
-  // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36, 8dBm Tx power
+  // Defaults after init are:
+  //  RF69: 434.0MHz, AFC BW == RX BW == 500KHz, modulation GFSK_Rb250Fd250, 13dBm Tx power
+  //  RF22B: 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36, 8dBm Tx power
   if (manager.init())
   {
-    rfmdrv.setTxPower(RH_RFM_TXPOW);
+    // Adjust transmission/reception parameters
+#if defined(RHRF69)
+    rfmdrv.setModemConfig(RH_RF69::FSK_Rb2_4Fd4_8);
+    rfmdrv.setFrequency(RF_FREQUENCY);
+#elif defined(RHRF22)
+    rfmdrv.setFrequency(RF_FREQUENCY,0.05);
+#endif
+    rfmdrv.setTxPower(RF_TXPOW);
+
 #if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
     Serial.println(F("RFM initialized"));
 #endif
@@ -294,7 +307,7 @@ void loop()
   // BMP180+SHT15 variables
   char status;
   double T = 0, P = 0, p0 = 0, a = 0;
-  float tempC = 0, tempF = 0, humidity = 0;
+  float tempC = 0, humidity = 0;
 
   char buf[10];
 
@@ -592,17 +605,7 @@ void loop()
 #if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)     
       Serial.println(F("Data not sent on RFM!"));
       Serial.println();
-#endif    
-
-    if (manager.init())
-    {
-      rfmdrv.setTxPower(RH_RFM_TXPOW);
- #if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
-      Serial.println(F("RFM initialized"));
- #endif
-      rfm_OK = true;
-    }
-    
+#endif        
   }
 
   delay(LOOP_DELAY);

@@ -92,12 +92,12 @@ RFM-22B version, with DEBUG_LEV2 output:
   Global variables use 1065 bytes (52%) of dynamic memory, leaving 983 bytes for local variables. Maximum is 2048 bytes.
 
 RFM-69 version, with DEBUG_LEV1 output:
-  Sketch uses 20616 bytes (67%) of program storage space. Maximum is 30720 bytes.
-  Global variables use 1041 bytes (50%) of dynamic memory, leaving 1007 bytes for local variables. Maximum is 2048 bytes.
+  Sketch uses 20618 bytes (67%) of program storage space. Maximum is 30720 bytes.
+  Global variables use 1076 bytes (52%) of dynamic memory, leaving 972 bytes for local variables. Maximum is 2048 bytes.
 
 RFM-69 version, with DEBUG_LEV2 output:
-  Sketch uses 21222 bytes (69%) of program storage space. Maximum is 30720 bytes.
-  Global variables use 1037 bytes (50%) of dynamic memory, leaving 1011 bytes for local variables. Maximum is 2048 bytes.
+  Sketch uses 21286 bytes (69%) of program storage space. Maximum is 30720 bytes.
+  Global variables use 1076 bytes (52%) of dynamic memory, leaving 972 bytes for local variables. Maximum is 2048 bytes.
 
 */
 
@@ -134,7 +134,8 @@ RFM-69 version, with DEBUG_LEV2 output:
 
 /// Low level configurations
 
-// RFM69/22B communication addresses
+// RFM69/22B communication & addresses
+#define RH_RFM_MESSAGE_LEN 20
 #define RF_FREQUENCY  434.0
 #define RF_GROUP_ID   22 // All devices
 #define RF_GATEWAY_ID 1  // Server ID (where to send packets)
@@ -145,8 +146,6 @@ RFM-69 version, with DEBUG_LEV2 output:
 // DO NOT change these unless you absolutely need to and you know what you are doing!
 
 #if defined(RHRF69)
-// RF69 messge length (bytes). Includes payload + 4 bytes of address and header.
-#define RH_RF69_MAX_MESSAGE_LEN 24 
 // This is a high power radio module (see RH_RF69.h line 71)
 #define RFM69_HW
 #include <RH_RF69.h>
@@ -166,20 +165,17 @@ SHT1x sht15(A2, A3); //Data, SCK
 // RFM69/22B radio driver
 #if defined(RHRF69)
 RH_RF69 rfmdrv;
-#define RH_RFM_MAX_MESSAGE_LEN RH_RF69_MAX_MESSAGE_LEN - 4
 #define RF_TXPOW 15
 #elif defined(RHRF22)
 RH_RF22 rfmdrv;
-#define RH_RFM_MAX_MESSAGE_LEN RH_RF22_MAX_MESSAGE_LEN
 #define RF_TXPOW RH_RF22_TXPOW_11DBM
 #endif
 
 // RadioHead class to manage message delivery and receipt, using the driver declared above
 RHReliableDatagram manager(rfmdrv, RF_NODE_ID);
 
-// Local data buffers
-uint8_t tx_data[RH_RFM_MAX_MESSAGE_LEN+1];
-uint8_t rx_buf[RH_RFM_MAX_MESSAGE_LEN+1];
+// Local data buffer
+uint8_t tx_data[RH_RFM_MESSAGE_LEN];
 
 // Hwd status flags
 boolean rfm_OK    = false;
@@ -327,7 +323,6 @@ void loop()
   		status = pressure.getTemperature(T);
   		if (status != 0)
   		{
-        T -= 1;
   		  // Start a pressure measurement:
   		  // The parameter is the oversampling setting, from 0 to 3 (highest res, longest wait).
   		  // If request is successful, the number of ms to wait is returned.
@@ -382,8 +377,7 @@ void loop()
   // Read humidity sensor
   if (sht15_OK)
   {
-	  tempC = sht15.readTemperatureC() - 1;
-	  //tempF = sht15.readTemperatureF();
+	  tempC = sht15.readTemperatureC();
 	  humidity = sht15.readHumidity();
   }
 
@@ -550,9 +544,7 @@ void loop()
   Serial.println(F("SHT data:"));
   Serial.print(F(" temperature: "));
   Serial.print(tempC);
-  Serial.println(F(" C, "));
-  //Serial.print(tempF);
-  //Serial.println(F(" F"));
+  Serial.println(F(" C"));
   Serial.print(F(" humidity: "));
   Serial.print(humidity);
   Serial.println(F("%"));
@@ -564,18 +556,23 @@ void loop()
   Serial.println(dir_val);
   Serial.print(F(" speed: "));
   Serial.println(AnemometerSpeed);
+#if defined(DEBUG_LEV2)  
   Serial.print(F(" last time: "));  
   Serial.println(lastAnemometerEvent);
   //Serial.print(F(" period count: "));
   //Serial.println(AnemometerPeriodReadingCount);
+#endif
 
   // Print RFM TX data
-  Serial.print(F("TXdata: "));
-  for(uint8_t bb=0; bb < RH_RFM_MAX_MESSAGE_LEN; bb++)
+  Serial.print(F("TXdata ("));
+  Serial.print(RH_RFM_MESSAGE_LEN);
+  Serial.print(F(" bytes): "));
+  for(uint8_t bb=0; bb < RH_RFM_MESSAGE_LEN-1; bb++)
   {
 	  Serial.print(tx_data[bb], HEX);
 	  Serial.print(":");
   }
+  Serial.print(tx_data[RH_RFM_MESSAGE_LEN-1], HEX);
   Serial.println();
 #endif
 
@@ -583,7 +580,7 @@ void loop()
   // Send a RFM message
   if (rfm_OK)
   {
-      if (manager.sendtoWait(tx_data, RH_RFM_MAX_MESSAGE_LEN, RF_GATEWAY_ID))
+      if (manager.sendtoWait(tx_data, RH_RFM_MESSAGE_LEN, RF_GATEWAY_ID))
       {
 #if defined(DEBUG_LEV2)
         Serial.print(F("sendtoWait ACK: "));

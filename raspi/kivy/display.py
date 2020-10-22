@@ -1,3 +1,13 @@
+'''
+Home Weather Staion code for Raspberry Pi
+
+Kivy based UI to display weather data (live and traces). The Kivy widgets are defined in screens.kv
+Uses a POSIX IPC Meesage Queue client to receive weather data from a server (see raspi/rfm/server_mq.cpp) running on the same machine
+
+Author: Istvan Z. Kovacs, 2020
+'''
+
+# System
 import time
 import struct
 from random import random, randint
@@ -9,6 +19,8 @@ import json
 from colorsys import hsv_to_rgb
 
 # Kivy
+import kivy
+kivy.require('1.11.1')
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.metrics import dp
@@ -543,13 +555,16 @@ class TracesScreen(Screen):
     # The default plot step
     _x_step = dp(100)
 
+    #def on_enter(self, *args):
+    #    self.widget_air_temp.canvas.ask_update()
+
     def update_trace_plots(self, weather_data_trace):
         '''Update the plots for all traces'''
 
         # The x axis step (common for all traces)     
-        self._x_step   = (self.widget_air_temp.width - self._x_offset - self._x_padding)/weather_data_trace["Time"].maxlen
+        self._x_step   = (self.widget_air_temp.width - self._x_offset)/weather_data_trace["Time"].maxlen
 
-        #print(weather_data_trace["Time"].maxlen)
+        #print(self.widget_air_temp.pos,self.widget_air_temp.width,self.widget_air_temp.height)
 
         # The time labels
         self._start_time_str = time.asctime(weather_data_trace["Time"][0])    
@@ -633,8 +648,8 @@ class TracesScreen(Screen):
         # The y offset and scale
         # The atm unit is roughly equivalent to the mean sea-level atmospheric pressure on Earth, 
         # that is, the Earth's atmospheric pressure at sea level is approximately 1 atm = 1013.25 mbar
-        _y_sc = self.widget_wind_speed.height/20.0
-        _y_off = self.widget_air_press.pos[1] + 0.5*self.widget_air_press.height - _y_sc*1013.25
+        _y_sc = self.widget_air_press.height/30.0
+        _y_off = self.widget_air_press.pos[1] + 0.5*self.widget_air_press.height - _y_sc*990.0
           
 
         # The points to plot

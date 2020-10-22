@@ -196,6 +196,7 @@ MyScreenManager:
             on_press: 
                 root.manager.current = 'traces15'
                 root.manager.transition.direction = 'left'  
+
         RoundedButton:
             pos_hint: {'x':-0.01, 'y':0.35}
             size_hint: 0.025, 0.30
@@ -248,7 +249,7 @@ MyScreenManager:
                     rgba: 1,1,1,1
                 Point:
                     points: traces._air_temperature_points
-                    pointsize: 5
+                    pointsize: 4
 
 
             LabelInfoSmall:
@@ -286,7 +287,7 @@ MyScreenManager:
                     rgba: 1,1,1,1
                 Point:
                     points: traces._wind_speed_points
-                    pointsize: 5
+                    pointsize: 4
 
             LabelInfoSmall:
                 text: '{:4.1f}'.format(root.manager._wind_speed) + '\n[size=15sp]m/s[/size]'
@@ -339,7 +340,7 @@ MyScreenManager:
                     rgba: 1,1,1,1
                 Point:
                     points: traces._air_pressure_points
-                    pointsize: 5
+                    pointsize: 4
 
             LabelInfoSmall:
                 text: '{:6.1f}'.format(root.manager._air_pressure) + '\n[size=15sp]mbar[/size]'
@@ -369,7 +370,7 @@ MyScreenManager:
                     rgba: 1,1,1,1
                 Point:
                     points: traces._air_relhumidity_points
-                    pointsize: 5
+                    pointsize: 4
 
             LabelInfoSmall:
                 text: '{:4.1f}'.format(root.manager._air_relhumidity) + '\n[size=15sp]%[/size]'

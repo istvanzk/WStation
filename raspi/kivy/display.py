@@ -46,13 +46,14 @@ Config.set('graphics', 'height', '480')
 Config.set('graphics', 'width', '800')
 Config.set('graphics', 'resizable', False)
 
+# The POSIX IPC Meesage Queue client
+from client_mq import ClientMQ
+
 # Message queue parameters
 # Message queue read interval (seconds)
 RXQUEUE_TIME  = 15 
-# Message queue name
-RXQUEUE_NAME  = "/rf22b_server_tx"
-# Max message length (bytes)
-MAX_RXMSG_SIZE = 255
+# Message queue name to connect to
+RXQUEUE_NAME  = "/rf69_server_tx"
 
 # Wind direction steps and North index/step
 DIR_STEPS      = 16
@@ -99,108 +100,6 @@ wssettings = json.dumps([
      'key': 'optionsexample',
      'options': ['option1', 'option2', 'option3']}])
 
-
-class ClientMq(object):
-
-    # The message queue
-    mqRX = None
-
-    def __init__(self, rxqueue_name):
-        # Create the message queue
-        # The umask is not relevant for reading, when the queue has been created as RW!
-        #old_umask = os.umask(0)
-        #os.umask(old_umask)
-        if hasattr(posix_ipc, 'MessageQueue'):
-            try:
-                self.mqRX = posix_ipc.MessageQueue(rxqueue_name, posix_ipc.O_RDONLY | posix_ipc.O_CREAT)
-                # Request notifications
-                #mqRX.request_notification((self.process_notification, mqRX))
-            except:
-                self.mqRX = None
-                pass
-        else:
-            self.mqRX = None
-
-
-    def process_notification(self,mq):
-
-        s, p = mq.receive()
-        sd = s.decode()
-
-        # Re-register for notifications
-        mq.request_notification((self.process_notification, mq))
-
-        #print("Message received: %s (%d) - %s\n" % (s, p, sd))
-
-    def read_weather_data(self, timeout_sec=None):
-       
-        # The local dictionary for storing the most recent weather data
-        _weather_data = {}
-
-        # Return if no RX message queue
-        if self.mqRX is None:
-            return None
-
-        # Receive from the MessageQueue
-        # Read all available messages and keep the last one only
-        bendRX = False
-        bmsgRX = False
-        while not bendRX:
-            try:
-                msg, pri = self.mqRX.receive(timeout=timeout_sec)
-                bmsgRX = True
-            except posix_ipc.BusyError:
-                bendRX = True
-
-        if not bmsgRX:
-            return None
-
-        # Unpack header info    
-        _unpacked_msgheader = struct.unpack('HHHHHHHHHBBBBBb', msg[:24])
-        _weather_data["Header"] = list(_unpacked_msgheader)
-
-        # Show raw data
-        #print(F"Message ({p:d}):")
-        #print(unpacked_msgheader)
-        #print(":".join("{:1s}".format(chr(c)) for c in msg[24:44]))
-
-        # Decode the 20 bytes weather data (from the RF22B/Arduino)
-        if _weather_data["Header"][14] == 20:
-            ii = 24
-            lng = 0
-            while ii < 44:
-                if chr(msg[ii]) == 'N':
-                    val = msg[ii+1]
-                    lng = 1
-
-                    #print(F"{chr(msg[ii]):1s}: {val:1d}")
-                    _weather_data[F"{chr(msg[ii]):1s}"] = val
-                
-                elif chr(msg[ii]) in ['S', 'T', 'P', 'H']:
-                    if chr(msg[ii]) is 'P':
-                        val_d = bytearray(msg[ii+1:ii+6])
-                        lng = 5
-                    else:
-                        val_d = bytearray(msg[ii+1:ii+4])                    
-                        lng = 3
-
-                    if val_d[0] == 0x20:
-                        val_d[0] = 0x30
-
-                    val = 0
-                    for dd in range(lng):
-                        val += (val_d[lng-dd-1]-0x30)*10**(dd-1)   
-
-                    #print(F"{chr(msg[ii]):1s}: {val:.1f}")
-                    _weather_data[F"{chr(msg[ii]):1s}"] = val
-
-                ii += (lng+1)
-
-        # Initial message with start-up info (string)
-        else:
-            _weather_data["IniMsg"] = "".join("{:1s}".format(chr(c)) for c in msg[18:(18+_weather_data["Header"][11])])
-
-        return _weather_data
 
 class MyScreenManager(ScreenManager):    
 
@@ -288,14 +187,14 @@ class MyScreenManager(ScreenManager):
 
         # Create the receive message queue
         # _msg_queue.mqRX is set to None when no MessageQueue is available (e.g. MacOS)!
-        self._msg_queue = ClientMq(self.rxqueueName)
+        self._msg_queue = ClientMQ(self.rxqueueName)
 
     def update_mainscreen_info(self, *args):
 
         # Current time as string
         self._crt_time_str = time.asctime(time.localtime(time.time()))
 
-        # Get real data from the remote weather station (via RF22B and local MessageQueue)
+        # Get real data from the remote weather station (via local MessageQueue)
         if self._msg_queue.mqRX is not None:
 
             _weather_data = self._msg_queue.read_weather_data(1.0)
@@ -306,7 +205,7 @@ class MyScreenManager(ScreenManager):
                     self.weather_data["IniMsg"] = None
 
                     # Adjust North direction based on calibration data
-                    _weather_data["N"]     = _weather_data["N"] - self.northIndex
+                    _weather_data["N"]     -= self.northIndex
                     if _weather_data["N"] <= 0:
                         _weather_data["N"] += self.windDirSteps 
                     self._wind_direction   = (360/self.windDirSteps) * _weather_data["N"]
@@ -320,10 +219,10 @@ class MyScreenManager(ScreenManager):
                     self.weather_data["IniMsg"] = _weather_data["IniMsg"]
 
                 # Header info
-                _weather_data["Header"][13] -= 256
                 self.weather_data["Header"] = _weather_data["Header"]
 
                 # RSSI
+                _weather_data["Header"][13] -= 256
                 self._rssi_dBm = _weather_data["Header"][13]
 
                 # Info
@@ -375,9 +274,9 @@ class MyScreenManager(ScreenManager):
                 self._air_temperature -= 2*random()
 
             if random() > 0.5:
-                self._air_pressure += 2*random()
+                self._air_pressure += 5*random()
             else:
-                self._air_pressure -= 2*random()
+                self._air_pressure -= 5*random()
 
             if random() > 0.5:
                 self._air_relhumidity += random()
@@ -649,7 +548,7 @@ class TracesScreen(Screen):
         # The atm unit is roughly equivalent to the mean sea-level atmospheric pressure on Earth, 
         # that is, the Earth's atmospheric pressure at sea level is approximately 1 atm = 1013.25 mbar
         _y_sc = self.widget_air_press.height/30.0
-        _y_off = self.widget_air_press.pos[1] + 0.5*self.widget_air_press.height - _y_sc*990.0
+        _y_off = self.widget_air_press.pos[1] + 0.66*self.widget_air_press.height - _y_sc*1013.25
           
 
         # The points to plot
@@ -852,7 +751,7 @@ class HomeWeatherStationApp(App):
                 self.manager.north_check()
 
     def on_start(self):
-        print("\non_start:")
+        #print("\non_start:")
         self._win_width = int(Config.get('graphics', 'width'))
         self._win_height = int(Config.get('graphics', 'height'))
         #print(self._win_width, self._win_height)
@@ -866,6 +765,8 @@ class HomeWeatherStationApp(App):
 
     def on_stop(self):
         #print("\non_stop:")
+        #if self.manager._msg_queue.mqRX is not None:
+        #    self.manager._msg_queue.mqRX.close()
         pass
     
 HomeWeatherStationApp().run()

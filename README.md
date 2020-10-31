@@ -1,6 +1,6 @@
 ## Home Weather Station built with Arduino Pro Mini and Raspberry PI (3 A+)
 
-**Note: This repo contains work-in-progress code and schematics - October 2020**
+**Note: This repo contains work-in-progress code and schematics - October 2020 (v1.0)**
 
 **Dependencies**
 
@@ -14,7 +14,7 @@
 - Python module for [POSIX IPC Semaphores, Shared Memory and Message Queues][6]
 - Pyhton library [Kivy][7]
 
-**GUI v1.0**
+**GUI (v1.0)**
 - The main screen - updated every 45 seconds
 ![Main screen](/docs/mainscreen.jpg)
 
@@ -22,16 +22,18 @@
 ![Traces screen](/docs/tracescreen.jpg)
 
 
-**Structure (draft)**
+**Structure (v1.0)**
 
 *arduino*
-- *KiCad*:
-- *WStation*:
+- *KiCad*: KiCad circuit diagrams
+- *WStation*: code
+  - *sensrfm*: client code for collecting weather sensor data and sending it via RFM69HCW or RFM22B radio
+  - other folders: test code for sensors and radio
 
 *raspi*
-- *KiCad*:
-- *kivy*:
-- *rfm*:
+- *KiCad*: KiCad circuit diagrams
+- *kivy*: Kivy GUI code (client_mq.py, display.py and screens.kv)
+- *rfm*: C code for reading the weather data transmissions via the RFM69HCW or RFM22B radio and sending them via POSIX MessageQueue to the Kivy GUI (server_mq.cpp)
 
 *docs*
 - Schematics and pictures

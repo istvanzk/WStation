@@ -14,6 +14,13 @@
 - Python module for [POSIX IPC Semaphores, Shared Memory and Message Queues][6]
 - Pyhton library [Kivy][7]
 
+**GUI v1.0**
+- The main screen - updated every 45 seconds
+![Main screen](/docs/mainscreen.jpg)
+
+- The trace sscreen - for last 15 minutes
+![Traces screen](/docs/tracescreen.jpg)
+
 
 **Structure (draft)**
 

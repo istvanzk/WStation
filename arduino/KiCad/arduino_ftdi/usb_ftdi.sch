@@ -6,8 +6,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "USB-UART to RS422 5V interface"
-Date "2021-03-06"
-Rev "1.1"
+Date "2021-04-11"
+Rev "1.3"
 Comp ""
 Comment1 "Interface from UART to RS442 on Ethernet cable"
 Comment2 ""
@@ -4959,16 +4959,6 @@ Ethernet cable #1\nFTDI via RS422 \nand power suply
 Wire Wire Line
 	4950 3450 4950 3250
 Wire Wire Line
-	5725 2950 5350 2950
-Connection ~ 5725 2950
-Wire Wire Line
-	5725 3225 5725 2950
-Wire Wire Line
-	5425 2850 5350 2850
-Connection ~ 5425 2850
-Wire Wire Line
-	5425 3225 5425 2850
-Wire Wire Line
 	5725 2550 5350 2550
 Connection ~ 5725 2550
 Wire Wire Line
@@ -4981,16 +4971,6 @@ Wire Wire Line
 Wire Wire Line
 	5950 1425 5725 1425
 Wire Wire Line
-	5725 1825 5350 1825
-Connection ~ 5725 1825
-Wire Wire Line
-	5725 2100 5725 1825
-Wire Wire Line
-	5425 1725 5350 1725
-Connection ~ 5425 1725
-Wire Wire Line
-	5425 2100 5425 1725
-Wire Wire Line
 	5725 1425 5350 1425
 Connection ~ 5725 1425
 Wire Wire Line
@@ -5001,36 +4981,14 @@ Connection ~ 5425 1525
 Wire Wire Line
 	5425 1325 5425 1525
 $Comp
-L Device:R R4
-U 1 1 5F664FC1
-P 5575 3225
-F 0 "R4" V 5368 3225 50  0000 C CNN
-F 1 "R120" V 5459 3225 50  0000 C CNN
-F 2 "" V 5505 3225 50  0001 C CNN
-F 3 "~" H 5575 3225 50  0001 C CNN
-	1    5575 3225
-	0    -1   1    0   
-$EndComp
-$Comp
-L Device:R R3
+L Device:R R2
 U 1 1 5F664745
 P 5575 2425
-F 0 "R3" V 5368 2425 50  0000 C CNN
+F 0 "R2" V 5368 2425 50  0000 C CNN
 F 1 "R120" V 5459 2425 50  0000 C CNN
 F 2 "" V 5505 2425 50  0001 C CNN
 F 3 "~" H 5575 2425 50  0001 C CNN
 	1    5575 2425
-	0    -1   1    0   
-$EndComp
-$Comp
-L Device:R R2
-U 1 1 5F663EB7
-P 5575 2100
-F 0 "R2" V 5368 2100 50  0000 C CNN
-F 1 "R120" V 5459 2100 50  0000 C CNN
-F 2 "" V 5505 2100 50  0001 C CNN
-F 3 "~" H 5575 2100 50  0001 C CNN
-	1    5575 2100
 	0    -1   1    0   
 $EndComp
 $Comp
@@ -5067,15 +5025,9 @@ F 3 "https://datasheets.maximintegrated.com/en/ds/MAX1487E-MAX491E.pdf" H 4710 2
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5725 1825 8525 1825
-Wire Wire Line
-	5425 1725 8450 1725
-Wire Wire Line
 	5725 2550 7025 2550
 Wire Wire Line
 	5425 2650 7125 2650
-Wire Wire Line
-	5425 2850 7300 2850
 Text Notes 6100 1500 2    50   ~ 0
 nc
 Wire Wire Line
@@ -5206,5 +5158,11 @@ Wire Wire Line
 Wire Wire Line
 	8250 2950 8250 2775
 Wire Wire Line
-	5725 2950 8250 2950
+	5350 1825 8525 1825
+Wire Wire Line
+	5350 1725 8450 1725
+Wire Wire Line
+	5350 2950 8250 2950
+Wire Wire Line
+	5350 2850 7300 2850
 $EndSCHEMATC

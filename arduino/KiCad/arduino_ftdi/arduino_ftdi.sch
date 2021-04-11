@@ -6,8 +6,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "RS422 5V to UART 3V3 interface"
-Date "2021-03-06"
-Rev "2.2"
+Date "2021-04-11"
+Rev "2.3"
 Comp ""
 Comment1 "Interface to provide UART from RS442 on Ethernet cable"
 Comment2 ""
@@ -187,8 +187,6 @@ Wire Wire Line
 	5025 1525 5250 1525
 Wire Wire Line
 	5250 1525 5250 1475
-Wire Wire Line
-	5250 1475 5550 1475
 $Comp
 L Interface_UART:MAX488E U2
 U 1 1 5F62386B
@@ -203,11 +201,7 @@ $EndComp
 Wire Wire Line
 	5150 2550 5150 2500
 Wire Wire Line
-	5150 2500 5250 2500
-Wire Wire Line
 	5200 2650 5200 2600
-Wire Wire Line
-	5200 2600 5550 2600
 Wire Wire Line
 	5150 2850 5150 2900
 Wire Wire Line
@@ -248,20 +242,9 @@ F 3 "~" H 3975 5800 50  0001 C CNN
 $EndComp
 $Comp
 L Device:R R1
-U 1 1 5F62DFF3
-P 5400 1275
-F 0 "R1" V 5193 1275 50  0000 C CNN
-F 1 "R120" V 5284 1275 50  0000 C CNN
-F 2 "" V 5330 1275 50  0001 C CNN
-F 3 "~" H 5400 1275 50  0001 C CNN
-	1    5400 1275
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R2
 U 1 1 5F62DFF4
 P 5400 2050
-F 0 "R2" V 5193 2050 50  0000 C CNN
+F 0 "R1" V 5193 2050 50  0000 C CNN
 F 1 "R120" V 5284 2050 50  0000 C CNN
 F 2 "" V 5330 2050 50  0001 C CNN
 F 3 "~" H 5400 2050 50  0001 C CNN
@@ -269,35 +252,16 @@ F 3 "~" H 5400 2050 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R R3
-U 1 1 5F62DFF5
-P 5400 2375
-F 0 "R3" V 5193 2375 50  0000 C CNN
-F 1 "R120" V 5284 2375 50  0000 C CNN
-F 2 "" V 5330 2375 50  0001 C CNN
-F 3 "~" H 5400 2375 50  0001 C CNN
-	1    5400 2375
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R4
+L Device:R R2
 U 1 1 5F62DFF6
 P 5400 3175
-F 0 "R4" V 5193 3175 50  0000 C CNN
+F 0 "R2" V 5193 3175 50  0000 C CNN
 F 1 "R120" V 5284 3175 50  0000 C CNN
 F 2 "" V 5330 3175 50  0001 C CNN
 F 3 "~" H 5400 3175 50  0001 C CNN
 	1    5400 3175
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	5550 1275 5550 1475
-Connection ~ 5550 1475
-Wire Wire Line
-	5550 1475 5625 1475
-Wire Wire Line
-	5250 1275 5250 1375
-Connection ~ 5250 1375
 Wire Wire Line
 	5250 1375 5625 1375
 Wire Wire Line
@@ -316,16 +280,6 @@ Wire Wire Line
 	5025 1425 5250 1425
 Wire Wire Line
 	5250 1425 5250 1375
-Wire Wire Line
-	5550 2375 5550 2600
-Connection ~ 5550 2600
-Wire Wire Line
-	5550 2600 5625 2600
-Wire Wire Line
-	5250 2375 5250 2500
-Connection ~ 5250 2500
-Wire Wire Line
-	5250 2500 5625 2500
 Wire Wire Line
 	5550 3175 5550 2800
 Connection ~ 5550 2800
@@ -7354,4 +7308,10 @@ Text Label 7025 2600 0    51   ~ 0
 RX-FTDI
 Text Label 7025 2800 0    51   ~ 0
 TX-FTDI
+Wire Wire Line
+	5250 1475 5625 1475
+Wire Wire Line
+	5200 2600 5625 2600
+Wire Wire Line
+	5150 2500 5625 2500
 $EndSCHEMATC

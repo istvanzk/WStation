@@ -1,5 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:arduino_wstation-cache
+LIBS:arduino_wstation_rfm69-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -15,7 +15,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L arduino_wstation-rescue:CONN_12-wstation-cache P1
+L arduino_wstation_rfm69-rescue:CONN_12-wstation-cache-arduino_wstation-rescue P1
 U 1 1 552014A1
 P 6725 2375
 F 0 "P1" V 6675 2375 60  0000 C CNN
@@ -26,7 +26,7 @@ F 3 "" H 6725 2375 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L arduino_wstation-rescue:CONN_12-wstation-cache P4
+L arduino_wstation_rfm69-rescue:CONN_12-wstation-cache-arduino_wstation-rescue P4
 U 1 1 552014EF
 P 7050 2375
 F 0 "P4" V 7000 2375 60  0000 C CNN
@@ -138,7 +138,7 @@ A2
 Text Label 7675 2225 0    60   ~ 0
 A3
 $Comp
-L arduino_wstation-rescue:CONN_2-wstation-cache P3
+L arduino_wstation_rfm69-rescue:CONN_2-wstation-cache-arduino_wstation-rescue P3
 U 1 1 55201A4F
 P 6675 3200
 F 0 "P3" V 6625 3200 40  0000 C CNN
@@ -155,7 +155,7 @@ A5
 Text Notes 6350 725  0    60   ~ 0
 Shield Arduino Pro Mini \n
 $Comp
-L arduino_wstation-rescue:CONN_2-wstation-cache P5
+L arduino_wstation_rfm69-rescue:CONN_2-wstation-cache-arduino_wstation-rescue P5
 U 1 1 552112EB
 P 7100 3200
 F 0 "P5" V 7050 3200 40  0000 C CNN
@@ -170,7 +170,7 @@ A7
 Text Label 7200 3550 3    60   ~ 0
 A6
 $Comp
-L arduino_wstation-rescue:BMP180-bmp180 IC2
+L arduino_wstation_rfm69-rescue:BMP180-bmp180-arduino_wstation-rescue IC2
 U 1 1 58010E86
 P 10025 5775
 F 0 "IC2" H 10225 6075 60  0000 C CNN
@@ -192,7 +192,7 @@ F 3 "" H 5225 1900 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L arduino_wstation-rescue:RFM69HCW U2
+L arduino_wstation_rfm69-rescue:RFM69HCW-arduino_wstation-rescue U2
 U 1 1 58011353
 P 10000 2725
 F 0 "U2" H 10275 2250 60  0000 C CNN
@@ -692,7 +692,7 @@ F 3 "" H 5525 5900 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L arduino_wstation-rescue:OPTO_NPN-wstation-cache 1Q2
+L arduino_wstation_rfm69-rescue:OPTO_NPN-wstation-cache-arduino_wstation-rescue 1Q2
 U 1 1 5801EB4C
 P 2625 6600
 F 0 "1Q2" H 2775 6650 50  0000 L CNN
@@ -703,7 +703,7 @@ F 3 "" H 2625 6600 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L arduino_wstation-rescue:OPTO_NPN-wstation-cache 1Q3
+L arduino_wstation_rfm69-rescue:OPTO_NPN-wstation-cache-arduino_wstation-rescue 1Q3
 U 1 1 5801EBFA
 P 3500 6600
 F 0 "1Q3" H 3650 6650 50  0000 L CNN
@@ -714,7 +714,7 @@ F 3 "" H 3500 6600 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L arduino_wstation-rescue:OPTO_NPN-wstation-cache 1Q4
+L arduino_wstation_rfm69-rescue:OPTO_NPN-wstation-cache-arduino_wstation-rescue 1Q4
 U 1 1 5801ED94
 P 4350 6600
 F 0 "1Q4" H 4500 6650 50  0000 L CNN
@@ -1163,7 +1163,7 @@ Wire Wire Line
 Wire Wire Line
 	1700 6800 5275 6800
 $Comp
-L arduino_wstation-rescue:SHT1X-sht10_11_15 IC1
+L arduino_wstation_rfm69-rescue:SHT1X-sht10_11_15-arduino_wstation-rescue IC1
 U 1 1 58010BB1
 P 10000 4625
 F 0 "IC1" H 9800 4150 50  0000 L BNN
@@ -1174,7 +1174,7 @@ F 3 "" H 10000 4625 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L arduino_wstation-rescue:CONN_6-wstation-cache P2
+L arduino_wstation_rfm69-rescue:CONN_6-wstation-cache-arduino_wstation-rescue P2
 U 1 1 55201543
 P 6875 1575
 F 0 "P2" V 6925 1550 60  0000 C CNN
@@ -1248,7 +1248,7 @@ Connection ~ 2925 6125
 Wire Wire Line
 	2925 6125 3800 6125
 $Comp
-L arduino_wstation-rescue:OPTO_NPN-wstation-cache 1Q5
+L arduino_wstation_rfm69-rescue:OPTO_NPN-wstation-cache-arduino_wstation-rescue 1Q5
 U 1 1 5801EE37
 P 5175 6600
 F 0 "1Q5" H 5325 6650 50  0000 L CNN

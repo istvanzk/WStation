@@ -6,7 +6,7 @@ Collects measurements from:
   * temperature & humidity (SHT15)
 Transmits combined data using a RH69HCW or RFM22B radio module
 
-Author: Istvan Z. Kovacs, 2019-2020
+Author: Istvan Z. Kovacs, 2019-2021
 
 ------------------------------------
 Connections:
@@ -123,7 +123,10 @@ RFM-69 version, with DEBUG_LEV2 output:
 
 
 // Loop delay value (milliseconds)
-#define LOOP_DELAY 7000
+// Short delays are good for testing
+// More accurate temperature readings are possible only with long delays
+// see http://cdn.sparkfun.com/datasheets/Sensors/Pressure/BMP180.pdf
+#define LOOP_DELAY 27000
 
 // Reference altitude (m) of Home Weather Station
 #define ALTITUDE 43.0
@@ -220,7 +223,7 @@ void setup()
   windM_OK  = false;
 
 #if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)
-  Serial.begin(9600);
+  Serial.begin(19200);
   Serial.println(F("REBOOT"));
 #endif
 
@@ -348,7 +351,7 @@ void loop()
     			  // This number is commonly used in weather reports.
     			  // Parameters: P = absolute pressure in mb, ALTITUDE = current altitude in m.
     			  // Result: p0 = sea-level compensated pressure in mb
-    			  p0 = pressure.sealevel(P,ALTITUDE); // we're at 1655 meters (Boulder, CO)
+    			  p0 = pressure.sealevel(P,ALTITUDE);
     
     			  // On the other hand, if you want to determine your altitude from the pressure reading,
     			  // use the altitude function along with a baseline pressure (sea-level or other).

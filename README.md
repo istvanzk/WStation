@@ -1,6 +1,6 @@
 ## Home Weather Station built with Arduino Pro Mini and Raspberry PI (3 A+)
 
-**Note: This repo contains work-in-progress code and schematics - October 2020 (v1.0)**
+**Note: This repo contains work-in-progress code and schematics - August 2021 (v2.0)**
 
 **Dependencies**
 

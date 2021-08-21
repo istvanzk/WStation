@@ -1,15 +1,14 @@
 EESchema Schematic File Version 4
-LIBS:usb_ftdi-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title "USB-UART to RS422 5V interface"
-Date "2021-04-11"
-Rev "1.3"
+Title "USB-UART to RS485 5V interface"
+Date "2021-08-21"
+Rev "1.5"
 Comp ""
-Comment1 "Interface from UART to RS442 on Ethernet cable"
+Comment1 "Interface from UART to RS485 on Ethernet cable"
 Comment2 ""
 Comment3 ""
 Comment4 ""
@@ -4985,7 +4984,7 @@ L Device:R R2
 U 1 1 5F664745
 P 5575 2425
 F 0 "R2" V 5368 2425 50  0000 C CNN
-F 1 "R120" V 5459 2425 50  0000 C CNN
+F 1 "R100" V 5459 2425 50  0000 C CNN
 F 2 "" V 5505 2425 50  0001 C CNN
 F 3 "~" H 5575 2425 50  0001 C CNN
 	1    5575 2425
@@ -4996,7 +4995,7 @@ L Device:R R1
 U 1 1 5F6632F6
 P 5575 1325
 F 0 "R1" V 5368 1325 50  0000 C CNN
-F 1 "R120" V 5459 1325 50  0000 C CNN
+F 1 "R100" V 5459 1325 50  0000 C CNN
 F 2 "" V 5505 1325 50  0001 C CNN
 F 3 "~" H 5575 1325 50  0001 C CNN
 	1    5575 1325
@@ -5081,22 +5080,7 @@ Text Notes 825  2225 0    51   ~ 10
 USB to PC\n(MICRO-B)
 Wire Bus Line
 	2025 2125 1325 2125
-$Comp
-L Device:R R5
-U 1 1 5F70F0B5
-P 4950 3700
-F 0 "R5" V 4743 3700 50  0000 C CNN
-F 1 "R100" V 4834 3700 50  0000 C CNN
-F 2 "" V 4880 3700 50  0001 C CNN
-F 3 "~" H 4950 3700 50  0001 C CNN
-	1    4950 3700
-	-1   0    0    -1  
-$EndComp
-Wire Wire Line
-	4950 3550 4950 3450
 Connection ~ 4950 3450
-Wire Wire Line
-	4950 3850 4950 4125
 Connection ~ 4950 4125
 Text Notes 1450 1350 0    51   ~ 0
 UB1\nFT231x breakout\n(SparkFun BOB-13263)
@@ -5165,4 +5149,6 @@ Wire Wire Line
 	5350 2950 8250 2950
 Wire Wire Line
 	5350 2850 7300 2850
+Wire Wire Line
+	4950 3450 4950 4125
 $EndSCHEMATC

@@ -1,12 +1,13 @@
 EESchema Schematic File Version 4
+LIBS:arduino_ftdi-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "RS485 5V to UART 3V3 interface"
-Date "2021-08-21"
-Rev "3.0"
+Date "2021-04-21"
+Rev "2.4"
 Comp ""
 Comment1 "Interface to provide UART from RS485 on Ethernet cable"
 Comment2 ""
@@ -289,36 +290,59 @@ Wire Wire Line
 Connection ~ 5250 2900
 Wire Wire Line
 	5250 2900 5625 2900
+$Comp
+L Logic_LevelTranslator:TXB0104D U3
+U 1 1 5F62DFF7
+P 8400 2325
+F 0 "U3" H 8675 3000 50  0000 C CNN
+F 1 "TXB0104 breakout (SparkFun BOB11771) " H 8800 1450 50  0001 C CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 8400 1575 50  0001 C CNN
+F 3 "http://www.ti.com/lit/ds/symlink/txb0104.pdf" H 8510 2420 50  0001 C CNN
+	1    8400 2325
+	-1   0    0    -1  
+$EndComp
 Wire Wire Line
 	6025 3400 6025 3200
 Wire Wire Line
 	6425 1675 7600 1675
 Wire Wire Line
-	7600 1675 7600 1975
+	7600 1675 7600 2025
 Wire Wire Line
-	7600 1975 7950 1975
+	7600 2025 8000 2025
 Wire Wire Line
-	6425 2600 7700 2600
+	6425 2600 7600 2600
 Wire Wire Line
-	7700 2600 7700 2475
+	7600 2600 7600 2225
 Wire Wire Line
-	7700 2475 7950 2475
+	7600 2225 8000 2225
 Wire Wire Line
-	6425 2800 7600 2800
+	6425 2800 7700 2800
 Wire Wire Line
-	7600 2800 7600 2375
+	7700 2800 7700 2425
 Wire Wire Line
-	7600 2375 7950 2375
+	7700 2425 8000 2425
+Text GLabel 5800 3750 2    50   Input ~ 0
+VDD
 Text GLabel 5800 3850 2    50   Input ~ 0
 GNDREF
+Text GLabel 4425 6025 0    50   Input ~ 0
+3V3
 Text GLabel 4425 6175 0    50   Input ~ 0
 GND
+Text GLabel 3500 4250 2    50   Input ~ 0
+VDD
 Text GLabel 3500 4450 2    50   Input ~ 0
 GNDREF
 Wire Wire Line
 	3500 4250 3250 4250
+Text GLabel 9800 3850 2    50   Input ~ 0
+GND
+Text GLabel 9825 1200 2    50   Input ~ 0
+3V3
 Text GLabel 9875 1025 2    50   Input ~ 0
 5V
+Wire Wire Line
+	8800 1825 8900 1825
 Text GLabel 5800 6425 0    50   Input ~ 0
 VDD
 Text GLabel 5800 6625 0    50   Input ~ 0
@@ -337,6 +361,19 @@ Text Notes 6275 6000 0    43   ~ 0
 Outputs\n3V3@800mA\n5V@800mA
 Text Notes 6300 6575 0    43   ~ 0
 Input\n9V - 12V\n2A - 5A
+$Comp
+L Jumper:SolderJumper_2_Bridged JP1
+U 1 1 5F62DFF1
+P 8900 1500
+F 0 "JP1" V 8854 1568 50  0000 L CNN
+F 1 "Closed" V 8945 1568 50  0000 L CNN
+F 2 "" H 8900 1500 50  0001 C CNN
+F 3 "~" H 8900 1500 50  0001 C CNN
+	1    8900 1500
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	8900 1650 8900 1825
 Text Notes 1125 6150 0    51   ~ 10
 Ethernet cable #2\nArduino UART
 Text Notes 1125 3125 0    51   ~ 10
@@ -350,10 +387,13 @@ Wire Wire Line
 Wire Wire Line
 	5000 3850 5375 3850
 Wire Wire Line
-	7825 1025 7825 2175
-Connection ~ 7825 1025
+	8300 1025 8300 1625
+Connection ~ 8300 1025
 Wire Wire Line
 	6625 1025 6625 2075
+Wire Wire Line
+	8900 1350 8900 1200
+Connection ~ 8900 1200
 Wire Wire Line
 	6250 6625 6250 5900
 $Comp
@@ -386,11 +426,17 @@ Wire Wire Line
 	6025 875  6025 1075
 Connection ~ 6975 2200
 Wire Wire Line
-	8775 1975 9350 1975
+	8800 2025 9175 2025
 Wire Wire Line
-	7825 1025 9875 1025
+	8800 2225 9075 2225
 Wire Wire Line
-	6625 1025 7825 1025
+	8300 1025 9875 1025
+Wire Wire Line
+	8900 1200 9825 1200
+Wire Wire Line
+	6625 1025 8300 1025
+Text GLabel 4950 6000 0    50   Input ~ 0
+5V
 Wire Wire Line
 	5375 5800 6200 5800
 Wire Wire Line
@@ -417,7 +463,11 @@ Connection ~ 4625 6175
 Wire Wire Line
 	4625 6175 4625 6300
 Wire Wire Line
-	8900 2175 8900 1200
+	8400 3125 8400 3375
+Wire Wire Line
+	8500 1200 8900 1200
+Wire Wire Line
+	8500 1625 8500 1200
 Text Notes 5425 5725 0    50   ~ 0
 nc
 Text Notes 4825 5725 0    50   ~ 0
@@ -438,18 +488,40 @@ Wire Wire Line
 	3625 3850 4800 3850
 Wire Wire Line
 	3775 3750 4800 3750
+Wire Notes Line
+	9325 1125 9325 2975
+Wire Notes Line
+	9325 3025 7825 3025
+Wire Notes Line
+	7825 2975 7825 1125
+Wire Notes Line
+	7825 1100 9325 1100
+Text Notes 9375 2125 0    51   ~ 0
+UB1\nTXB0104 breakout \n(SparkFun BOB11771) 
 Wire Wire Line
-	7825 2275 7825 3125
+	8400 3025 8400 3125
 Wire Wire Line
-	7825 3125 6975 3125
+	8400 3125 6975 3125
 Wire Wire Line
 	6975 2200 6975 3125
 Wire Wire Line
-	9350 1975 9350 4975
+	9175 2025 9175 4975
 Wire Wire Line
-	4175 4975 9350 4975
+	8800 2425 8975 2425
 Wire Wire Line
-	4175 5075 9250 5075
+	4175 5175 8975 5175
+Wire Wire Line
+	4175 4975 9175 4975
+Wire Wire Line
+	9075 2225 9075 5075
+Wire Wire Line
+	4175 5075 9075 5075
+Wire Wire Line
+	8975 2425 8975 5175
+Text Notes 9100 1300 0    51   ~ 0
+VCCA
+Text Notes 8075 1200 0    51   ~ 0
+VCCB\n
 Wire Wire Line
 	1925 5250 2025 5250
 Wire Wire Line
@@ -504,8 +576,14 @@ Text Label 2700 4975 0    51   ~ 0
 DTR-Arduino(Transparent)
 Text Label 2700 5075 0    51   ~ 0
 TXO-Arduino(Black)
+Text Label 2700 5175 0    51   ~ 0
+RXI-Arduino(White)
+Text Label 4525 5075 0    51   ~ 0
+RX-FTDI
 Text Label 4525 5175 0    51   ~ 0
 TX-FTDI
+Text Label 4525 4975 0    51   ~ 0
+DTR-FTDI
 $Comp
 L Connector:Screw_Terminal_01x02 J7
 U 1 1 5F5F586F
@@ -519,20 +597,60 @@ F 3 "~" H 4800 2550 50  0001 C CNN
 $EndComp
 Text Notes 6475 1500 0    50   ~ 0
 nc
-Text Label 9000 2475 0    51   ~ 0
+Text Label 8825 2025 0    51   ~ 0
+DTR-FTDI
+Text Label 8825 2225 0    51   ~ 0
 RX-FTDI
+Text Label 8825 2425 0    51   ~ 0
+TX-FTDI
+Text Label 7025 1675 0    51   ~ 0
+DTR-FTDI
 Text Label 7025 2600 0    51   ~ 0
 RX-FTDI
 Text Label 7025 2800 0    51   ~ 0
 TX-FTDI
+$Comp
+L Connector:Screw_Terminal_01x03 J?
+U 1 1 5F5F077A
+P 3975 5075
+F 0 "J?" H 3893 5392 50  0000 C CNN
+F 1 "DTR/TX/RX" H 3893 5301 50  0000 C CNN
+F 2 "" H 3975 5075 50  0001 C CNN
+F 3 "~" H 3975 5075 50  0001 C CNN
+	1    3975 5075
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x04_Female J?
+U 1 1 5F60BAA6
+P 5175 5800
+F 0 "J?" H 5075 5550 50  0000 C CNN
+F 1 "3V3 & 5V" H 4950 5475 50  0000 C CNN
+F 2 "" H 5175 5800 50  0001 C CNN
+F 3 "~" H 5175 5800 50  0001 C CNN
+	1    5175 5800
+	-1   0    0    -1  
+$EndComp
 Text GLabel 5800 3750 2    50   Input ~ 0
 VDD
+Text GLabel 5800 3850 2    50   Input ~ 0
+GNDREF
 Text GLabel 4425 6025 0    50   Input ~ 0
 3V3
+Text GLabel 4425 6175 0    50   Input ~ 0
+GND
 Text GLabel 3500 4250 2    50   Input ~ 0
 VDD
+Text GLabel 3500 4450 2    50   Input ~ 0
+GNDREF
 Text GLabel 9825 1200 2    50   Input ~ 0
 3V3
+Text GLabel 9875 1025 2    50   Input ~ 0
+5V
+Text GLabel 5800 6425 0    50   Input ~ 0
+VDD
+Text GLabel 5800 6625 0    50   Input ~ 0
+GNDREF
 Text Notes 5975 5575 0    50   ~ 0
 UB2\nNwazet Pi Power Supply\n(5V & 3.3V Line Regulator)
 Text Notes 6275 6000 0    43   ~ 0
@@ -7151,104 +7269,62 @@ BE 71 54 6E 39 5E DE C7 16 CC 30 C3 0C BF 25 98 65 E0 66 98 61 06 60 66 0B 66 98
 60 82 
 EndData
 $EndBitmap
+Text Notes 9375 2125 0    51   ~ 0
+UB1\nTXB0104 breakout \n(SparkFun BOB11771) 
+Text Notes 9100 1300 0    51   ~ 0
+VCCA
+Text Notes 8075 1200 0    51   ~ 0
+VCCB\n
+Text Label 2700 5800 0    51   ~ 0
+VCC-Arduino(Red)
+Text Label 2700 5900 0    51   ~ 0
+GND-Arduino(Blue)
+Text Label 2700 4975 0    51   ~ 0
+DTR-Arduino(Transparent)
+Text Label 2700 5075 0    51   ~ 0
+TXO-Arduino(Black)
 Text Label 2700 5175 0    51   ~ 0
 RXI-Arduino(White)
 Text Label 4525 5075 0    51   ~ 0
 RX-FTDI
+Text Label 4525 5175 0    51   ~ 0
+TX-FTDI
 Text Label 4525 4975 0    51   ~ 0
 DTR-FTDI
 Text Notes 6475 1500 0    50   ~ 0
 nc
+Text Label 8825 2025 0    51   ~ 0
+DTR-FTDI
+Text Label 8825 2225 0    51   ~ 0
+RX-FTDI
+Text Label 8825 2425 0    51   ~ 0
+TX-FTDI
 Text Label 7025 1675 0    51   ~ 0
 DTR-FTDI
+Text Label 7025 2600 0    51   ~ 0
+RX-FTDI
+Text Label 7025 2800 0    51   ~ 0
+TX-FTDI
 Wire Wire Line
 	5250 1475 5625 1475
 Wire Wire Line
 	5200 2600 5625 2600
 Wire Wire Line
 	5150 2500 5625 2500
-Connection ~ 7825 3125
-Wire Wire Line
-	7825 3125 8900 3125
-Text GLabel 9800 3125 2    50   Input ~ 0
-GND
-Wire Wire Line
-	8900 1200 9825 1200
 $Comp
-L arduino_ftdi-eagle-import:M06SIP JP1
-U 1 1 612696AD
-P 8575 2275
-F 0 "JP1" H 8500 2850 59  0000 C CNN
-F 1 "LLC" H 8500 2750 59  0000 C CNN
-F 2 "" H 8575 2275 51  0001 C CNN
-F 3 "" H 8575 2275 51  0001 C CNN
-	1    8575 2275
+L Device:R R3
+U 1 1 6080F85B
+P 8400 3525
+F 0 "R3" V 8193 3525 50  0000 C CNN
+F 1 "R100" V 8284 3525 50  0000 C CNN
+F 2 "" V 8330 3525 50  0001 C CNN
+F 3 "~" H 8400 3525 50  0001 C CNN
+	1    8400 3525
 	1    0    0    -1  
 $EndComp
-$Comp
-L arduino_ftdi-eagle-import:M06SIP JP2
-U 1 1 61271DCC
-P 8150 2175
-F 0 "JP2" H 8150 1700 59  0000 R CNN
-F 1 "LLC" H 8150 1800 59  0000 R CNN
-F 2 "" H 8150 2175 51  0001 C CNN
-F 3 "" H 8150 2175 51  0001 C CNN
-	1    8150 2175
-	-1   0    0    1   
-$EndComp
-Text Label 8100 1975 0    43   ~ 0
-TX_HV
-Text Notes 7950 1600 0    51   ~ 0
-UB1\nSparkFun BOB-08745
+Connection ~ 8400 3125
 Wire Wire Line
-	4175 5175 9150 5175
+	8400 3675 8400 3850
 Wire Wire Line
-	9250 2475 9250 5075
-Wire Wire Line
-	8775 2475 9250 2475
-Wire Wire Line
-	9150 2375 9150 5175
-Wire Wire Line
-	8775 2375 9150 2375
-Text Label 8425 1975 0    43   ~ 0
-TX_LV
-Text Label 8100 2475 0    43   ~ 0
-TX2_HV
-Text Label 8400 2475 0    43   ~ 0
-TX2_LV
-Text Label 8100 2375 0    43   ~ 0
-RX2_HV
-Text Label 8375 2375 0    43   ~ 0
-RX2_LV
-Wire Wire Line
-	7825 2175 7950 2175
-Text Label 8100 2175 0    43   ~ 0
-HV
-Text Label 8525 2175 0    43   ~ 0
-LV
-Wire Wire Line
-	8900 2175 8775 2175
-Wire Notes Line
-	7900 1625 7900 2650
-Wire Notes Line
-	7900 2650 8825 2650
-Wire Notes Line
-	8825 2650 8825 1625
-Wire Notes Line
-	8825 1625 7900 1625
-Wire Wire Line
-	7825 2275 7950 2275
-Wire Wire Line
-	8775 2275 8900 2275
-Wire Wire Line
-	8900 2275 8900 3125
-Connection ~ 8900 3125
-Wire Wire Line
-	8900 3125 9800 3125
-Text Label 9000 1950 0    51   ~ 0
-DTR-FTDI
-Text Label 9000 2375 0    51   ~ 0
-TX-FTDI
-Text Label 2700 5900 0    51   ~ 0
-GND-Arduino(Blue)
+	8400 3850 9800 3850
 $EndSCHEMATC

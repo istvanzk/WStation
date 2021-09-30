@@ -5,8 +5,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "RS485 5V to UART 3V3 interface"
-Date "2021-08-21"
-Rev "3.0"
+Date "2021-09-11"
+Rev "3.5"
 Comp ""
 Comment1 "Interface to provide UART from RS485 on Ethernet cable"
 Comment2 ""
@@ -27,23 +27,23 @@ $EndComp
 $Comp
 L Connector:Barrel_Jack_Switch J2
 U 1 1 5F5EE7AE
-P 2950 4350
-F 0 "J2" H 3007 4667 50  0000 C CNN
-F 1 "IN/OUT" H 3007 4576 50  0000 C CNN
-F 2 "" H 3000 4310 50  0001 C CNN
-F 3 "~" H 3000 4310 50  0001 C CNN
-	1    2950 4350
+P 3750 7300
+F 0 "J2" H 3807 7617 50  0000 C CNN
+F 1 "IN/OUT" H 3807 7526 50  0000 C CNN
+F 2 "" H 3800 7260 50  0001 C CNN
+F 3 "~" H 3800 7260 50  0001 C CNN
+	1    3750 7300
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Screw_Terminal_01x03 J3
 U 1 1 5F62DFE4
-P 3975 5075
-F 0 "J3" H 3893 5392 50  0000 C CNN
-F 1 "DTR/TX/RX" H 3893 5301 50  0000 C CNN
-F 2 "" H 3975 5075 50  0001 C CNN
-F 3 "~" H 3975 5075 50  0001 C CNN
-	1    3975 5075
+P 4825 5075
+F 0 "J3" H 4743 5392 50  0000 C CNN
+F 1 "DTR/TX/RX" H 4743 5301 50  0000 C CNN
+F 2 "" H 4825 5075 50  0001 C CNN
+F 3 "~" H 4825 5075 50  0001 C CNN
+	1    4825 5075
 	-1   0    0    -1  
 $EndComp
 $Comp
@@ -73,7 +73,7 @@ L Connector:Screw_Terminal_01x02 J9
 U 1 1 5F62DFEA
 P 4800 3750
 F 0 "J9" H 4800 3975 50  0000 C CNN
-F 1 "Power input 9V-12V" H 4825 3875 50  0000 C CNN
+F 1 "Power input 6V-12V" H 4825 3875 50  0000 C CNN
 F 2 "" H 4800 3750 50  0001 C CNN
 F 3 "~" H 4800 3750 50  0001 C CNN
 	1    4800 3750
@@ -116,17 +116,17 @@ L Connector:Conn_01x02_Male J10
 U 1 1 5F602E34
 P 5575 3750
 F 0 "J10" H 5750 3975 50  0000 R CNN
-F 1 "9V-12V" H 5800 3875 50  0000 R CNN
+F 1 "6V-12V" H 5800 3875 50  0000 R CNN
 F 2 "" H 5575 3750 50  0001 C CNN
 F 3 "~" H 5575 3750 50  0001 C CNN
 	1    5575 3750
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Connector:Conn_01x04_Male J11
+L Connector:Conn_01x04_Male J12
 U 1 1 5F62DFEC
 P 5150 5800
-F 0 "J11" H 5325 6075 50  0000 R CNN
+F 0 "J12" H 5325 6075 50  0000 R CNN
 F 1 "3V3 & 5V" H 5325 6000 50  0000 R CNN
 F 2 "" H 5150 5800 50  0001 C CNN
 F 3 "~" H 5150 5800 50  0001 C CNN
@@ -140,11 +140,11 @@ Wire Wire Line
 Wire Wire Line
 	4175 5900 4625 5900
 $Comp
-L Connector:Conn_01x02_Female J12
+L Connector:Conn_01x02_Female J11
 U 1 1 5F62DFED
 P 5600 3750
-F 0 "J12" H 5475 3575 50  0000 C CNN
-F 1 "9V-12V" H 5475 3500 50  0000 C CNN
+F 0 "J11" H 5475 3575 50  0000 C CNN
+F 1 "6V-12V" H 5475 3500 50  0000 C CNN
 F 2 "" H 5600 3750 50  0001 C CNN
 F 3 "~" H 5600 3750 50  0001 C CNN
 	1    5600 3750
@@ -311,12 +311,12 @@ Wire Wire Line
 	7600 2375 7950 2375
 Text GLabel 5800 3850 2    50   Input ~ 0
 GNDREF
-Text GLabel 4425 6175 0    50   Input ~ 0
+Text GLabel 4425 6500 0    50   Input ~ 0
 GND
-Text GLabel 3500 4450 2    50   Input ~ 0
+Text GLabel 4300 7400 2    50   Input ~ 0
 GNDREF
 Wire Wire Line
-	3500 4250 3250 4250
+	4300 7200 4050 7200
 Text GLabel 9875 1025 2    50   Input ~ 0
 5V
 Text GLabel 5800 6425 0    50   Input ~ 0
@@ -337,16 +337,8 @@ Text Notes 6275 6000 0    43   ~ 0
 Outputs\n3V3@800mA\n5V@800mA
 Text Notes 6300 6575 0    43   ~ 0
 Input\n9V - 12V\n2A - 5A
-Text Notes 1125 6150 0    51   ~ 10
-Ethernet cable #2\nArduino UART
-Text Notes 1125 3125 0    51   ~ 10
-Ethernet cable #1\nFTDI via RS422 \nand power suply
-Text Notes 1150 4425 0    51   ~ 10
-Power supply, Input or Output, 9V-12V\n(2.1mm x 5.5mm DC barrel jack)
-Text Notes 3900 4375 0    51   ~ 0
-Output when J12 is connected\nInput when J12 is disconnected
 Wire Wire Line
-	3500 4450 3250 4450
+	4300 7400 4050 7400
 Wire Wire Line
 	5000 3850 5375 3850
 Wire Wire Line
@@ -356,17 +348,6 @@ Wire Wire Line
 	6625 1025 6625 2075
 Wire Wire Line
 	6250 6625 6250 5900
-$Comp
-L power:GND #PWR?
-U 1 1 5F62DFF2
-P 4625 6300
-F 0 "#PWR?" H 4625 6050 50  0001 C CNN
-F 1 "GND" H 4630 6127 50  0000 C CNN
-F 2 "" H 4625 6300 50  0001 C CNN
-F 3 "" H 4625 6300 50  0001 C CNN
-	1    4625 6300
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	5800 6425 6200 6425
 Wire Wire Line
@@ -405,17 +386,14 @@ Connection ~ 4500 5800
 Wire Wire Line
 	4500 5800 4950 5800
 Wire Wire Line
-	4425 6175 4625 6175
+	4425 6500 4625 6500
 Connection ~ 4625 5900
 Wire Wire Line
 	4625 5900 4950 5900
 Wire Wire Line
 	5800 6625 6250 6625
 Wire Wire Line
-	4625 5900 4625 6175
-Connection ~ 4625 6175
-Wire Wire Line
-	4625 6175 4625 6300
+	4625 5900 4625 6500
 Wire Wire Line
 	8900 2175 8900 1200
 Text Notes 5425 5725 0    50   ~ 0
@@ -447,9 +425,9 @@ Wire Wire Line
 Wire Wire Line
 	9350 1975 9350 4975
 Wire Wire Line
-	4175 4975 9350 4975
+	5025 4975 9350 4975
 Wire Wire Line
-	4175 5075 9250 5075
+	5025 5075 9250 5075
 Wire Wire Line
 	1925 5250 2025 5250
 Wire Wire Line
@@ -468,43 +446,33 @@ Wire Wire Line
 Wire Wire Line
 	2125 5375 2125 5600
 Wire Wire Line
-	3975 5900 2250 5900
-Wire Wire Line
-	2250 5900 2250 5525
+	2250 6500 2250 5525
 Wire Wire Line
 	2250 5525 2025 5525
 Wire Wire Line
 	2125 5600 2325 5600
 Wire Wire Line
-	2325 5600 2325 5800
+	2325 5600 2325 6300
 Wire Wire Line
-	2325 5800 3975 5800
+	2325 6300 3050 6300
 Connection ~ 2125 5600
-Text Label 2700 5800 0    51   ~ 0
+Text Label 2350 6275 0    51   ~ 0
 VCC-Arduino(Red)
-Wire Wire Line
-	1925 5450 2325 5450
-Wire Wire Line
-	2325 5450 2325 5175
-Wire Wire Line
-	2325 5175 3975 5175
 Wire Wire Line
 	1925 5750 2200 5750
 Wire Wire Line
 	2200 5750 2200 5075
 Wire Wire Line
-	2200 5075 3975 5075
-Wire Wire Line
 	1925 5325 2125 5325
 Wire Wire Line
-	2125 5325 2125 4975
+	2125 5325 2125 4775
 Wire Wire Line
-	2125 4975 3975 4975
-Text Label 2700 4975 0    51   ~ 0
+	2125 4775 3275 4775
+Text Label 1900 4750 0    51   ~ 0
 DTR-Arduino(Transparent)
-Text Label 2700 5075 0    51   ~ 0
+Text Label 2175 5050 0    51   ~ 0
 TXO-Arduino(Black)
-Text Label 4525 5175 0    51   ~ 0
+Text Label 5025 5175 0    51   ~ 0
 TX-FTDI
 $Comp
 L Connector:Screw_Terminal_01x02 J7
@@ -529,7 +497,7 @@ Text GLabel 5800 3750 2    50   Input ~ 0
 VDD
 Text GLabel 4425 6025 0    50   Input ~ 0
 3V3
-Text GLabel 3500 4250 2    50   Input ~ 0
+Text GLabel 4300 7200 2    50   Input ~ 0
 VDD
 Text GLabel 9825 1200 2    50   Input ~ 0
 3V3
@@ -539,23 +507,23 @@ Text Notes 6275 6000 0    43   ~ 0
 Outputs\n3V3@800mA\n5V@800mA
 Text Notes 6300 6575 0    43   ~ 0
 Input\n9V - 12V\n2A - 5A
-Text Notes 1125 6150 0    51   ~ 10
+Text Notes 1100 6025 0    51   ~ 10
 Ethernet cable #2\nArduino UART
-Text Notes 1125 3125 0    51   ~ 10
-Ethernet cable #1\nFTDI via RS422 \nand power suply
-Text Notes 1150 4425 0    51   ~ 10
-Power supply, Input or Output, 9V-12V\n(2.1mm x 5.5mm DC barrel jack)
-Text Notes 3900 4375 0    51   ~ 0
-Output when J12 is connected\nInput when J12 is disconnected
+Text Notes 800  2975 0    51   ~ 10
+Ethernet cable #1\nFTDI via RS485 and power suply
+Text Notes 1950 7375 0    51   ~ 10
+Power supply, Input or Output, 6V-12V\n(2.1mm x 5.5mm DC barrel jack)
+Text Notes 4700 7325 0    51   ~ 0
+Output when J10-J11 is connected\nInput when J10-J11 is disconnected
 $Comp
 L power:GND #PWR?
 U 1 1 5F653183
-P 4625 6300
-F 0 "#PWR?" H 4625 6050 50  0001 C CNN
-F 1 "GND" H 4630 6127 50  0000 C CNN
-F 2 "" H 4625 6300 50  0001 C CNN
-F 3 "" H 4625 6300 50  0001 C CNN
-	1    4625 6300
+P 4625 6700
+F 0 "#PWR?" H 4625 6450 50  0001 C CNN
+F 1 "GND" H 4630 6527 50  0000 C CNN
+F 2 "" H 4625 6700 50  0001 C CNN
+F 3 "" H 4625 6700 50  0001 C CNN
+	1    4625 6700
 	1    0    0    -1  
 $EndComp
 Text GLabel 4950 6000 0    50   Input ~ 0
@@ -7151,11 +7119,11 @@ BE 71 54 6E 39 5E DE C7 16 CC 30 C3 0C BF 25 98 65 E0 66 98 61 06 60 66 0B 66 98
 60 82 
 EndData
 $EndBitmap
-Text Label 2700 5175 0    51   ~ 0
+Text Label 2275 5425 0    51   ~ 0
 RXI-Arduino(White)
-Text Label 4525 5075 0    51   ~ 0
+Text Label 5025 5075 0    51   ~ 0
 RX-FTDI
-Text Label 4525 4975 0    51   ~ 0
+Text Label 5025 4975 0    51   ~ 0
 DTR-FTDI
 Text Notes 6475 1500 0    50   ~ 0
 nc
@@ -7201,7 +7169,7 @@ TX_HV
 Text Notes 7950 1600 0    51   ~ 0
 UB1\nSparkFun BOB-08745
 Wire Wire Line
-	4175 5175 9150 5175
+	5025 5175 9150 5175
 Wire Wire Line
 	9250 2475 9250 5075
 Wire Wire Line
@@ -7249,6 +7217,88 @@ Text Label 9000 1950 0    51   ~ 0
 DTR-FTDI
 Text Label 9000 2375 0    51   ~ 0
 TX-FTDI
-Text Label 2700 5900 0    51   ~ 0
+Text Label 2250 6500 0    51   ~ 0
 GND-Arduino(Blue)
+$Comp
+L Connector:DIN-3 J14
+U 1 1 613D692C
+P 3775 5075
+F 0 "J14" V 3300 5150 50  0000 R CNN
+F 1 "DIN-Female" V 3375 5325 50  0000 R CNN
+F 2 "" H 3775 5075 50  0001 C CNN
+F 3 "http://www.mouser.com/ds/2/18/40_c091_abd_e-75918.pdf" H 3775 5075 50  0001 C CNN
+	1    3775 5075
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	3775 4775 4500 4775
+Wire Wire Line
+	4500 4775 4500 4975
+Wire Wire Line
+	4500 4975 4825 4975
+Wire Wire Line
+	4075 5075 4825 5075
+Wire Wire Line
+	3775 5375 4500 5375
+Wire Wire Line
+	4500 5375 4500 5175
+Wire Wire Line
+	4500 5175 4825 5175
+$Comp
+L Connector:Conn_Coaxial_x2 J16
+U 1 1 6142E3E5
+P 3775 6400
+F 0 "J16" H 3775 6700 50  0000 C CNN
+F 1 "RCA_Female" H 3700 6625 50  0000 C CNN
+F 2 "" H 3775 6300 50  0001 C CNN
+F 3 " ~" H 3775 6300 50  0001 C CNN
+	1    3775 6400
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	3775 6700 4625 6700
+Connection ~ 4625 6700
+Wire Wire Line
+	4625 6500 4625 6700
+Connection ~ 4625 6500
+Wire Wire Line
+	4500 6025 4500 6300
+Wire Wire Line
+	4500 6300 3975 6300
+Connection ~ 4500 6025
+Wire Wire Line
+	3975 6300 3975 6500
+Connection ~ 3975 6300
+$Comp
+L Connector:Conn_Coaxial J15
+U 1 1 614D0481
+P 3250 6300
+F 0 "J15" H 3175 6500 50  0000 L CNN
+F 1 "RCA_Male" H 3050 6425 50  0000 L CNN
+F 2 "" H 3250 6300 50  0001 C CNN
+F 3 " ~" H 3250 6300 50  0001 C CNN
+	1    3250 6300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2250 6500 3250 6500
+$Comp
+L Connector:DIN-3 J13
+U 1 1 614F0ACC
+P 3275 5075
+F 0 "J13" V 2800 5125 50  0000 R CNN
+F 1 "DIN-Male" V 2875 5275 50  0000 R CNN
+F 2 "" H 3275 5075 50  0001 C CNN
+F 3 "http://www.mouser.com/ds/2/18/40_c091_abd_e-75918.pdf" H 3275 5075 50  0001 C CNN
+	1    3275 5075
+	0    -1   1    0   
+$EndComp
+Wire Wire Line
+	2200 5075 3175 5075
+Wire Wire Line
+	1925 5450 3275 5450
+Wire Wire Line
+	3275 5450 3275 5375
+Text Notes 1250 2025 0    50   ~ 0
+J0\nRJ45
 $EndSCHEMATC

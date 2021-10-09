@@ -13,7 +13,7 @@ import struct
 from random import random, randint
 from collections import deque
 from math import log10, cos
-from statistics import mean, median, multimode
+from statistics import mean, median, mode, StatisticsError
 import posix_ipc
 import json
 from colorsys import hsv_to_rgb
@@ -403,7 +403,11 @@ class MyScreenManager(ScreenManager):
                 struc_t.tm_yday, 
                 struc_t.tm_isdst)
             self.weather_data_trace24["Time"].append(_TimeAvg)
-            self.weather_data_trace24["N"].append(multimode(self.weather_data_trace15["N"])[0])
+            try:
+                self.weather_data_trace24["N"].append(mode(self.weather_data_trace15["N"]))
+            except StatisticsError:
+                self.weather_data_trace24["N"].append(self.weather_data["N"])
+                pass
             self.weather_data_trace24["T"].append(mean(self.weather_data_trace15["T"]))
             self.weather_data_trace24["S"].append(mean(self.weather_data_trace15["S"]))
             self.weather_data_trace24["P"].append(mean(self.weather_data_trace15["P"]))

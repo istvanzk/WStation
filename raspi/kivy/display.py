@@ -551,7 +551,7 @@ class TracesScreen(Screen):
         # The atm unit is roughly equivalent to the mean sea-level atmospheric pressure on Earth, 
         # that is, the Earth's atmospheric pressure at sea level is approximately 1 atm = 1013.25 mbar
         _y_sc = self.widget_air_press.height/30.0
-        _y_off = self.widget_air_press.pos[1] + 0.66*self.widget_air_press.height - _y_sc*1013.25
+        _y_off = self.widget_air_press.pos[1] + 0.30*self.widget_air_press.height - _y_sc*1013.25
           
 
         # The points to plot
@@ -568,8 +568,8 @@ class TracesScreen(Screen):
         x_axis = [_x_off + i*self._x_step for i in range(len(y_values))]
         
         # The y offset and scale
-        _y_sc = self.widget_wind_speed.height/40
-        _y_off = self.widget_air_relhum.pos[1] + 0.25*self.widget_air_relhum.height - _y_sc*50.0 
+        _y_sc = self.widget_wind_speed.height/50
+        _y_off = self.widget_air_relhum.pos[1] + 0.25*self.widget_air_relhum.height - _y_sc*70.0 
 
         # The points to plot
         points = [0 for i in range(2*len(y_values))]

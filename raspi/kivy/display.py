@@ -4,7 +4,7 @@ Home Weather Staion code for Raspberry Pi
 Kivy based UI to display weather data (live and traces). The Kivy widgets are defined in screens.kv
 Uses a POSIX IPC Meesage Queue client to receive weather data from a server (see raspi/rfm/server_mq.cpp) running on the same machine
 
-Author: Istvan Z. Kovacs, 2020
+Author: Istvan Z. Kovacs, 2020-2021
 '''
 
 # System
@@ -55,9 +55,21 @@ RXQUEUE_TIME  = 15
 # Message queue name to connect to
 RXQUEUE_NAME  = "/rf69_server_tx"
 
+# The Adafruit IO client
+# Note: This requires an external aiocfg.txt configuration file:
+# username,aio_key
+# WS,ws
+# North,Temperature,Windspeed,Pressure,Humidity,Rssi
+# 57.0547,9.9198,44
+from client_io import AdafruitClientIO
+
 # Wind direction steps and North index/step
 DIR_STEPS      = 16
 NORTHDIR_INDX  = 16
+
+# Debug messages
+# TODO: Use logger
+DEBUG = 1
 
 wssettings = json.dumps([
     {'type': 'title',
@@ -125,6 +137,9 @@ class MyScreenManager(ScreenManager):
     # The message queue
     _msg_queue = None
 
+    # The client IO
+    _client_io = None
+
     # Displayed info and their color
     #(access with root.manager.* from the kv file)
     _wind_direction = NumericProperty(22.5)
@@ -188,6 +203,10 @@ class MyScreenManager(ScreenManager):
         # Create the receive message queue
         # _msg_queue.mqRX is set to None when no MessageQueue is available (e.g. MacOS)!
         self._msg_queue = ClientMQ(self.rxqueueName)
+
+        # Create IO client
+        self._client_io = AdafruitClientIO()
+
 
     def update_mainscreen_info(self, *args):
 
@@ -321,8 +340,13 @@ class MyScreenManager(ScreenManager):
         self.weather_data["S"] = self._wind_speed
         self.weather_data["P"] = self._air_pressure
         self.weather_data["H"] = self._air_relhumidity
+        self.weather_data["Rssi"] = self._rssi_dBm
 
-        print(self.weather_data)
+        # Send data with default metadata attached
+        self._client_io.send_data_all_feeds(self.weather_data)
+
+        if DEBUG:
+            print(self.weather_data)
 
         # Process and store weather data       
         if self.weather_data["IniMsg"] is None:

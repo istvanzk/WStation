@@ -706,8 +706,8 @@ class HomeWeatherStationApp(App):
         #self.config.write()
 
         # Read these config parameter values when App starts
-        self.manager.northIndex = int(self.config.get('calibration','north_index',fallback=NORTHDIR_INDX))
-        self.manager.northIndex = int(self.config.get('calibration','wind_direction_steps',fallback=DIR_STEPS))
+        self.manager.northIndex   = int(self.config.get('calibration','north_index',fallback=NORTHDIR_INDX))
+        self.manager.windDirSteps = int(self.config.get('calibration','wind_direction_steps',fallback=DIR_STEPS))
         # Note: these parameter values cannot be changed during runtime!
         self.manager.rxqueueName = self.config.get('general','rxqueue_name',fallback=RXQUEUE_NAME)
         self.manager.rxtimeIntv  = float(self.config.get('general','rxqueue_timeintv',fallback=RXQUEUE_TIME))

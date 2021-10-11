@@ -122,12 +122,15 @@ class AdafruitClientIO(object):
             'created_at': datetime.datetime.utcnow().isoformat()}
 
         # Send data to all feeds
-        self.aio.send_data(self._direction.key, data_dict['N'], metadata)
-        self.aio.send_data(self._temperature.key, data_dict['T'], metadata)
-        self.aio.send_data(self._speed.key, data_dict['S'], metadata)
-        self.aio.send_data(self._pressure.key, data_dict['P'], metadata)
-        self.aio.send_data(self._humidity.key, data_dict['H'], metadata)
-        self.aio.send_data(self._rssi.key, data_dict['Rssi'], metadata)
+        try:
+            self.aio.send_data(self._direction.key, data_dict['N'], metadata)
+            self.aio.send_data(self._temperature.key, data_dict['T'], metadata)
+            self.aio.send_data(self._speed.key, data_dict['S'], metadata)
+            self.aio.send_data(self._pressure.key, data_dict['P'], metadata)
+            self.aio.send_data(self._humidity.key, data_dict['H'], metadata)
+            self.aio.send_data(self._rssi.key, data_dict['Rssi'], metadata)
+        except ConnectionError:
+            pass
 
         if DEBUG:
             print(f"Data {data_dict} sent to {len(self.group.feeds)} feeds with metadata {metadata}")

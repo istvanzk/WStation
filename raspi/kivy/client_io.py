@@ -23,10 +23,10 @@ class AdafruitClientIO(object):
     aio = None
     group = None
 
-    def __init__(self, cfg_file=None):
+    def __init__(self, cfg_file="aiocfg.txt"):
 
         # Read the access info
-        self.cfg_file = cfg_file or "aiocfg.txt"
+        self.cfg_file = cfg_file
         try:
             with open(self.cfg_file,'r') as f:
                 aio_info = f.read().split('\n')

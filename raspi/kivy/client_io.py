@@ -54,7 +54,7 @@ class AdafruitClientIO(object):
                     print(self.aio_loc)
 
         except IOError:
-            print(f"Adafruit IO:: Configuration file '{self.key_file}' read error! Exiting!", exc_info=True)
+            print(f"Adafruit IO:: Configuration file '{self.cfg_file}' read error! Exiting!", exc_info=True)
             raise
 
         # Create an instance of the REST client.

@@ -4,10 +4,13 @@ Module implements an Adafruit IO client class to send custom feed data (N,T,S,P,
 Author: Istvan Z. Kovacs, 2021
 '''
 
-# Import Adafruit IO REST client.
+import os
 from typing import Any
-from Adafruit_IO import Client, Feed, Group, Data, errors
 import datetime
+from pathlib import Path
+
+# Import Adafruit IO REST client.
+from Adafruit_IO import Client, Feed, Group, Data, errors
 
 # Enable debug info
 DEBUG = 0
@@ -26,7 +29,7 @@ class AdafruitClientIO(object):
     def __init__(self, cfg_file="aiocfg.txt"):
 
         # Read the access info
-        self.cfg_file = cfg_file
+        self.cfg_file = os.path.join(Path(__file__).parent.absolute(), cfg_file)
         try:
             with open(self.cfg_file,'r') as f:
                 aio_info = f.read().split('\n')

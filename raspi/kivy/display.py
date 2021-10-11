@@ -395,7 +395,7 @@ class MyScreenManager(ScreenManager):
 
         # Update trace15 deques
         self.weather_data_trace15["Time"].append(_crtTime)
-        self.weather_data_trace15["Rssi"].append(self.weather_data["Header"][10])
+        self.weather_data_trace15["Rssi"].append(self.weather_data["Rssi"])
         self.weather_data_trace15["N"].append(self.weather_data["N"])
         self.weather_data_trace15["T"].append(self.weather_data["T"])
         self.weather_data_trace15["S"].append(self.weather_data["S"])

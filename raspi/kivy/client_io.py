@@ -131,7 +131,7 @@ class AdafruitClientIO(object):
         if self._crt_time >= self._last_time + self.update_sec:
             
             # Time update
-            self._last_time = self._crt_time
+            self._last_time = datetime.datetime.utcnow()
 
             # Metadata
             metadata = metadata or {'lat': float(self.aio_loc[0]), 

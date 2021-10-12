@@ -36,8 +36,8 @@ class AdafruitClientIO(object):
             self.update_sec = datetime.timedelta(seconds=12)
 
         # Force feed update when the send_data_all_feeds() is called for the first time
-        self._crt_time  = 0
-        self._last_time = datetime.timedelta(seconds=-1.0*self.update_sec)
+        self._crt_time  = datetime.datetime.utcnow()
+        self._last_time = datetime.datetime.utcnow() - self.update_sec
 
         # Read the access info
         self.cfg_file = os.path.join(Path(__file__).parent.absolute(), cfg_file)

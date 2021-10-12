@@ -205,7 +205,8 @@ class MyScreenManager(ScreenManager):
         self._msg_queue = ClientMQ(self.rxqueueName)
 
         # Create IO client
-        self._client_io = AdafruitClientIO()
+        # The feeds are updated only with the set period
+        self._client_io = AdafruitClientIO(update_sec=60)
 
 
     def update_mainscreen_info(self, *args):
@@ -343,8 +344,9 @@ class MyScreenManager(ScreenManager):
         self.weather_data["Rssi"] = self._rssi_dBm
 
         # Send data with default metadata attached
+        # The feeds are updated only with the set period
         self._client_io.send_data_all_feeds(self.weather_data)
-
+ 
         if DEBUG:
             print(self.weather_data)
 
@@ -405,6 +407,7 @@ class MyScreenManager(ScreenManager):
         if len(self.weather_data_trace15["Time"]) < 2:
             self._start_secs = time.mktime(_crtTime)
             return None
+
 
         # At the end of each ~15 minutes time window:
         # - Calculate average values over the past ~15 minutes (all values in the trace15 deques)

@@ -26,7 +26,18 @@ class AdafruitClientIO(object):
     aio = None
     group = None
 
-    def __init__(self, cfg_file="aiocfg.txt"):
+    def __init__(self, update_sec=30, cfg_file="aiocfg.txt"):
+
+        # Update period
+        # Rate limit is 30 updates every 60 seconds = 6 feeds every 12 seconds
+        if update_sec > 60/(30/6):
+            self.update_sec = datetime.timedelta(seconds=update_sec)
+        else:
+            self.update_sec = datetime.timedelta(seconds=12)
+
+        # Force feed update when the send_data_all_feeds() is called for the first time
+        self._crt_time  = 0
+        self._last_time = -1.0*self.update_sec
 
         # Read the access info
         self.cfg_file = os.path.join(Path(__file__).parent.absolute(), cfg_file)
@@ -115,25 +126,32 @@ class AdafruitClientIO(object):
 
     def send_data_all_feeds(self, data_dict, metadata=None):
         
-        # Metadata
-        metadata = metadata or {'lat': float(self.aio_loc[0]), 
-            'lon': float(self.aio_loc[1]), 
-            'ele': float(self.aio_loc[2]), 
-            'created_at': datetime.datetime.utcnow().isoformat()}
+        # Trigger update with the set time period
+        self._crt_time = datetime.datetime.utcnow()
+        if self._crt_time >= self._last_time + self.update_sec:
+            
+            # Time update
+            self._last_time = self._crt_time
 
-        # Send data to all feeds
-        try:
-            self.aio.send_data(self._direction.key, data_dict['N'], metadata)
-            self.aio.send_data(self._temperature.key, data_dict['T'], metadata)
-            self.aio.send_data(self._speed.key, data_dict['S'], metadata)
-            self.aio.send_data(self._pressure.key, data_dict['P'], metadata)
-            self.aio.send_data(self._humidity.key, data_dict['H'], metadata)
-            self.aio.send_data(self._rssi.key, data_dict['Rssi'], metadata)
-        except ConnectionError:
-            pass
+            # Metadata
+            metadata = metadata or {'lat': float(self.aio_loc[0]), 
+                'lon': float(self.aio_loc[1]), 
+                'ele': float(self.aio_loc[2]), 
+                'created_at': self._crt_time.isoformat()}
 
-        if DEBUG:
-            print(f"Data {data_dict} sent to {len(self.group.feeds)} feeds with metadata {metadata}")
+            # Send data to all feeds
+            try:
+                self.aio.send_data(self._direction.key, data_dict['N'], metadata)
+                self.aio.send_data(self._temperature.key, data_dict['T'], metadata)
+                self.aio.send_data(self._speed.key, data_dict['S'], metadata)
+                self.aio.send_data(self._pressure.key, data_dict['P'], metadata)
+                self.aio.send_data(self._humidity.key, data_dict['H'], metadata)
+                self.aio.send_data(self._rssi.key, data_dict['Rssi'], metadata)
+            except ConnectionError:
+                pass
+
+            if DEBUG:
+                print(f"Data {data_dict} sent to {len(self.group.feeds)} feeds with metadata {metadata}")
 
     def send_batch_data(self, feed, data_list, created_at=None):
 

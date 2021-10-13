@@ -8,7 +8,7 @@ import os
 from typing import Any
 import datetime
 from pathlib import Path
-from urllib3.exceptions import NewConnectionError, MaxRetryError
+from urllib3.exceptions import ConnectionError, NewConnectionError, MaxRetryError
 
 # Import Adafruit IO REST client.
 from Adafruit_IO import Client, Feed, Group, Data, errors

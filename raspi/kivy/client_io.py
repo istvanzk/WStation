@@ -149,7 +149,7 @@ class AdafruitClientIO(object):
                 self.aio.send_data(self._pressure.key, data_dict['P'], metadata)
                 self.aio.send_data(self._humidity.key, data_dict['H'], metadata)
                 self.aio.send_data(self._rssi.key, data_dict['Rssi'], metadata)
-            except ConnectionError or NewConnectionError or MaxRetryError:
+            except (ConnectionError, NewConnectionError, MaxRetryError):
                 pass
 
             if DEBUG:

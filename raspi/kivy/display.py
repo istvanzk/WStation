@@ -484,8 +484,11 @@ class TracesScreen(Screen):
     # The default plot step
     _x_step = dp(100)
 
-    #def on_enter(self, *args):
-    #    self.widget_air_temp.canvas.ask_update()
+    def on_enter(self, *args):
+        self.widget_air_temp.canvas.ask_update()
+        self.widget_wind_speed.canvas.ask_update()
+        self.widget_air_press.canvas.ask_update()
+        self.widget_air_relhum.canvas.ask_update()
 
     def update_trace_plots(self, weather_data_trace):
         '''Update the plots for all traces'''

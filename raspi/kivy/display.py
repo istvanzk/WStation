@@ -69,7 +69,7 @@ NORTHDIR_INDX  = 16
 
 # Debug messages
 # TODO: Use logger
-DEBUG = 1
+DEBUG = 0
 
 wssettings = json.dumps([
     {'type': 'title',
@@ -494,7 +494,7 @@ class TracesScreen(Screen):
         '''Update the plots for all traces'''
 
         # The x axis step (common for all traces)     
-        self._x_step   = (self.widget_air_temp.width - self._x_offset)/weather_data_trace["Time"].maxlen
+        self._x_step   = (self.widget_air_temp.width - self.widget_air_temp.pos[0] - self._x_offset)/weather_data_trace["Time"].maxlen
 
         #print(self.widget_air_temp.pos,self.widget_air_temp.width,self.widget_air_temp.height)
 
@@ -561,7 +561,7 @@ class TracesScreen(Screen):
         x_axis = [_x_off + i*self._x_step for i in range(len(y_values))]
         
         # The y offset
-        _y_sc = self.widget_wind_speed.height/35.0
+        _y_sc = self.widget_wind_speed.height/20.0
         _y_off = self.widget_wind_speed.pos[1] + dp(2)   
 
         # The points to plot
@@ -581,7 +581,7 @@ class TracesScreen(Screen):
         # The atm unit is roughly equivalent to the mean sea-level atmospheric pressure on Earth, 
         # that is, the Earth's atmospheric pressure at sea level is approximately 1 atm = 1013.25 mbar
         _y_sc = self.widget_air_press.height/30.0
-        _y_off = self.widget_air_press.pos[1] + 0.30*self.widget_air_press.height - _y_sc*1013.25
+        _y_off = self.widget_air_press.pos[1] + 0.30*self.widget_air_press.height - _y_sc*990.0
           
 
         # The points to plot

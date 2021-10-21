@@ -129,7 +129,7 @@ RFM-69 version, with DEBUG_LEV2 output:
 #define LOOP_DELAY 27000
 
 // Reference altitude (m) of Home Weather Station
-#define ALTITUDE 43.0
+#define ALTITUDE 44.0
 
 // Anemometer scaling (meters per revolution), for sensor with 1 pulse per revolution
 #define ANEMOMETER_MPR 0.345708 
@@ -624,7 +624,7 @@ void set_pci()
   // Set up TIMER2
   TCCR2A = B00000000;
   TCCR2B = B00000000; 
-  // Set CS20 & CS22 bits for 1024 prescaler: 1024 * 256 * 1/(8*10^6) = 0.032768 msec
+  // Set CS20 & CS22 bits for 1024 prescaler: 1024 * 256 * 1/(8*10^6) = 32.768 msec
   TCCR2B |= (1 << CS20) | (1 << CS22);
   // Enable the overflow ISR
   TIMSK2 |= (1 << TOIE2); 
@@ -657,8 +657,8 @@ ISR(PCINT1_vect)
 			else {
 				period = timeAnemometerEvent - lastAnemometerEvent;
 			}
-			// Ignore switch-bounce glitches less than 50ms after initial edge
-			if(period < 50) {
+			// Ignore switch-bounce glitches less than 32.768ms after initial edge
+			if(period < 33) {
 				return;
 			}
 			// If the period is the shortest (and therefore fastest windspeed) seen, capture it
@@ -682,21 +682,23 @@ ISR(TIMER2_OVF_vect)
 {
   TCNT2 = 0;
   
-  // Estimate wind speed only ~1 per second
+  // Estimate wind speed approx. every 1 second
   ovfSpeedCount++;
   if (ovfSpeedCount < 30) 
     return;
 
-  // Estimate wind speed  
+  // Estimate wind speed and reset counters
   ovfSpeedCount = 0;
 	if(AnemometerPeriodTotal > 0) {
 		AnemometerSpeed =  ANEMOMETER_MPR * 1000.0 * float(AnemometerPeriodReadingCount) / float(AnemometerPeriodTotal);
+    AnemometerPeriodTotal = 0;
+		AnemometerPeriodReadingCount = 0;
 	}
  
 	if(AnemometerPeriodReadingCount == lastAnemometerPeriodReadingCount && lastAnemometerPeriodReadingCount > 0)
 	{
 		zeroSpeedCount++;
-		if(zeroSpeedCount > 10)
+		if(zeroSpeedCount > 15)
 		{
 			zeroSpeedCount = 0;
 			AnemometerSpeed = 0.0;

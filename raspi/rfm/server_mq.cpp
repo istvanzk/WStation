@@ -52,7 +52,7 @@
 #elif defined (RHRF69)
 #include <RH_RF69.h>
 #else
-fprintf(stderr, "%s: The RH_RF22 or RH_RF69 macro must be defined!\n", __BASEFILE__);
+fprintf(stderr, "%s: The RHRF22 or RHRF69 macro must be defined!\n", __BASEFILE__);
 #endif
 
 #if defined (SYSTEMD)
@@ -62,7 +62,7 @@ fprintf(stderr, "%s: The RH_RF22 or RH_RF69 macro must be defined!\n", __BASEFIL
 /// Low level configurations
 
 // Constants with CS and IRQ pin definition
-// HopeRF RFM22B or RFM69HCW based radio modules (no onboard led - reset pin not used)
+// HopeRF RFM22B or RFM69HCW based radio modules (no onboard led & reset pins not used)
 // see https://www.sparkfun.com/products/retired/10154, https://www.sparkfun.com/products/13910
 #define RF_CS_PIN  RPI_V2_GPIO_P1_24 // Slave Select on CE0 so P1 connector pin #24
 #define RF_IRQ_PIN RPI_V2_GPIO_P1_22 // IRQ on GPIO25 so P1 connector pin #22
@@ -419,6 +419,7 @@ int main (int argc, const char* argv[] )
                 rfmdrv.setHeaderId(id);
             	rfmdrv.setHeaderFlags(0x80);
             	rfmdrv.sendto(&ack, sizeof(ack), from);
+                bcm2835_delay(10);
             	rfmdrv.setModeRx();
                 last_id = id;
             }
@@ -452,7 +453,7 @@ int main (int argc, const char* argv[] )
 #endif
       }
 
-#if defined (DEBUG_LEV1) || defined( DEBUG_LEV2)
+#if defined (DEBUG_LEV1) || defined (DEBUG_LEV2)
       fflush(stdout);
 #endif
       // Let OS do other tasks

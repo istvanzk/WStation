@@ -270,7 +270,8 @@ void setup()
   digitalWrite(windIntfEnable, HIGH);
 
   pinMode(windSpeedSens, INPUT);
-  digitalWrite(windSpeedSens, LOW);
+  //digitalWrite(windSpeedSens, LOW);
+  pinMode(windSpeedSens, PULLDOWN);
 
   for( uint8_t grp4 = 0; grp4 < 2; grp4++ )
   {
@@ -499,7 +500,7 @@ void loop()
 
   tx_data[10] = 0x50; // P
   dtostrf(P,6,1,buf);
-  tx_data[11] = buf[0]; // 5Bytes= UVWXY.Z
+  tx_data[11] = buf[0]; // 5Bytes= VWXY.Z
   tx_data[12] = buf[1];
   tx_data[13] = buf[2];
   tx_data[14] = buf[3];
@@ -616,6 +617,8 @@ void set_pci()
 {
 	cli();
 
+  // Clear all interrupt flags
+  PCIFR = B00000000; 
 	// Enable Port C (PCINT8 - PCINT14) Pin Change Interrupts
 	PCICR |= B00000010;
 	// Mask PCINT8 (A0)
@@ -642,7 +645,7 @@ ISR(PCINT1_vect)
   if( (PINC & (1 << PINC0)) == 1 ){
 
 		// Based on https://github.com/rpurser47/weatherstation/blob/master/weatherstation.ino
-		// Activated by the magnet in the anemometer (1 ticks per rotation)
+		// Activated by the magnet in the anemometer, 1 tick/pulse per rotation
 
 		// Grab current time
 		unsigned long timeAnemometerEvent = millis();
@@ -657,8 +660,8 @@ ISR(PCINT1_vect)
 			else {
 				period = timeAnemometerEvent - lastAnemometerEvent;
 			}
-			// Ignore switch-bounce glitches less than 32.768ms after initial edge
-			if(period < 33) {
+			// Ignore switch-bounce glitches less than 10ms after initial edge (max 35m/s, 125km/h)
+			if(period < 10) {
 				return;
 			}
 			// If the period is the shortest (and therefore fastest windspeed) seen, capture it

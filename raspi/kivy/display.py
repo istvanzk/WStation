@@ -14,7 +14,6 @@ from random import random, randint
 from collections import deque
 from math import log10, cos
 from statistics import mean, median, mode, StatisticsError
-import posix_ipc
 import json
 from colorsys import hsv_to_rgb
 

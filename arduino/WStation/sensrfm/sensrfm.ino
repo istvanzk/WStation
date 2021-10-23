@@ -697,6 +697,9 @@ ISR(TIMER2_OVF_vect)
 
   // Estimate wind speed and reset counters
   ovfSpeedCount = 0;
+  
+  noInterrupts();
+
 	if(AnemometerPeriodTotal > 0) {
 		AnemometerSpeed =  ANEMOMETER_MPR * 1000.0 * float(AnemometerPeriodReadingCount) / float(AnemometerPeriodTotal);
     AnemometerPeriodTotal = 0;
@@ -713,11 +716,11 @@ ISR(TIMER2_OVF_vect)
 			lastAnemometerEvent = 0;
 			AnemometerPeriodTotal = 0;
 			AnemometerPeriodReadingCount = 0;
-			lastAnemometerPeriodReadingCount = 0;
 			GustPeriod = 65535;
 		}
 	}
-  else
-  	lastAnemometerPeriodReadingCount = AnemometerPeriodReadingCount;
   
+  lastAnemometerPeriodReadingCount = AnemometerPeriodReadingCount;
+  
+  interrupts();
 }

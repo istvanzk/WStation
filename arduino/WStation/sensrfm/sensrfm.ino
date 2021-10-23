@@ -270,9 +270,8 @@ void setup()
   digitalWrite(windIntfEnable, HIGH);
 
   pinMode(windSpeedSens, INPUT);
-  //digitalWrite(windSpeedSens, LOW);
-  pinMode(windSpeedSens, PULLDOWN);
-
+  digitalWrite(windSpeedSens, LOW);
+ 
   for( uint8_t grp4 = 0; grp4 < 2; grp4++ )
   {
 	pinMode(windDirGrp4Seq[grp4], OUTPUT);
@@ -300,6 +299,10 @@ void loop()
 {
   // Wind Meter variables
   int windDirSensValue = 1023;
+  noInterrupts();
+  float windSpeed = AnemometerSpeed;
+  interrupts();
+
   //float dir_angle = 0.0;
   uint8_t dir_val = 0;
   boolean dir_flag = false;
@@ -482,12 +485,13 @@ void loop()
   }
 
 
+
   // Construct RFM message payload of 20 Bytes
   tx_data[0] = 0x4E; // N
   tx_data[1] = dir_val;
 
   tx_data[2] = 0x53; // S
-  dtostrf(AnemometerSpeed,4,1,buf);
+  dtostrf(windSpeed,4,1,buf);
   tx_data[3] = buf[0]; // 3Bytes= XY.Z
   tx_data[4] = buf[1];
   tx_data[5] = buf[3];
@@ -559,7 +563,7 @@ void loop()
   Serial.print(F(" direction: "));
   Serial.println(dir_val);
   Serial.print(F(" speed: "));
-  Serial.println(AnemometerSpeed);
+  Serial.println(windSpeed);
 #if defined(DEBUG_LEV2)  
   Serial.print(F(" last time: "));  
   Serial.println(lastAnemometerEvent);
@@ -615,7 +619,7 @@ void loop()
 
 void set_pci()
 {
-	cli();
+	noInterrupts();
 
   // Clear all interrupt flags
   PCIFR = B00000000; 
@@ -634,7 +638,7 @@ void set_pci()
   // Reset the counter
   TCNT2 = 0;
 
-  sei();
+  interrupts();
 }
 
 
@@ -642,6 +646,7 @@ void set_pci()
 ISR(PCINT1_vect)
 {
 	// Count only at LOW to HIGH transition (pulse start)
+  // http://gammon.com.au/interrupts#reply6
   if( (PINC & (1 << PINC0)) == 1 ){
 
 		// Based on https://github.com/rpurser47/weatherstation/blob/master/weatherstation.ino

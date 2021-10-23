@@ -579,8 +579,8 @@ class TracesScreen(Screen):
         # The y offset and scale
         # The atm unit is roughly equivalent to the mean sea-level atmospheric pressure on Earth, 
         # that is, the Earth's atmospheric pressure at sea level is approximately 1 atm = 1013.25 mbar
-        _y_sc = self.widget_air_press.height/40.0
-        _y_off = self.widget_air_press.pos[1] + 0.30*self.widget_air_press.height - _y_sc*990.0
+        _y_sc = self.widget_air_press.height/50.0
+        _y_off = self.widget_air_press.pos[1] + 0.25*self.widget_air_press.height - _y_sc*990.0
           
 
         # The points to plot

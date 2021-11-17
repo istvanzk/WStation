@@ -503,18 +503,18 @@ class TracesScreen(Screen):
 
         # The trace data values
         for k in weather_data_trace:
-            if k is not "Time":
-                if k is "N":
+            if k != "Time":
+                if k == "N":
                     self._update_wind_direction_plot(weather_data_trace[k])
-                elif k is "T":
+                elif k == "T":
                     self._update_air_temperature_plot(weather_data_trace[k])
-                elif k is "S":
+                elif k == "S":
                     self._update_wind_speed_plot(weather_data_trace[k])
-                elif k is "P":
+                elif k == "P":
                     self._update_air_pressure_plot(weather_data_trace[k])
-                elif k is "H":
+                elif k == "H":
                     self._update_air_relhumidity_plot(weather_data_trace[k])
-                elif k is "Rssi":
+                elif k == "Rssi":
                     self._update_rssi_plot(weather_data_trace[k])
             
         # Update the progress bar

@@ -19,7 +19,7 @@ from colorsys import hsv_to_rgb
 
 # Kivy
 import kivy
-kivy.require('1.11.1')
+kivy.require('2.0.0')
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.metrics import dp
@@ -712,13 +712,20 @@ root_widget = Builder.load_file('screens.kv')
 
 class HomeWeatherStationApp(App):
     '''The Kivy App'''
+    
+    # Note:  Many programs set the title just after mapping the window which means the value Openbox sees as it is determining which rules to apply 
+    # is sometimes empty or something like "Untitled". 
+    # The _OB_APP_TITLE property will show the value that Openbox used, not the current title.
+    # (from http://openbox.org/wiki/Help:Applications)
+    # Trying to avoid this by setting the window title here rather than in build
+    title = 'Home Weather Station V1'
 
     def __init__(self, **kwargs):
         super(HomeWeatherStationApp, self).__init__(**kwargs)
         #Window.bind(on_close=self.on_stop)
 
     def build(self):
-        self.title = 'Home Weather Station V0'
+        #self.title = 'Home Weather Station V1'
 
         # Settings
         self.settings_cls = SettingsWithSidebar
@@ -767,9 +774,10 @@ class HomeWeatherStationApp(App):
                 self.manager.smallMode = value
                 if int(value)==0:
                     #Window.fullscreen = True
+                    Window.maximize()
                     Window.borderless = True
                     Window.resizable = False
-                    Window.size = (self._win_width, self._win_height)
+                    #Window.size = (self._win_width, self._win_height)
                 else:
                     #Window.fullscreen = False
                     Window.borderless = False

@@ -43,7 +43,11 @@ Config.set('kivy', 'exit_on_escape', 1)
 Config.set('graphics', 'borderless', 1)
 Config.set('graphics', 'height', '480')
 Config.set('graphics', 'width', '800')
+Config.set('graphics', 'window_state', 'maximized')
+Config.set('graphics', 'fullscreen', 'auto')
 Config.set('graphics', 'resizable', False)
+Config.set('graphics', 'show_cursor', 0)
+Window.set_title('Home Weather Station V1')
 
 # The POSIX IPC Meesage Queue client
 from client_mq import ClientMQ
@@ -717,15 +721,15 @@ class HomeWeatherStationApp(App):
     # is sometimes empty or something like "Untitled". 
     # The _OB_APP_TITLE property will show the value that Openbox used, not the current title.
     # (from http://openbox.org/wiki/Help:Applications)
-    # Trying to avoid this by setting the window title here rather than in build
-    title = 'Home Weather Station V1'
-
+    # => The self.title only sets the WM_NAME property of openbox!
+    # => The _OB_APP_TITLE is not set!
+ 
     def __init__(self, **kwargs):
         super(HomeWeatherStationApp, self).__init__(**kwargs)
         #Window.bind(on_close=self.on_stop)
 
     def build(self):
-        #self.title = 'Home Weather Station V1'
+        self.title = 'Home Weather Station V1'
 
         # Settings
         self.settings_cls = SettingsWithSidebar

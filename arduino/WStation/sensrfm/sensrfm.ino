@@ -311,6 +311,7 @@ void loop()
   char status;
   double T = 0, P = 0, p0 = 0, a = 0;
   float tempC = 0, humidity = 0;
+  float T_enc = 0;
 
   char buf[10];
 
@@ -497,7 +498,12 @@ void loop()
   tx_data[5] = buf[3];
 
   tx_data[6] = 0x54; // T
-  dtostrf((T + tempC)/2,4,1,buf);
+  T_enc = (T + tempC)/2
+  if (T_enc < 0)
+  {
+    T_enc = 100 + T_enc
+  }
+  dtostrf(T_enc,4,1,buf);
   tx_data[7] = buf[0]; // 3Bytes= XY.Z
   tx_data[8] = buf[1];
   tx_data[9] = buf[3];
@@ -517,7 +523,7 @@ void loop()
   tx_data[19] = buf[3];
 
   // Message end char
-  //tx_data[20] = 0x0;
+  //tx_data[21] = 0x0;
 
 
 #if defined(DEBUG_LEV1) || defined(DEBUG_LEV2)

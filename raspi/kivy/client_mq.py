@@ -97,8 +97,8 @@ class ClientMQ(object):
         #print(unpacked_msgheader)
         #print(":".join("{:1s}".format(chr(c)) for c in msg[24:44]))
 
-        # Decode the 20 bytes weather data (from the RFM-Arduino)
-        if _weather_data["Header"][14] == 20:
+        # Decode the 21 bytes weather data (from the RFM-Arduino)
+        if _weather_data["Header"][14] == 21:
             ii = 24
             lng = 0
             while ii < 44:
@@ -123,6 +123,9 @@ class ClientMQ(object):
                     val = 0
                     for dd in range(lng):
                         val += (val_d[lng-dd-1]-0x30)*10**(dd-1)   
+                        
+                    if chr(msg[ii]) is 'T':
+                        val = val-100.0 if val > 50 else val
 
                     #print(F"{chr(msg[ii]):1s}: {val:.1f}")
                     _weather_data[F"{chr(msg[ii]):1s}"] = val

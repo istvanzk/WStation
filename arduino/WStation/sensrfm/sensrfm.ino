@@ -498,10 +498,10 @@ void loop()
   tx_data[5] = buf[3];
 
   tx_data[6] = 0x54; // T
-  T_enc = (T + tempC)/2
+  T_enc = (T + tempC)/2;
   if (T_enc < 0)
   {
-    T_enc = 100 + T_enc
+    T_enc = 100 + T_enc;
   }
   dtostrf(T_enc,4,1,buf);
   tx_data[7] = buf[0]; // 3Bytes= XY.Z

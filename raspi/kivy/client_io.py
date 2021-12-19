@@ -11,6 +11,7 @@ from pathlib import Path
 from urllib3.exceptions import NewConnectionError, MaxRetryError
 from requests.exceptions import ConnectionError
 from socket import gaierror
+from json import JSONDecodeError
 
 # Import Adafruit IO REST client.
 from Adafruit_IO import Client, Feed, Group, Data, errors
@@ -151,7 +152,7 @@ class AdafruitClientIO(object):
                 self.aio.send_data(self._pressure.key, data_dict['P'], metadata)
                 self.aio.send_data(self._humidity.key, data_dict['H'], metadata)
                 self.aio.send_data(self._rssi.key, data_dict['Rssi'], metadata)
-            except (gaierror, ConnectionError, NewConnectionError, MaxRetryError):
+            except (gaierror, ConnectionError, NewConnectionError, MaxRetryError, JSONDecodeError):
                 pass
 
             if DEBUG:
